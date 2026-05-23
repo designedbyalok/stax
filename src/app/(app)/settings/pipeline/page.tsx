@@ -23,7 +23,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { api, ApiColumn } from "@/lib/api-client";
 
 export default function PipelineSettings() {
