@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// --- Auth.js required models ---
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  timezone      String    @default("UTC")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  columns       Column[]
+  applications  Application[]
+  reminders     Reminder[]
+  settings      UserSettings?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+// --- App models ---
+model UserSettings {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  digestEnabled   Boolean @default(true)
+  digestDay       Int     @default(1)     // 0 = Sun, 1 = Mon, etc.
+  digestHour      Int     @default(9)     // user-local hour
+  staleDaysApplied Int    @default(7)
+  staleDaysInterview Int  @default(5)
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Column {
+  id          String        @id @default(cuid())
+  userId      String
+  name        String
+  position    Int
+  color       String        @default("#94A3B8")
+  isArchive   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@index([userId, position])
+}
+
+model Application {
+  id                  String    @id @default(cuid())
+  userId              String
+  columnId            String
+  position            Int
+
+  roleTitle           String
+  companyName         String
+  companyLogoUrl      String?
+  location            String?
+  salaryRange         String?
+  jobType             JobType?
+
+  originalUrl         String?
+  sourcePlatform      SourcePlatform?
+  jobDescription      String?   @db.Text
+
+  notes               String?   @db.Text
+  resumeVersion       String?
+  coverLetterVersion  String?
+
+  nextAction          String?
+  nextActionDate      DateTime?
+
+  appliedAt           DateTime?
+  archivedAt          DateTime?
+  deletedAt           DateTime?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  column              Column    @relation(fields: [columnId], references: [id])
+  contacts            Contact[]
+  activities          Activity[]
+  reminders           Reminder[]
+
+  @@index([userId, columnId, position])
+  @@index([userId, deletedAt])
+}
+
+model Contact {
+  id            String      @id @default(cuid())
+  applicationId String
+  name          String
+  role          ContactRole @default(OTHER)
+  email         String?
+  notes         String?     @db.Text
+  createdAt     DateTime    @default(now())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id            String       @id @default(cuid())
+  applicationId String
+  type          ActivityType
+  description   String
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+  application   Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, createdAt])
+}
+
+model Reminder {
+  id            String         @id @default(cuid())
+  applicationId String
+  userId        String
+  type          ReminderType
+  status        ReminderStatus @default(PENDING)
+  dueAt         DateTime
+  snoozedUntil  DateTime?
+  createdAt     DateTime       @default(now())
+  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, dueAt])
+}
+
+enum JobType {
+  FULL_TIME
+  CONTRACT
+  INTERNSHIP
+  PART_TIME
+  OTHER
+}
+
+enum SourcePlatform {
+  LINKEDIN
+  GREENHOUSE
+  LEVER
+  WORKDAY
+  INDEED
+  OTHER
+  MANUAL
+}
+
+enum ContactRole {
+  RECRUITER
+  HIRING_MANAGER
+  REFERRER
+  OTHER
+}
+
+enum ActivityType {
+  CREATED
+  STATUS_CHANGED
+  CONTACT_ADDED
+  NOTE_ADDED
+  USER_EVENT
+}
+
+enum ReminderType {
+  AUTO_FOLLOWUP
+  NEXT_ACTION_DUE
+}
+
+enum ReminderStatus {
+  PENDING
+  SNOOZED
+  DISMISSED
+  COMPLETED
+}
