@@ -64,7 +64,7 @@ export function ProductShowcase() {
     <div className="section" id="product">
       <div className="container">
         <div className="reveal">
-          <div className="section-eyebrow">// the board</div>
+          <div className="section-eyebrow">{"// the board"}</div>
           <h2 className="section-title">
             Your pipeline, <em>at a glance.</em>
           </h2>
@@ -111,7 +111,7 @@ export function HowItWorks() {
     <div className="section" style={{ background: "var(--bg-soft)" }} id="how">
       <div className="container">
         <div className="reveal">
-          <div className="section-eyebrow">// how it works</div>
+          <div className="section-eyebrow">{"// how it works"}</div>
           <h2 className="section-title">
             Three habits, one <em>quiet board.</em>
           </h2>

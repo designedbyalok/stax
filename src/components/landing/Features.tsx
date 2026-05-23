@@ -325,7 +325,7 @@ export function Features() {
     <div className="section" id="features">
       <div className="container">
         <div className="reveal">
-          <div className="section-eyebrow">// what&apos;s inside</div>
+          <div className="section-eyebrow">{"// what's inside"}</div>
           <h2 className="section-title">
             A whole workspace, hiding in <em>one card.</em>
           </h2>
@@ -337,7 +337,7 @@ export function Features() {
 
         <div className="feature-grid reveal-stagger">
           <div className="feature">
-            <div className="feature-tag">// capture</div>
+            <div className="feature-tag">{"// capture"}</div>
             <h3>
               Paste once.
               <br />
@@ -353,7 +353,7 @@ export function Features() {
           </div>
 
           <div className="feature">
-            <div className="feature-tag">// workspace</div>
+            <div className="feature-tag">{"// workspace"}</div>
             <h3>The card is a workspace, not a row.</h3>
             <p>
               Contacts, timeline, resume version, next action — all inline-editable.
@@ -365,7 +365,7 @@ export function Features() {
           </div>
 
           <div className="feature">
-            <div className="feature-tag">// follow-up</div>
+            <div className="feature-tag">{"// follow-up"}</div>
             <h3>Never let a lead go cold.</h3>
             <p>
               A weekly Monday digest surfaces the applications that have gone quiet.

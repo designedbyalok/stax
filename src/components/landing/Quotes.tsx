@@ -34,7 +34,7 @@ export function Quotes() {
     <div className="section" id="quotes">
       <div className="container">
         <div className="reveal">
-          <div className="section-eyebrow">// in the wild</div>
+          <div className="section-eyebrow">{"// in the wild"}</div>
           <h2 className="section-title">
             Built for the way real <em>job searches feel.</em>
           </h2>

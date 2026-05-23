@@ -90,7 +90,7 @@ export function Footer() {
         </div>
 
         <div className="footer-col">
-          <h5>// product</h5>
+          <h5>{"// product"}</h5>
           <ul>
             <li>
               <a href="#product">The board</a>
@@ -111,7 +111,7 @@ export function Footer() {
         </div>
 
         <div className="footer-col">
-          <h5>// company</h5>
+          <h5>{"// company"}</h5>
           <ul>
             <li>
               <a href="#">About</a>
@@ -129,7 +129,7 @@ export function Footer() {
         </div>
 
         <div className="footer-col">
-          <h5>// elsewhere</h5>
+          <h5>{"// elsewhere"}</h5>
           <ul>
             <li>
               <a href="#">X / Twitter</a>

@@ -35,7 +35,7 @@ export function FAQ() {
     <div className="section" id="faq">
       <div className="container">
         <div className="reveal">
-          <div className="section-eyebrow">// questions</div>
+          <div className="section-eyebrow">{"// questions"}</div>
           <h2 className="section-title">
             A few <em>honest</em> answers.
           </h2>
