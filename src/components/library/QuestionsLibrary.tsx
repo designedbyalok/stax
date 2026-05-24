@@ -14,10 +14,21 @@ export function QuestionsLibrary() {
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAnswer, setEditAnswer] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [newQuestionText, setNewQuestionText] = useState("");
 
   const { data: questions = [], isLoading } = useQuery({
     queryKey: ["questions"],
     queryFn: () => api.listQuestions().then((r) => r.questions),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: () => api.createQuestion({ questionText: newQuestionText.trim() }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      setIsAdding(false);
+      setNewQuestionText("");
+    },
   });
 
   const updateMutation = useMutation({
@@ -52,6 +63,10 @@ export function QuestionsLibrary() {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <header className="px-6 h-12 border-b flex items-center justify-between gap-4 shrink-0">
         <h1 className="text-sm font-semibold tracking-tight">Question Library</h1>
+        <Button size="sm" onClick={() => setIsAdding(true)}>
+          <Plus className="h-4 w-4 mr-1.5" />
+          Add Question
+        </Button>
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -65,6 +80,31 @@ export function QuestionsLibrary() {
               className="pl-9"
             />
           </div>
+
+          {isAdding && (
+            <div className="border rounded-lg bg-card p-4 space-y-3 shadow-sm">
+              <h3 className="text-sm font-medium">Add a new question</h3>
+              <Textarea
+                placeholder="What is your biggest weakness?"
+                value={newQuestionText}
+                onChange={(e) => setNewQuestionText(e.target.value)}
+                className="min-h-[80px]"
+                autoFocus
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setNewQuestionText(""); }}>
+                  Cancel
+                </Button>
+                <Button 
+                  size="sm" 
+                  disabled={!newQuestionText.trim() || createMutation.isPending}
+                  onClick={() => createMutation.mutate()}
+                >
+                  {createMutation.isPending ? "Adding..." : "Add Question"}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {isLoading ? (
             <div className="space-y-4">
