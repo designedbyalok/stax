@@ -164,13 +164,6 @@ export type ApiApplicationDetail = ApiApplication & {
   questions?: ApiInterviewQuestion[];
 };
 
-export type ApiStatsSummary = {
-  totalActive: number;
-  appliedThisWeek: number;
-  awaitingResponse: number;
-  upcomingInterviews: number;
-};
-
 export type ApiReminder = {
   id: string;
   type:
@@ -323,8 +316,6 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ description }),
     }),
-  // Stats
-  getStatsSummary: () => request<ApiStatsSummary>("/api/stats/summary"),
   // Reminders
   listReminders: () => request<{ reminders: ApiReminder[] }>("/api/reminders"),
   snoozeReminder: (id: string, days: number) =>

@@ -1,36 +1,41 @@
-"use client";
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { makeServerQueryClient } from "@/lib/server-query";
+import {
+  loadApplications,
+  loadColumns,
+  loadReminders,
+} from "@/lib/loaders";
+import ListPageClient from "./ListPageClient";
 
-import { ApplicationList } from "@/components/list/ApplicationList";
-import { ManualEntryForm } from "@/components/capture/ManualEntryForm";
-import { PreviewCard } from "@/components/capture/PreviewCard";
-import { DuplicateDialog } from "@/components/capture/DuplicateDialog";
-import { SearchFilters } from "@/components/filters/SearchFilters";
-import { RemindersBell } from "@/components/reminders/RemindersBell";
-import { useSelectedCard } from "@/components/kanban/selected-card-store";
+// Mirrors /board: server-prefetch columns + applications + reminders so the
+// list shows up populated on first paint. userSettings isn't needed here.
+export default async function ListPage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
 
-export default function ListPage() {
-  const select = useSelectedCard((s) => s.select);
+  const queryClient = makeServerQueryClient();
+
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: ["columns"],
+      queryFn: () => loadColumns(userId),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["applications"],
+      queryFn: () => loadApplications(userId),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["reminders"],
+      queryFn: () => loadReminders(userId),
+    }),
+  ]);
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden">
-      <header className="px-6 h-12 border-b flex items-center justify-between gap-4 shrink-0">
-        <h1 className="text-sm font-semibold tracking-tight">List</h1>
-        <div className="flex items-center gap-2">
-          <RemindersBell />
-          <ManualEntryForm />
-        </div>
-      </header>
-
-      <div className="px-6 py-3 border-b shrink-0">
-        <SearchFilters />
-      </div>
-
-      <div className="flex-1 overflow-hidden">
-        <ApplicationList />
-      </div>
-
-      <PreviewCard />
-      <DuplicateDialog onOpenExisting={(id) => select(id)} />
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ListPageClient />
+    </HydrationBoundary>
   );
 }
