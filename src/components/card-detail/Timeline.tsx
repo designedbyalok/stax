@@ -17,6 +17,7 @@ const TYPE_DOT: Record<ApiActivity["type"], string> = {
   CONTACT_ADDED: "bg-foreground/30",
   NOTE_ADDED: "bg-foreground/30",
   USER_EVENT: "bg-foreground/60",
+  EMAIL_RECEIVED: "bg-emerald-500/60",
 };
 
 export function Timeline({

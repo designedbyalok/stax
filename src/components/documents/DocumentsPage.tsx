@@ -107,9 +107,9 @@ export function DocumentsPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div key={tab} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger-list">
             {data?.map((doc: ApiDocument) => (
-              <Card key={doc.id} className="p-4 flex flex-col gap-3 group relative overflow-hidden transition-colors hover:bg-muted/30">
+              <Card key={doc.id} className="p-4 flex flex-col gap-3 group relative overflow-hidden card-lift hover:bg-muted/30 hover:border-foreground/15">
                 <div className="flex justify-between items-start gap-2">
                   <div className="min-w-0">
                     <h3 className="text-sm font-medium truncate">{doc.name}</h3>

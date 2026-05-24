@@ -35,10 +35,11 @@ export const schedulePrepReminders = inngest.createFunction(
             userId: event.userId,
             applicationId: event.applicationId,
             type: "INTERVIEW_PREP_DUE",
-            dueDate: {
-              // Same day
-              gte: new Date(now.setHours(0, 0, 0, 0)),
-              lt: new Date(now.setHours(23, 59, 59, 999)),
+            dueAt: {
+              // Same calendar day as `now`. Build fresh Date instances so
+              // setHours() mutations don't bleed across the two bounds.
+              gte: new Date(new Date(now).setHours(0, 0, 0, 0)),
+              lt: new Date(new Date(now).setHours(23, 59, 59, 999)),
             },
           },
         });
@@ -50,7 +51,7 @@ export const schedulePrepReminders = inngest.createFunction(
               applicationId: event.applicationId,
               type: "INTERVIEW_PREP_DUE",
               message: `Prep for your interview with ${event.application.companyName}`,
-              dueDate: new Date(), // Due immediately
+              dueAt: new Date(), // Due immediately
               status: "PENDING",
             },
           });

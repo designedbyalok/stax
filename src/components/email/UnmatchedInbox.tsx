@@ -78,9 +78,12 @@ export function UnmatchedInbox() {
         <h2 className="text-sm font-semibold tracking-tight">Unmatched Emails ({data.length})</h2>
       </div>
 
-      <div className="border rounded-md divide-y bg-card overflow-hidden">
+      <div className="border rounded-md divide-y bg-card overflow-hidden stagger-list">
         {data.map((email) => (
-          <div key={email.id} className="p-4 flex flex-col sm:flex-row sm:items-start gap-4">
+          <div
+            key={email.id}
+            className="p-4 flex flex-col sm:flex-row sm:items-start gap-4 transition-colors hover:bg-muted/30"
+          >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm font-semibold truncate">{email.senderName || email.senderEmail}</span>
@@ -98,7 +101,12 @@ export function UnmatchedInbox() {
             <div className="flex items-center gap-2 shrink-0 sm:w-64">
               <Select
                 disabled={processingId === email.id}
-                onValueChange={(appId) => updateMutation.mutate({ id: email.id, applicationId: appId })}
+                onValueChange={(appId) =>
+                  updateMutation.mutate({
+                    id: email.id,
+                    applicationId: (appId as string | null) ?? null,
+                  })
+                }
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue placeholder="Assign to card..." />

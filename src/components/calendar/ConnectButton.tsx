@@ -55,14 +55,14 @@ export function ConnectButton() {
   }
 
   return (
-    <Button 
-      asChild
+    <Button
       className="gap-2"
-    >
-      <a href="/api/integrations/google-calendar/connect">
-        <Calendar className="h-4 w-4" />
-        Connect Google Calendar
-      </a>
-    </Button>
+      render={
+        <a href="/api/integrations/google-calendar/connect">
+          <Calendar className="h-4 w-4" />
+          Connect Google Calendar
+        </a>
+      }
+    />
   );
 }

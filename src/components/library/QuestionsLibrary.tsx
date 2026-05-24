@@ -23,7 +23,7 @@ export function QuestionsLibrary() {
   });
 
   const createMutation = useMutation({
-    mutationFn: () => api.createQuestion({ questionText: newQuestionText.trim() }),
+    mutationFn: () => api.createQuestion({ question: newQuestionText.trim() }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["questions"] });
       setIsAdding(false);
@@ -44,7 +44,7 @@ export function QuestionsLibrary() {
 
   const filtered = questions.filter(
     (q) =>
-      q.questionText.toLowerCase().includes(search.toLowerCase()) ||
+      q.question.toLowerCase().includes(search.toLowerCase()) ||
       q.tags.some((t) => t.toLowerCase().includes(search.toLowerCase())) ||
       q.application?.companyName.toLowerCase().includes(search.toLowerCase())
   );
@@ -137,12 +137,12 @@ export function QuestionsLibrary() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 stagger-list">
               {filtered.map((q) => (
-                <div key={q.id} className="border rounded-lg bg-card overflow-hidden">
+                <div key={q.id} className="border rounded-lg bg-card overflow-hidden card-lift hover:border-foreground/15">
                   <div className="p-4 border-b flex items-start justify-between gap-4">
                     <div className="space-y-1">
-                      <h3 className="font-medium text-[14px]">{q.questionText}</h3>
+                      <h3 className="font-medium text-[14px]">{q.question}</h3>
                       {q.application && (
                         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                           <LinkIcon className="h-3 w-3" />

@@ -7,7 +7,7 @@ import { ExternalLink } from "lucide-react";
 import { ContactsList } from "./ContactsList";
 import { CalendarSection } from "./CalendarSection";
 import { Timeline } from "./Timeline";
-import { ApiApplicationDetail } from "@/lib/api-client";
+import { ApiApplication, ApiApplicationDetail } from "@/lib/api-client";
 
 function toDateInputValue(isoString?: string | null) {
   if (!isoString) return "";
@@ -27,10 +27,10 @@ export function OverviewTab({
   draft,
   updateField,
 }: {
-  card: ApiApplicationDetail;
-  detail: ApiApplicationDetail;
+  card: ApiApplication;
+  detail: ApiApplicationDetail | null | undefined;
   draft: Partial<ApiApplicationDetail>;
-  updateField: (key: string, value: any) => void;
+  updateField: (key: string, value: unknown) => void;
 }) {
   const sourceLabel = card.sourcePlatform ? SOURCE_LABEL[card.sourcePlatform] : null;
 

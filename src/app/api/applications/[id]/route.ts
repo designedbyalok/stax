@@ -18,6 +18,8 @@ const patchSchema = z.object({
   notes: optionalString(50_000),
   resumeVersion: optionalString(200),
   coverLetterVersion: optionalString(200),
+  resumeId: z.string().min(1).nullable().optional(),
+  coverLetterId: z.string().min(1).nullable().optional(),
   nextAction: optionalString(500),
   nextActionDate: z.string().datetime().nullable().optional(),
   appliedAt: z.string().datetime().nullable().optional(),

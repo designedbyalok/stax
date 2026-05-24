@@ -130,9 +130,9 @@ export function StoriesLibrary() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-list">
               {filtered.map((s) => (
-                <div key={s.id} className="border rounded-lg bg-card p-4 flex flex-col hover:border-foreground/20 transition-colors">
+                <div key={s.id} className="border rounded-lg bg-card p-4 flex flex-col card-lift hover:border-foreground/20">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <h3 className="font-medium text-[14px] leading-tight">{s.title}</h3>
                     <div className="flex items-center gap-1 shrink-0">

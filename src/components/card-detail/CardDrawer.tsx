@@ -132,27 +132,47 @@ export function CardDrawer({
           <SheetTitle className="sr-only">{card.roleTitle}</SheetTitle>
           <SheetDescription className="sr-only">{card.companyName}</SheetDescription>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="card-role">Role</Label>
-            <Input
-              id="card-role"
-              value={draft.roleTitle}
-              onChange={(e) => updateField("roleTitle", e.target.value)}
-              className="text-[15px] font-medium"
-            />
-          </div>
+          <div className="flex gap-4 items-start">
+            <div className="flex-1 space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="card-role">Role</Label>
+                <Input
+                  id="card-role"
+                  value={draft.roleTitle}
+                  onChange={(e) => updateField("roleTitle", e.target.value)}
+                  className="text-[15px] font-medium"
+                />
+              </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="card-company">Company</Label>
-            <Input
-              id="card-company"
-              value={draft.companyName}
-              onChange={(e) => updateField("companyName", e.target.value)}
-            />
+              <div className="space-y-1.5">
+                <Label htmlFor="card-company">Company</Label>
+                <Input
+                  id="card-company"
+                  value={draft.companyName}
+                  onChange={(e) => updateField("companyName", e.target.value)}
+                />
+              </div>
+            </div>
+            {card.companyLogoUrl && (
+              <div className="pt-6 pr-2 shrink-0">
+                <img 
+                  src={card.companyLogoUrl} 
+                  alt={card.companyName} 
+                  className="w-16 h-16 rounded-md object-contain border bg-background shadow-sm" 
+                />
+              </div>
+            )}
           </div>
         </SheetHeader>
 
-        <CardTabs card={card} detail={detail} draft={draft} updateField={updateField} />
+        <CardTabs
+          card={card}
+          detail={detail}
+          draft={draft}
+          updateField={
+            updateField as unknown as (key: string, value: unknown) => void
+          }
+        />
 
         <div className="px-5 py-3 border-t flex items-center justify-between gap-3 shrink-0">
           <span className="text-[11px] text-muted-foreground">

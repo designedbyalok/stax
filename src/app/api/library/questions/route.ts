@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     data: {
       userId: auth.userId,
       applicationId: body.applicationId || null,
-      questionText: body.questionText,
+      question: body.question,
       yourAnswer: body.yourAnswer || null,
       tags: body.tags || [],
       isFrequent: body.isFrequent || false,

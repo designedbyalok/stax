@@ -193,6 +193,7 @@ model Reminder {
   status        ReminderStatus @default(PENDING)
   dueAt         DateTime
   snoozedUntil  DateTime?
+  message       String?        @db.Text
   createdAt     DateTime       @default(now())
   application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -351,7 +352,7 @@ model InterviewQuestion {
   id            String       @id @default(cuid())
   userId        String
   applicationId String?
-  questionText  String       @db.Text
+  question      String       @db.Text
   yourAnswer    String?      @db.Text
   tags          String[]
   isFrequent    Boolean      @default(false)

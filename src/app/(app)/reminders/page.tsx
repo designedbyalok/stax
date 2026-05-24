@@ -24,6 +24,9 @@ const SNOOZE_DAYS = [3, 7, 14];
 const TYPE_LABEL: Record<ApiReminder["type"], string> = {
   AUTO_FOLLOWUP: "Follow up",
   NEXT_ACTION_DUE: "Next action due",
+  STALE_APPLICATION: "Stale application",
+  CUSTOM: "Reminder",
+  INTERVIEW_PREP_DUE: "Interview prep",
 };
 
 export default function RemindersPage() {

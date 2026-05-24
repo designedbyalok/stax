@@ -49,7 +49,7 @@ export function InterviewsDashboard() {
     const isPastEvent = isPast(new Date(event.endTime));
     return (
       <div 
-        className={`p-4 border rounded-lg bg-card transition-colors hover:border-foreground/20 cursor-pointer ${isPastEvent ? "opacity-60 grayscale-[0.5]" : ""}`}
+        className={`p-4 border rounded-lg bg-card card-lift hover:border-foreground/20 cursor-pointer ${isPastEvent ? "opacity-60 grayscale-[0.5]" : ""}`}
         onClick={() => select(event.applicationId)}
       >
         <div className="flex items-start justify-between gap-4">
@@ -141,7 +141,7 @@ export function InterviewsDashboard() {
                     No upcoming interviews scheduled.
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 stagger-list">
                     {upcomingEvents.map((e) => (
                       <EventCard key={e.id} event={e} />
                     ))}
@@ -154,7 +154,7 @@ export function InterviewsDashboard() {
                   <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-4 text-muted-foreground">
                     Past
                   </h2>
-                  <div className="space-y-3">
+                  <div className="space-y-3 stagger-list">
                     {pastEvents.map((e) => (
                       <EventCard key={e.id} event={e} />
                     ))}

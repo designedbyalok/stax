@@ -34,6 +34,7 @@ export type ApiColumn = {
   position: number;
   color: string;
   isArchive: boolean;
+  isInterviewStage: boolean;
   createdAt: string;
 };
 
@@ -51,7 +52,13 @@ export type ApiContact = {
 export type ApiActivity = {
   id: string;
   applicationId: string;
-  type: "CREATED" | "STATUS_CHANGED" | "CONTACT_ADDED" | "NOTE_ADDED" | "USER_EVENT";
+  type:
+    | "CREATED"
+    | "STATUS_CHANGED"
+    | "CONTACT_ADDED"
+    | "NOTE_ADDED"
+    | "USER_EVENT"
+    | "EMAIL_RECEIVED";
   description: string;
   metadata: Record<string, unknown> | null;
   createdAt: string;
@@ -115,7 +122,7 @@ export type ApiInterviewQuestion = {
   id: string;
   userId: string;
   applicationId: string | null;
-  questionText: string;
+  question: string;
   yourAnswer: string | null;
   tags: string[];
   isFrequent: boolean;
@@ -166,10 +173,16 @@ export type ApiStatsSummary = {
 
 export type ApiReminder = {
   id: string;
-  type: "AUTO_FOLLOWUP" | "NEXT_ACTION_DUE";
+  type:
+    | "AUTO_FOLLOWUP"
+    | "NEXT_ACTION_DUE"
+    | "STALE_APPLICATION"
+    | "CUSTOM"
+    | "INTERVIEW_PREP_DUE";
   status: "PENDING" | "SNOOZED" | "DISMISSED" | "COMPLETED";
   dueAt: string;
   snoozedUntil: string | null;
+  message: string | null;
   application: {
     id: string;
     roleTitle: string;
@@ -289,6 +302,7 @@ export const api = {
       name: string;
       role?: ApiContact["role"];
       email?: string | null;
+      phone?: string | null;
       notes?: string | null;
     }
   ) =>

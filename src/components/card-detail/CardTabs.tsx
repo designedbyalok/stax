@@ -4,7 +4,7 @@ import { useState } from "react";
 import { OverviewTab } from "./OverviewTab";
 import { PrepTab } from "./PrepTab";
 import { DocumentsTab } from "./DocumentsTab";
-import { ApiApplicationDetail } from "@/lib/api-client";
+import { ApiApplication, ApiApplicationDetail } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 
@@ -14,10 +14,13 @@ export function CardTabs({
   draft,
   updateField,
 }: {
-  card: ApiApplicationDetail;
-  detail: ApiApplicationDetail;
+  // `card` is the summary record from the board cache, present immediately.
+  // `detail` is the enriched record (contacts/activities/email events/etc.)
+  // and may be null while the per-card fetch is still in flight.
+  card: ApiApplication;
+  detail: ApiApplicationDetail | null | undefined;
   draft: Partial<ApiApplicationDetail>;
-  updateField: (key: string, value: any) => void;
+  updateField: (key: string, value: unknown) => void;
 }) {
   const [activeTab, setActiveTab] = useState<"OVERVIEW" | "PREP" | "DOCUMENTS">("OVERVIEW");
 
@@ -61,17 +64,23 @@ export function CardTabs({
         </button>
       </div>
 
-      {activeTab === "OVERVIEW" && (
-        <OverviewTab card={card} detail={detail} draft={draft} updateField={updateField} />
-      )}
-      {activeTab === "PREP" && isInterviewStage && (
-        <PrepTab card={card} detail={detail} />
-      )}
-      {activeTab === "DOCUMENTS" && (
-        <DocumentsTab card={card} onUpdate={(fields) => {
-          Object.entries(fields).forEach(([k, v]) => updateField(k, v));
-        }} />
-      )}
+      <div key={activeTab} className="tab-content flex-1 flex flex-col overflow-hidden">
+        {activeTab === "OVERVIEW" && (
+          <OverviewTab card={card} detail={detail} draft={draft} updateField={updateField} />
+        )}
+        {activeTab === "PREP" && isInterviewStage && (
+          <PrepTab card={card} detail={detail} />
+        )}
+        {activeTab === "DOCUMENTS" && (
+          <DocumentsTab
+            card={card}
+            detail={detail}
+            onUpdate={(fields) => {
+              Object.entries(fields).forEach(([k, v]) => updateField(k, v));
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

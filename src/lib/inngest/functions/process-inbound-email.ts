@@ -91,25 +91,21 @@ export const processInboundEmail = inngest.createFunction(
       if (attachedAppId) {
         await prisma.activity.create({
           data: {
-            userId: user.id,
             applicationId: attachedAppId,
             type: "EMAIL_RECEIVED",
-            title: `Email received: ${parsed.subject}`,
-          },
-        });
-      } else {
-        // Create an un-matched reminder
-        await prisma.reminder.create({
-          data: {
-            userId: user.id,
-            type: "CUSTOM",
-            message: `Unmatched email: ${parsed.subject}`,
-            dueDate: new Date(),
-            status: "PENDING",
-            // We'll show these in the Unmatched inbox view rather than a generic reminder
+            description: `Email received: ${parsed.subject}`,
+            metadata: {
+              senderEmail: parsed.senderEmail,
+              senderName: parsed.senderName,
+              emailEventId: emailEvent.id,
+            },
           },
         });
       }
+      // Unmatched emails surface via the EmailEvent table itself
+      // (UnmatchedInbox queries EmailEvent where applicationId IS NULL).
+      // Reminder.applicationId is required by the schema, so we can't
+      // create a generic Reminder here.
 
       return emailEvent;
     });

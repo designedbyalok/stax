@@ -21,7 +21,7 @@ export async function PATCH(
   const question = await prisma.interviewQuestion.update({
     where: { id },
     data: {
-      questionText: body.questionText !== undefined ? body.questionText : undefined,
+      question: body.question !== undefined ? body.question : undefined,
       yourAnswer: body.yourAnswer !== undefined ? body.yourAnswer : undefined,
       tags: body.tags !== undefined ? body.tags : undefined,
       isFrequent: body.isFrequent !== undefined ? body.isFrequent : undefined,

@@ -278,14 +278,21 @@ function ColumnRow({
       )}
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="icon-sm" variant="ghost" className="shrink-0" aria-label="Change color">
-            <div
-              className="w-3.5 h-3.5 rounded-full border border-foreground/10"
-              style={{ backgroundColor: column.color || PRESET_COLORS[0] }}
-            />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              className="shrink-0"
+              aria-label="Change color"
+            >
+              <div
+                className="w-3.5 h-3.5 rounded-full border border-foreground/10"
+                style={{ backgroundColor: column.color || PRESET_COLORS[0] }}
+              />
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end" className="w-[120px] p-1.5 flex flex-wrap gap-1">
           {PRESET_COLORS.map((c) => (
             <DropdownMenuItem

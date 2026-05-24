@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileText, Eye, Trash2, Plus, Calendar, Star, Upload, Loader2 } from "lucide-react";
-import { api, ApiApplicationDetail } from "@/lib/api-client";
+import { api, ApiApplication, ApiApplicationDetail } from "@/lib/api-client";
 import { toast } from "sonner";
 import { DocumentPicker } from "@/components/documents/DocumentPicker";
 import { PdfPreview } from "@/components/documents/PdfPreview";
@@ -16,11 +16,17 @@ import { DocxPreview } from "@/components/documents/DocxPreview";
 
 export function DocumentsTab({
   card,
-  onUpdate
+  detail,
+  onUpdate,
 }: {
-  card: ApiApplicationDetail;
-  onUpdate: (fields: any) => void;
+  card: ApiApplication;
+  detail: ApiApplicationDetail | null | undefined;
+  onUpdate: (fields: { resumeId?: string | null; coverLetterId?: string | null }) => void;
 }) {
+  // `resume` / `coverLetter` only exist on the enriched detail
+  // record. Use the lazy-loaded detail for the joined relations.
+  const resume = detail?.resume ?? null;
+  const coverLetter = detail?.coverLetter ?? null;
   const queryClient = useQueryClient();
   const [viewingResume, setViewingResume] = useState(false);
   const [viewingCoverLetter, setViewingCoverLetter] = useState(false);
@@ -99,7 +105,7 @@ export function DocumentsTab({
                 onChange={(id) => onUpdate({ resumeId: id })}
               />
             </div>
-            {card.resumeId && card.resume && (
+            {card.resumeId && resume && (
               <Button
                 variant="outline"
                 size="icon"
@@ -111,12 +117,12 @@ export function DocumentsTab({
             )}
           </div>
           
-          {viewingResume && card.resume && (
+          {viewingResume && resume && (
             <div className="mt-4 border rounded-md overflow-hidden h-[400px]">
-              {card.resume.mimeType === "application/pdf" ? (
-                <PdfPreview url={`/api/documents/${card.resume.id}/url`} />
+              {resume.mimeType === "application/pdf" ? (
+                <PdfPreview url={`/api/documents/${resume.id}/url`} />
               ) : (
-                <DocxPreview documentId={card.resume.id} />
+                <DocxPreview documentId={resume.id} />
               )}
             </div>
           )}
@@ -145,7 +151,7 @@ export function DocumentsTab({
                 onChange={(id) => onUpdate({ coverLetterId: id })}
               />
             </div>
-            {card.coverLetterId && card.coverLetter && (
+            {card.coverLetterId && coverLetter && (
               <Button
                 variant="outline"
                 size="icon"
@@ -157,12 +163,12 @@ export function DocumentsTab({
             )}
           </div>
 
-          {viewingCoverLetter && card.coverLetter && (
+          {viewingCoverLetter && coverLetter && (
             <div className="mt-4 border rounded-md overflow-hidden h-[400px]">
-              {card.coverLetter.mimeType === "application/pdf" ? (
-                <PdfPreview url={`/api/documents/${card.coverLetter.id}/url`} />
+              {coverLetter.mimeType === "application/pdf" ? (
+                <PdfPreview url={`/api/documents/${coverLetter.id}/url`} />
               ) : (
-                <DocxPreview documentId={card.coverLetter.id} />
+                <DocxPreview documentId={coverLetter.id} />
               )}
             </div>
           )}

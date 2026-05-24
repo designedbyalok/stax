@@ -47,10 +47,15 @@ export async function PATCH(
       if (body.applicationId) {
         await tx.activity.create({
           data: {
-            userId: auth.userId,
             applicationId: body.applicationId,
             type: "EMAIL_RECEIVED",
-            title: `Email assigned: ${emailEvent.subject}`,
+            description: `Email assigned: ${emailEvent.subject}`,
+            metadata: {
+              senderEmail: emailEvent.senderEmail,
+              senderName: emailEvent.senderName,
+              emailEventId: emailEvent.id,
+              manuallyAssigned: true,
+            },
           },
         });
       }

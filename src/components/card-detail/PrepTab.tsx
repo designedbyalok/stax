@@ -3,19 +3,20 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckSquare, Square, Trash2, Plus, FileText, AlignLeft, Send, Sparkles } from "lucide-react";
-import { api, ApiApplicationDetail } from "@/lib/api-client";
+import { api, ApiApplication, ApiApplicationDetail } from "@/lib/api-client";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function PrepTab({ 
-  card, 
-  detail 
-}: { 
-  card: ApiApplicationDetail;
-  detail: ApiApplicationDetail;
+export function PrepTab({
+  card,
+  detail,
+}: {
+  card: ApiApplication;
+  detail: ApiApplicationDetail | null | undefined;
 }) {
+  void detail;
   const queryClient = useQueryClient();
   const [newItemText, setNewItemText] = useState("");
   const [newQuestionText, setNewQuestionText] = useState("");

@@ -94,3 +94,92 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Subtle motion utilities used across the app pages.
+   Pair these with the existing Linear-style Geist aesthetic.
+   ───────────────────────────────────────────────────────────── */
+
+@keyframes app-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes app-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes app-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apply a soft fade-up to a single element. */
+.fade-in-up {
+  animation: app-fade-in-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Apply staggered fade-up to direct children. Uses --i CSS var or
+   nth-child fallback for items 1..12. */
+.stagger-list > * {
+  animation: app-fade-in-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 32ms);
+}
+.stagger-list > *:nth-child(1)  { --i: 1; }
+.stagger-list > *:nth-child(2)  { --i: 2; }
+.stagger-list > *:nth-child(3)  { --i: 3; }
+.stagger-list > *:nth-child(4)  { --i: 4; }
+.stagger-list > *:nth-child(5)  { --i: 5; }
+.stagger-list > *:nth-child(6)  { --i: 6; }
+.stagger-list > *:nth-child(7)  { --i: 7; }
+.stagger-list > *:nth-child(8)  { --i: 8; }
+.stagger-list > *:nth-child(9)  { --i: 9; }
+.stagger-list > *:nth-child(10) { --i: 10; }
+.stagger-list > *:nth-child(11) { --i: 11; }
+.stagger-list > *:nth-child(12) { --i: 12; }
+
+/* Smooth content swap when toggling tabs / panels. */
+.tab-content {
+  animation: app-fade-in 0.22s ease-out;
+}
+
+/* Subtle card hover lift used on document cards, event cards, etc. */
+.card-lift {
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.15s;
+}
+.card-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.07);
+}
+
+/* Pill-style tab indicator slide. */
+.pill-tab {
+  position: relative;
+  transition: color 0.18s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up,
+  .stagger-list > *,
+  .tab-content,
+  .card-lift {
+    animation: none !important;
+    transition: none !important;
+  }
+}
