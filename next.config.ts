@@ -30,6 +30,5 @@ export default sentryEnabled
       silent: true,
       widenClientFileUpload: true,
       tunnelRoute: "/monitoring",
-      disableLogger: true,
     })
   : nextConfig;
