@@ -5,10 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { ApplicationList } from "@/components/list/ApplicationList";
 import { ManualEntryForm } from "@/components/capture/ManualEntryForm";
+import { PasteBar } from "@/components/capture/PasteBar";
 import { PreviewCard } from "@/components/capture/PreviewCard";
 import { DuplicateDialog } from "@/components/capture/DuplicateDialog";
 import { SearchFilters } from "@/components/filters/SearchFilters";
 import { RemindersBell } from "@/components/reminders/RemindersBell";
+import { StatsStrip } from "@/components/stats/StatsStrip";
 import { ViewToggle } from "@/components/board/ViewToggle";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
 import { api } from "@/lib/api-client";
@@ -80,6 +82,16 @@ export default function ListPageClient() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Stats — derived from the same cache the board uses */}
+        <div className="mb-3">
+          <StatsStrip />
+        </div>
+
+        {/* Capture */}
+        <div className="mb-3">
+          <PasteBar />
         </div>
 
         {/* Filter row with view toggle */}

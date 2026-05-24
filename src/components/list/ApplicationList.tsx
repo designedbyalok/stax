@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsUpDown, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { api, ApiColumn } from "@/lib/api-client";
 import { CardDrawer } from "@/components/card-detail/CardDrawer";
@@ -10,6 +10,22 @@ import { useSelectedCard } from "@/components/kanban/selected-card-store";
 import { useFilteredApplications } from "@/lib/use-filtered-applications";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BrandAvatar } from "@/components/ui/brand-avatar";
+import { Pip } from "@/components/ui/pip";
+
+// Map well-known column names to stage tint slugs (same source of
+// truth as the kanban Column / StageSelector).
+const STAGE_BY_NAME: Record<string, string> = {
+  saved: "saved",
+  applied: "applied",
+  "phone screen": "phone",
+  interview: "interview",
+  "on-site": "interview",
+  onsite: "interview",
+  offer: "offer",
+  rejected: "rejected",
+  closed: "rejected",
+};
 
 type SortKey =
   | "company"
@@ -200,19 +216,47 @@ export function ApplicationList() {
                 onClick={() => setSelectedId(row.app.id)}
                 className="hover:bg-muted/40 cursor-pointer"
               >
-                <td className="px-3 py-2.5 border-b font-medium truncate max-w-0">
-                  {row.company}
+                <td className="px-3 py-2.5 border-b font-medium max-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <BrandAvatar
+                      name={row.company}
+                      src={row.app.companyLogoUrl}
+                      tint={row.app.logoColor}
+                      size={22}
+                      className="rounded"
+                    />
+                    <span className="truncate">{row.company}</span>
+                  </div>
                 </td>
                 <td className="px-3 py-2.5 border-b text-foreground max-w-0">
                   <div className="truncate">{row.role}</div>
                   {row.app.tldrHeadline && (
-                    <div className="truncate text-[11px] text-muted-foreground mt-0.5">
-                      {row.app.tldrHeadline}
+                    <div
+                      className="flex items-center gap-1 mt-0.5 text-[11px] text-muted-foreground min-w-0"
+                      title={row.app.tldrHeadline}
+                    >
+                      <Sparkles
+                        className="h-2.5 w-2.5 shrink-0 text-violet-500"
+                        strokeWidth={2}
+                      />
+                      <span className="truncate">{row.app.tldrHeadline}</span>
                     </div>
                   )}
                 </td>
                 <td className="px-3 py-2.5 border-b">
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] bg-muted text-foreground">
+                  <span
+                    data-stage={STAGE_BY_NAME[row.status.toLowerCase().trim()]}
+                    className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[11px] bg-muted text-foreground"
+                  >
+                    <Pip
+                      size={6}
+                      color={
+                        STAGE_BY_NAME[row.status.toLowerCase().trim()]
+                          ? undefined
+                          : columnsById.get(row.app.columnId)?.color ||
+                            "hsl(var(--muted-foreground))"
+                      }
+                    />
                     {row.status}
                   </span>
                 </td>
