@@ -16,6 +16,6 @@ const PdfPreviewClient = dynamic(
   }
 );
 
-export function PdfPreview({ url }: { url: string }) {
-  return <PdfPreviewClient url={url} />;
+export function PdfPreview({ documentId }: { documentId: string }) {
+  return <PdfPreviewClient documentId={documentId} />;
 }

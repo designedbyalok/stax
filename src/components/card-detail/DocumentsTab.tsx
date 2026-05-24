@@ -120,7 +120,7 @@ export function DocumentsTab({
           {viewingResume && resume && (
             <div className="mt-4 border rounded-md overflow-hidden h-[400px]">
               {resume.mimeType === "application/pdf" ? (
-                <PdfPreview url={`/api/documents/${resume.id}/url`} />
+                <PdfPreview documentId={resume.id} />
               ) : (
                 <DocxPreview documentId={resume.id} />
               )}
@@ -166,7 +166,7 @@ export function DocumentsTab({
           {viewingCoverLetter && coverLetter && (
             <div className="mt-4 border rounded-md overflow-hidden h-[400px]">
               {coverLetter.mimeType === "application/pdf" ? (
-                <PdfPreview url={`/api/documents/${coverLetter.id}/url`} />
+                <PdfPreview documentId={coverLetter.id} />
               ) : (
                 <DocxPreview documentId={coverLetter.id} />
               )}

@@ -128,7 +128,7 @@ export function DocumentsSection({
           </DialogHeader>
           <div className="flex-1 overflow-hidden">
             {previewDoc?.mimeType === "application/pdf" ? (
-              <DocUrlLoader documentId={previewDoc.id} />
+              <PdfPreview documentId={previewDoc.id} />
             ) : previewDoc ? (
               <DocxPreview documentId={previewDoc.id} />
             ) : null}
@@ -137,15 +137,4 @@ export function DocumentsSection({
       </Dialog>
     </div>
   );
-}
-
-// Small helper to load URL for PDF preview
-function DocUrlLoader({ documentId }: { documentId: string }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["documentUrl", documentId],
-    queryFn: () => api.getDocumentUrl(documentId),
-  });
-  if (isLoading) return <div className="flex items-center justify-center h-full text-sm text-muted-foreground">Loading preview...</div>;
-  if (!data?.url) return <div className="flex items-center justify-center h-full text-sm text-destructive">Failed to load preview</div>;
-  return <PdfPreview url={data.url} />;
 }
