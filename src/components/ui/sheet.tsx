@@ -28,9 +28,8 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        // Match the Dialog backdrop — 25px blur + rgba(0,0,0,0.6)
-        // tint so text behind the sheet isn't readable.
-        "fixed inset-0 z-50 bg-black/60 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-[25px]",
+        // Match the Dialog backdrop — see .modal-scrim in globals.css.
+        "fixed inset-0 z-50 modal-scrim transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0",
         className
       )}
       {...props}

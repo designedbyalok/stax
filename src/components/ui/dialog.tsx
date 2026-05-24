@@ -31,11 +31,10 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        // Dark frosted-glass backdrop. 25px blur distorts letter
-        // shapes; a rgba(0,0,0,0.6) tint blocks contrast so text
-        // behind the modal isn't readable. Stays dark in both
-        // themes (foreground/* would invert in dark mode).
-        "fixed inset-0 isolate z-50 bg-black/60 duration-150 supports-backdrop-filter:backdrop-blur-[25px] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        // Frosted-glass backdrop via the .modal-scrim class in
+        // globals.css (handles backdrop-filter + -webkit- prefix
+        // + a fallback dark tint for browsers without backdrop).
+        "fixed inset-0 isolate z-50 modal-scrim duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}

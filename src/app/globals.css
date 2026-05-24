@@ -214,6 +214,27 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Frosted-glass overlay for Dialog / Sheet backdrops.
+
+   Written as a plain CSS class so we don't depend on Tailwind's
+   `supports-backdrop-filter:` variant being compiled correctly.
+   25px blur distorts letter shapes; the 0.6 black tint blocks
+   contrast. Safari needs the -webkit- prefix.
+   ───────────────────────────────────────────────────────────── */
+.modal-scrim {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .modal-scrim {
+    -webkit-backdrop-filter: blur(25px) saturate(120%);
+    backdrop-filter: blur(25px) saturate(120%);
+    /* Slightly lighter tint when blur works; the blur does the
+       heavy lifting and a darker layer would muddy it. */
+    background-color: rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
    Subtle scrollbars — applied globally so every overflow
    container in the app gets the same soft chrome.
 
