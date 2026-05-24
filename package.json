@@ -28,6 +28,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.3.0",
+    "fast-average-color": "^9.5.2",
+    "fast-average-color-node": "^3.2.0",
     "fractional-indexing": "^3.2.0",
     "googleapis": "^172.0.0",
     "inngest": "^4.4.0",

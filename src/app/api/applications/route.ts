@@ -3,6 +3,7 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
 import { nextPositionAfter } from "@/lib/positions";
+import { getAverageColor } from "fast-average-color-node";
 
 export async function GET() {
   const authResult = await requireUserId();
@@ -86,6 +87,16 @@ export async function POST(request: Request) {
     select: { position: true },
   });
 
+  let logoColor = null;
+  if (parsed.data.companyLogoUrl) {
+    try {
+      const color = await getAverageColor(parsed.data.companyLogoUrl);
+      logoColor = color.hex;
+    } catch (e) {
+      console.error("Failed to get average color for logo:", e);
+    }
+  }
+
   const application = await prisma.application.create({
     data: {
       userId,
@@ -98,6 +109,7 @@ export async function POST(request: Request) {
       originalUrl: parsed.data.originalUrl || null,
       jobDescription: parsed.data.jobDescription || null,
       companyLogoUrl: parsed.data.companyLogoUrl || null,
+      logoColor,
       sourcePlatform: parsed.data.sourcePlatform || "MANUAL",
       activities: {
         create: {

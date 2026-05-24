@@ -61,7 +61,10 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
   return (
     <div
       ref={isOverlay ? undefined : setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        ...(card.logoColor ? { backgroundColor: `${card.logoColor}10` } : {})
+      }}
       {...(isOverlay ? {} : attributes)}
       {...(isOverlay ? {} : listeners)}
       onClick={onClick}
@@ -71,11 +74,22 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
         isOverlay && "shadow-xl ring-1 ring-foreground/20 cursor-grabbing rotate-[2deg] scale-105 z-50"
       )}
     >
-      <div className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground">
-        {card.roleTitle}
-      </div>
-      <div className="text-[12px] text-muted-foreground mt-0.5 line-clamp-1">
-        {card.companyName}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground">
+            {card.roleTitle}
+          </div>
+          <div className="text-[12px] text-muted-foreground mt-0.5 line-clamp-1">
+            {card.companyName}
+          </div>
+        </div>
+        {card.companyLogoUrl && (
+          <img 
+            src={card.companyLogoUrl} 
+            alt={card.companyName} 
+            className="w-8 h-8 rounded shrink-0 object-contain bg-background border border-foreground/5 shadow-sm" 
+          />
+        )}
       </div>
       {(card.location || sourceLabel || card.appliedAt) && (
         <div className="flex items-center gap-2 mt-2 text-[11px] text-muted-foreground">

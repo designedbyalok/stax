@@ -120,6 +120,7 @@ model Application {
   roleTitle           String
   companyName         String
   companyLogoUrl      String?
+  logoColor           String?
   location            String?
   salaryRange         String?
   jobType             JobType?

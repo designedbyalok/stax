@@ -6,6 +6,7 @@ export type ApiApplication = {
   roleTitle: string;
   companyName: string;
   companyLogoUrl: string | null;
+  logoColor: string | null;
   location: string | null;
   salaryRange: string | null;
   jobType: string | null;
