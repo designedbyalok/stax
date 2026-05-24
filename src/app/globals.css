@@ -226,11 +226,11 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .modal-scrim {
-    -webkit-backdrop-filter: blur(25px) saturate(120%);
-    backdrop-filter: blur(25px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    backdrop-filter: blur(12px) saturate(120%);
     /* Slightly lighter tint when blur works; the blur does the
        heavy lifting and a darker layer would muddy it. */
-    background-color: rgba(0, 0, 0, 0.45);
+    background-color: rgba(0, 0, 0, 0.4);
   }
 }
 
