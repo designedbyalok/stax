@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   await seedDefaultsForUser(session.user.id);
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-muted/20 dark:bg-background">
+    <div className="flex min-h-screen flex-col md:flex-row bg-background">
       <Sidebar user={session.user} />
       <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {children}

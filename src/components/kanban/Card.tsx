@@ -2,9 +2,13 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, Globe, MapPin } from "lucide-react";
 import { ApiApplication } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { BrandAvatar } from "@/components/ui/brand-avatar";
+import { LiveDot } from "@/components/ui/live-dot";
+import { Pill } from "@/components/ui/pill";
+import { AINote } from "@/components/ui/ai-note";
 
 interface CardProps {
   card: ApiApplication;
@@ -22,6 +26,8 @@ const SOURCE_LABEL: Record<string, string> = {
   MANUAL: "Manual",
 };
 
+const DAY = 24 * 60 * 60 * 1000;
+
 export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } =
     useSortable({
@@ -34,106 +40,174 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
     transform: CSS.Transform.toString(transform),
   };
 
-  const sourceLabel = card.sourcePlatform ? SOURCE_LABEL[card.sourcePlatform] : null;
-
+  // Empty drag-source placeholder — the dragged item is rendered
+  // in a portal'd DragOverlay.
   if (isDragging && !isOverlay) {
     return (
       <div
         ref={setNodeRef}
         style={style}
-        className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-xl px-5 py-4 opacity-50 select-none min-h-[160px]"
+        className="rounded-[10px] border border-dashed border-foreground/15 bg-transparent min-h-[120px] opacity-50 select-none"
       />
     );
   }
 
-  // Format the applied date or fallback to created at
-  const dateObj = card.appliedAt ? new Date(card.appliedAt) : new Date(card.createdAt);
-  const dateString = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  const sourceLabel = card.sourcePlatform ? SOURCE_LABEL[card.sourcePlatform] : null;
+  const tint = card.logoColor ?? null;
+
+  // Footer label: prefer the applied date, fall back to created at.
+  const dateLabel = card.appliedAt
+    ? `applied ${formatShortDate(card.appliedAt)}`
+    : `saved ${formatShortDate(card.createdAt)}`;
+
+  // Live signal: any card touched in the past 24 hours gets a
+  // soft pulsing dot next to the company name. Cheap delight.
+  const isLive =
+    Date.now() - new Date(card.updatedAt).getTime() < DAY && !card.deletedAt;
+
+  // AI nudge selection priority:
+  // 1. Match score → success
+  // 2. Stale in current column (no recent update, no appliedAt move) → warning
+  // 3. TLDR headline → default
+  const aiNote = chooseAINote(card);
 
   return (
     <div
       ref={isOverlay ? undefined : setNodeRef}
-      style={{
-        ...style,
-        ...(card.logoColor ? { borderTopWidth: 4, borderTopColor: card.logoColor } : { borderTopWidth: 4, borderTopColor: 'transparent' })
-      }}
+      style={style}
       {...(isOverlay ? {} : attributes)}
       {...(isOverlay ? {} : listeners)}
       onClick={onClick}
       className={cn(
-        "group bg-card text-card-foreground p-5 rounded-xl border shadow-sm cursor-grab active:cursor-grabbing select-none transition-all duration-200",
-        "hover:shadow-md hover:border-primary/20",
-        isOverlay && "shadow-2xl ring-1 ring-primary/20 cursor-grabbing rotate-[2deg] scale-105 z-50",
-        !card.logoColor && "border-t-border"
+        "group relative isolate bg-card text-card-foreground rounded-[10px] border border-border",
+        "transition-[border-color,background-color,box-shadow] duration-200 ease-out",
+        "cursor-grab active:cursor-grabbing select-none overflow-hidden",
+        "hover:border-[hsl(var(--foreground)/0.18)] hover:bg-[hsl(var(--card)/0.92)] hover:shadow-[var(--shadow-pop)]",
+        isOverlay &&
+          "shadow-2xl ring-1 ring-foreground/10 cursor-grabbing rotate-[1deg] scale-[1.02] z-50"
       )}
     >
-      {/* Header: Logo, Company Name, Status/Match */}
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0 border shadow-sm overflow-hidden p-1.5">
-            {card.companyLogoUrl ? (
-              <img src={card.companyLogoUrl} alt={card.companyName} className="w-full h-full object-contain" />
-            ) : (
-              <span className="text-sm font-bold text-muted-foreground">{card.companyName.charAt(0)}</span>
-            )}
-          </div>
-          <div className="min-w-0">
-            <div className="text-sm font-semibold text-foreground truncate">{card.companyName}</div>
-            <div className="text-[11px] text-muted-foreground truncate">{dateString}</div>
+      {/* Left accent stripe — appears on hover, picks up the
+          brand color (logoColor) when available. */}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute left-0 top-2.5 bottom-2.5 w-[2px] rounded-r-sm",
+          "opacity-0 scale-y-[0.4] origin-center",
+          "group-hover:opacity-100 group-hover:scale-y-100",
+          "transition-[opacity,transform] duration-300 ease-out"
+        )}
+        style={{
+          background: tint ?? "hsl(var(--foreground) / 0.5)",
+        }}
+      />
+
+      <div className="relative z-10 p-3 pb-2.5">
+        <div className="flex items-start gap-2.5 mb-2.5">
+          <BrandAvatar
+            name={card.companyName}
+            src={card.companyLogoUrl}
+            tint={tint}
+            size={28}
+          />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[14px] font-semibold text-foreground leading-[1.35] tracking-[-0.005em] line-clamp-2">
+              {card.roleTitle}
+            </h3>
+            <p className="text-[12px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+              <span className="truncate">{card.companyName}</span>
+              {isLive && <LiveDot title="Recently updated" />}
+            </p>
           </div>
         </div>
-        
-        {card.matchScore != null ? (
-          <span className="shrink-0 inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-900/30 dark:text-green-400">
-            {card.matchScore}% Match
-          </span>
-        ) : (
-          <span className="shrink-0 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-            Active
-          </span>
-        )}
-      </div>
 
-      {/* Body: Role Title & Image placeholder if any */}
-      <div className="mb-4">
-        <h3 className="text-base font-bold leading-snug line-clamp-2 text-foreground">
-          {card.roleTitle}
-        </h3>
-      </div>
-
-      {/* Tags */}
-      <div className="flex flex-wrap gap-1.5 mb-5">
-        {sourceLabel && (
-          <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-            {sourceLabel}
-          </span>
-        )}
-        {card.location && (
-          <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground max-w-[120px] truncate">
-            {card.location}
-          </span>
-        )}
-        {card.salaryRange && (
-          <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-            {card.salaryRange}
-          </span>
-        )}
-      </div>
-
-      {/* Footer Stats */}
-      <div className="flex items-center gap-4 pt-4 border-t mt-auto text-[11px] text-muted-foreground font-medium">
-        {card.tldrHeadline ? (
-          <div className="flex items-center gap-1.5 line-clamp-1" title={card.tldrHeadline}>
-            <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-            <span className="truncate">{card.tldrHeadline}</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 shrink-0" />
-            View details
+        {(card.location || card.salaryRange || card.jobType) && (
+          <div className="flex items-center gap-1.5 flex-wrap mt-1">
+            {card.location && (
+              <Pill
+                icon={<MapPin />}
+                className="max-w-[180px]"
+              >
+                {card.location}
+              </Pill>
+            )}
+            {card.salaryRange && <Pill>{card.salaryRange}</Pill>}
+            {card.jobType && <Pill>{card.jobType}</Pill>}
           </div>
         )}
+
+        {aiNote && (
+          <div className="mt-2">
+            <AINote text={aiNote.text} tone={aiNote.tone} />
+          </div>
+        )}
+      </div>
+
+      <div className="relative z-10 flex items-center justify-between gap-2 px-3 py-2 border-t border-border text-[12px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 min-w-0">
+          <Globe className="h-3 w-3 shrink-0 opacity-70" strokeWidth={2} />
+          <span className="truncate">
+            {sourceLabel ? `${sourceLabel} · ${dateLabel}` : dateLabel}
+          </span>
+        </span>
+        <ArrowRight
+          className={cn(
+            "h-3 w-3 shrink-0 text-muted-foreground/0",
+            "transition-all duration-200 ease-out",
+            "group-hover:text-foreground/70 group-hover:translate-x-0.5"
+          )}
+        />
       </div>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────
+
+function formatShortDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function chooseAINote(
+  card: ApiApplication
+): { text: string; tone: "default" | "warning" | "success" } | null {
+  // Match score nudge
+  if (card.matchScore != null && card.matchScore >= 75) {
+    return { text: `${card.matchScore}% match · strong fit`, tone: "success" };
+  }
+
+  // Stale: applied >9 days ago and still in same column
+  if (card.appliedAt) {
+    const daysSinceApplied = (Date.now() - new Date(card.appliedAt).getTime()) / DAY;
+    if (daysSinceApplied > 9) {
+      return {
+        text: `Silent for ${Math.floor(daysSinceApplied)} days · nudge today?`,
+        tone: "warning",
+      };
+    }
+  }
+
+  // Upcoming interview
+  if (card.nextActionDate) {
+    const t = new Date(card.nextActionDate).getTime();
+    const days = Math.round((t - Date.now()) / DAY);
+    if (days >= 0 && days <= 7 && card.nextAction) {
+      return {
+        text: `${card.nextAction} · ${formatShortDate(card.nextActionDate)}`,
+        tone: "default",
+      };
+    }
+  }
+
+  // Fall back to the AI TL;DR headline
+  if (card.tldrHeadline) {
+    return { text: card.tldrHeadline, tone: "default" };
+  }
+
+  return null;
 }

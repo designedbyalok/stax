@@ -12,7 +12,14 @@ export async function GET() {
   const [user, googleIntegration] = await Promise.all([
     prisma.user.findUnique({
       where: { id: auth.userId },
-      select: { id: true, email: true, name: true, image: true, timezone: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        timezone: true,
+        inboundEmailToken: true,
+      },
     }),
     prisma.googleIntegration.findUnique({
       where: { userId: auth.userId },

@@ -4,69 +4,99 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 6% 10%;
+    /* ─────────────────────────────────────────────────────────
+       Warm canvas — Airbnb-inspired. Replaces the cold neutral
+       palette. Shadcn primitives inherit through these tokens.
+       ───────────────────────────────────────────────────────── */
+    --background: 39 23% 95%;        /* #f5f3ef warm cream */
+    --foreground: 40 12% 9%;         /* #1a1916 warm ink */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 6% 10%;
+    --card: 0 0% 100%;               /* #ffffff paper */
+    --card-foreground: 40 12% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 6% 10%;
+    --popover-foreground: 40 12% 9%;
 
-    --primary: 240 6% 10%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 40 12% 9%;            /* near-black ink */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
+    --secondary: 39 23% 92%;
+    --secondary-foreground: 40 12% 9%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 39 20% 94%;             /* slightly cooler than bg */
+    --muted-foreground: 36 6% 47%;   /* warm gray */
 
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 6% 10%;
+    --accent: 39 23% 92%;
+    --accent-foreground: 40 12% 9%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 240 6% 10%;
+    --border: 36 12% 88%;
+    --input: 36 12% 88%;
+    --ring: 40 12% 9%;
+
+    /* Coral accent (Airbnb-inspired). Use sparingly — primary
+       CTAs and a few brand moments. */
+    --coral: 350 100% 60%;           /* #ff385c */
+    --coral-soft: 350 100% 95%;
+    --coral-ink: 348 80% 42%;
+
+    /* Stage tint variables (OKLCH). Used per-column for kanban. */
+    --stage-saved-h: 38;     --stage-saved-c: 0.06;
+    --stage-applied-h: 240;  --stage-applied-c: 0.10;
+    --stage-phone-h: 28;     --stage-phone-c: 0.13;
+    --stage-interview-h: 285;--stage-interview-c: 0.12;
+    --stage-offer-h: 150;    --stage-offer-c: 0.10;
+    --stage-rejected-h: 18;  --stage-rejected-c: 0.11;
+
+    /* Stat pip hues — keep these distinct + readable. */
+    --pip-active: 220 9% 46%;        /* slate */
+    --pip-week: 217 91% 60%;         /* blue */
+    --pip-waiting: 32 95% 44%;       /* amber */
+    --pip-upcoming: 262 83% 58%;     /* violet */
 
     --radius: 0.5rem;
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
+
+    --shadow-card: 0 1px 0 hsl(40 12% 9% / 0.03),
+                   0 1px 2px hsl(40 12% 9% / 0.03);
+    --shadow-pop: 0 1px 0 hsl(40 12% 9% / 0.03),
+                  0 12px 24px -14px hsl(40 12% 9% / 0.10),
+                  0 4px 10px -6px hsl(40 12% 9% / 0.06);
   }
 
   .dark {
-    --background: 240 6% 7%;
-    --foreground: 0 0% 96%;
+    --background: 30 5% 8%;
+    --foreground: 36 12% 95%;
 
-    --card: 240 6% 9%;
-    --card-foreground: 0 0% 96%;
+    --card: 30 5% 11%;
+    --card-foreground: 36 12% 95%;
 
-    --popover: 240 6% 9%;
-    --popover-foreground: 0 0% 96%;
+    --popover: 30 5% 11%;
+    --popover-foreground: 36 12% 95%;
 
-    --primary: 0 0% 96%;
-    --primary-foreground: 240 6% 10%;
+    --primary: 36 12% 95%;
+    --primary-foreground: 30 5% 8%;
 
-    --secondary: 240 5% 14%;
-    --secondary-foreground: 0 0% 96%;
+    --secondary: 30 5% 16%;
+    --secondary-foreground: 36 12% 95%;
 
-    --muted: 240 5% 14%;
-    --muted-foreground: 240 4% 56%;
+    --muted: 30 5% 14%;
+    --muted-foreground: 36 6% 60%;
 
-    --accent: 240 5% 14%;
-    --accent-foreground: 0 0% 96%;
+    --accent: 30 5% 16%;
+    --accent-foreground: 36 12% 95%;
 
     --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 96%;
 
-    --border: 240 5% 18%;
-    --input: 240 5% 18%;
-    --ring: 240 5% 70%;
+    --border: 30 5% 20%;
+    --input: 30 5% 20%;
+    --ring: 36 12% 70%;
   }
 
   * {
@@ -80,11 +110,11 @@
   }
 
   body {
-    @apply bg-background text-foreground text-[13px] leading-relaxed;
+    @apply bg-background text-foreground text-[14px] leading-[1.45];
   }
 
   ::selection {
-    @apply bg-foreground/10;
+    background: hsl(40 12% 9% / 0.08);
   }
 }
 
@@ -96,19 +126,35 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Stage tint helpers. Used by kanban columns + cards so a
+   single hue+chroma pair drives pip, soft tint, and accent
+   stripe colors.
+
+   Usage: <div className="stage-applied"> wraps a column or card.
+   Then read with `bg-[var(--stage-tint-soft)]`,
+   `border-l-[var(--stage-tint-strong)]`, etc.
+   ───────────────────────────────────────────────────────────── */
+
+[data-stage] {
+  --tint-soft: oklch(0.97 calc(var(--tint-c) * 0.5) var(--tint-h));
+  --tint-band: oklch(0.78 var(--tint-c) var(--tint-h));
+  --tint-strong: oklch(0.65 var(--tint-c) var(--tint-h));
+  --tint-ink: oklch(0.36 var(--tint-c) var(--tint-h));
+}
+[data-stage="saved"]     { --tint-h: var(--stage-saved-h);     --tint-c: var(--stage-saved-c); }
+[data-stage="applied"]   { --tint-h: var(--stage-applied-h);   --tint-c: var(--stage-applied-c); }
+[data-stage="phone"]     { --tint-h: var(--stage-phone-h);     --tint-c: var(--stage-phone-c); }
+[data-stage="interview"] { --tint-h: var(--stage-interview-h); --tint-c: var(--stage-interview-c); }
+[data-stage="offer"]     { --tint-h: var(--stage-offer-h);     --tint-c: var(--stage-offer-c); }
+[data-stage="rejected"]  { --tint-h: var(--stage-rejected-h);  --tint-c: var(--stage-rejected-c); }
+
+/* ─────────────────────────────────────────────────────────────
    Subtle motion utilities used across the app pages.
-   Pair these with the existing Linear-style Geist aesthetic.
    ───────────────────────────────────────────────────────────── */
 
 @keyframes app-fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes app-fade-in {
@@ -117,23 +163,19 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 @keyframes app-scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-/* Apply a soft fade-up to a single element. */
+@keyframes app-live-pulse {
+  0%   { transform: scale(0.7); opacity: 0.4; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
 .fade-in-up {
   animation: app-fade-in-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
-/* Apply staggered fade-up to direct children. Uses --i CSS var or
-   nth-child fallback for items 1..12. */
 .stagger-list > * {
   animation: app-fade-in-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: calc(var(--i, 0) * 32ms);
@@ -151,12 +193,10 @@ input[type="number"]::-webkit-inner-spin-button {
 .stagger-list > *:nth-child(11) { --i: 11; }
 .stagger-list > *:nth-child(12) { --i: 12; }
 
-/* Smooth content swap when toggling tabs / panels. */
 .tab-content {
   animation: app-fade-in 0.22s ease-out;
 }
 
-/* Subtle card hover lift used on document cards, event cards, etc. */
 .card-lift {
   transition:
     transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
@@ -165,10 +205,9 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 .card-lift:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.07);
+  box-shadow: var(--shadow-pop);
 }
 
-/* Pill-style tab indicator slide. */
 .pill-tab {
   position: relative;
   transition: color 0.18s ease;

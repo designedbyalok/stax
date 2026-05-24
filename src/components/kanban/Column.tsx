@@ -2,9 +2,10 @@
 
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { MapPin } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { ApiApplication } from "@/lib/api-client";
 import { KanbanCard } from "./Card";
+import { Pip } from "@/components/ui/pip";
 import { cn } from "@/lib/utils";
 
 interface ColumnProps {
@@ -13,21 +14,26 @@ interface ColumnProps {
   onCardClick: (card: ApiApplication) => void;
   showEmptyHint?: boolean;
   showPlaceholders?: boolean;
+  onAddCard?: () => void;
 }
 
-// Example placeholder cards shown on a brand-new account's empty board.
-// Per AC-05 in the PRD: they disappear on first real save.
+// Map column names to the stage tint slugs defined in globals.css.
+// Anything that doesn't match falls back to the user-defined color.
+const STAGE_BY_NAME: Record<string, string> = {
+  saved: "saved",
+  applied: "applied",
+  "phone screen": "phone",
+  interview: "interview",
+  "on-site": "interview",
+  onsite: "interview",
+  offer: "offer",
+  rejected: "rejected",
+  closed: "rejected",
+};
+
 const PLACEHOLDERS = [
-  {
-    roleTitle: "Senior Product Designer",
-    companyName: "Linear",
-    location: "Remote",
-  },
-  {
-    roleTitle: "Frontend Engineer",
-    companyName: "Vercel",
-    location: "San Francisco",
-  },
+  { roleTitle: "Senior Product Designer", companyName: "Linear", location: "Remote" },
+  { roleTitle: "Frontend Engineer", companyName: "Vercel", location: "San Francisco" },
 ];
 
 export function Column({
@@ -36,31 +42,57 @@ export function Column({
   onCardClick,
   showEmptyHint,
   showPlaceholders,
+  onAddCard,
 }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
     data: { type: "Column", column },
   });
 
+  const stageSlug = STAGE_BY_NAME[column.title.toLowerCase().trim()];
+  const pipColor = stageSlug
+    ? undefined // pip reads from --tint-strong via [data-stage]
+    : column.color || "hsl(var(--muted-foreground))";
+
   return (
-    <div className="flex flex-col flex-shrink-0 w-72">
-      <div className="flex items-center px-1 pb-3">
-        <div className="flex items-center gap-2 bg-background border shadow-sm px-3 py-1.5 rounded-full">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: column.color || 'var(--primary)' }} />
-          <span className="text-xs font-semibold text-foreground tracking-tight">
-            {column.title}
-          </span>
-          <span className="text-[10px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full tabular-nums">
-            {cards.length}
-          </span>
+    <div
+      className="flex flex-col flex-shrink-0 w-[280px]"
+      data-stage={stageSlug}
+    >
+      <div className="flex items-center gap-2 px-1 pb-1 pt-0.5 group/colhead">
+        <Pip color={pipColor} />
+        <span className="text-[14px] font-semibold text-foreground tracking-[-0.005em]">
+          {column.title}
+        </span>
+        <span className="text-[12px] text-muted-foreground/80 font-medium tabular-nums">
+          {cards.length}
+        </span>
+        <div className="ml-auto flex items-center gap-0.5 opacity-0 group-hover/colhead:opacity-100 transition-opacity">
+          {onAddCard && (
+            <button
+              type="button"
+              onClick={onAddCard}
+              className="w-[22px] h-[22px] grid place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              title="Add card"
+            >
+              <Plus className="h-3 w-3" strokeWidth={2} />
+            </button>
+          )}
+          <button
+            type="button"
+            className="w-[22px] h-[22px] grid place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            title="Column options"
+          >
+            <MoreHorizontal className="h-3 w-3" strokeWidth={2} />
+          </button>
         </div>
       </div>
 
       <div
         ref={setNodeRef}
         className={cn(
-          "flex-1 flex flex-col gap-4 rounded-xl p-1 min-h-[120px] transition-colors",
-          isOver ? "bg-primary/5" : "bg-transparent"
+          "flex-1 flex flex-col gap-2 rounded-lg p-1 min-h-[120px] transition-colors",
+          isOver ? "bg-[hsl(var(--foreground)/0.04)]" : "bg-transparent"
         )}
       >
         <SortableContext
@@ -77,16 +109,21 @@ export function Column({
         </SortableContext>
 
         {cards.length === 0 && showPlaceholders && (
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {PLACEHOLDERS.map((p, i) => (
               <PlaceholderCard key={i} {...p} />
             ))}
           </div>
         )}
 
-        {cards.length === 0 && showEmptyHint && !showPlaceholders && (
-          <div className="text-[11px] text-muted-foreground text-center py-4 px-2">
-            Paste a job link to get started.
+        {cards.length === 0 && !showPlaceholders && (
+          <div
+            className={cn(
+              "rounded-[10px] border border-dashed border-foreground/15 p-3.5 text-center text-[12px] text-muted-foreground/80",
+              showEmptyHint ? "" : "opacity-70"
+            )}
+          >
+            {showEmptyHint ? "Paste a job link to get started." : "Drop a card here"}
           </div>
         )}
       </div>
@@ -104,17 +141,14 @@ function PlaceholderCard({
   location: string;
 }) {
   return (
-    <div className="px-3 py-2.5 rounded-md border border-dashed bg-transparent select-none pointer-events-none">
+    <div className="px-3 py-2.5 rounded-[10px] border border-dashed border-foreground/15 bg-transparent select-none pointer-events-none">
       <div className="text-[13px] font-medium leading-snug text-muted-foreground/80">
         {roleTitle}
       </div>
       <div className="text-[12px] text-muted-foreground/60 mt-0.5">
         {companyName}
       </div>
-      <div className="flex items-center gap-1 mt-2 text-[11px] text-muted-foreground/50">
-        <MapPin className="h-3 w-3 shrink-0" strokeWidth={1.75} />
-        {location}
-      </div>
+      <div className="text-[11px] text-muted-foreground/50 mt-2">{location}</div>
     </div>
   );
 }
