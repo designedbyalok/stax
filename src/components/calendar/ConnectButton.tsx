@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, Loader2, Unplug } from "lucide-react";
 import { toast } from "sonner";
@@ -9,12 +10,41 @@ import { api } from "@/lib/api-client";
 
 export function ConnectButton() {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [disconnecting, setDisconnecting] = useState(false);
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user"],
-    queryFn: () => fetch("/api/user").then(r => r.json()),
+    queryFn: async () => {
+      const r = await fetch("/api/user");
+      if (!r.ok) throw new Error(`/api/user ${r.status}`);
+      return r.json();
+    },
   });
+
+  // After the OAuth callback redirects back with ?success=1 / ?error=…,
+  // refetch the user so the button flips to "Connected", show a toast,
+  // and clean the query string so it doesn't fire again on refresh.
+  useEffect(() => {
+    const success = searchParams.get("success");
+    const error = searchParams.get("error");
+    if (!success && !error) return;
+
+    if (success) {
+      toast.success("Google Calendar connected");
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    } else if (error) {
+      const messages: Record<string, string> = {
+        NotConfigured: "Google OAuth isn't configured — contact support.",
+        NoCode: "Google didn't return an authorization code.",
+        OAuthFailed: "Couldn't complete the Google connection. Try again.",
+      };
+      toast.error(messages[error] ?? `Connection failed (${error})`);
+    }
+
+    router.replace("/settings/integrations");
+  }, [searchParams, queryClient, router]);
 
   const isConnected = !!user?.googleIntegration;
 
