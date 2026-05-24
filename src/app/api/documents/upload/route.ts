@@ -39,9 +39,13 @@ export async function POST(req: NextRequest) {
     const storageKey = `${auth.userId}/${nanoid()}.${ext}`;
 
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || "documents";
+    
+    // In Next 15 / Node 20+, passing a File object directly to Supabase upload 
+    // can cause a fetch failed error due to Undici. We pass an ArrayBuffer instead.
+    const fileBuffer = await file.arrayBuffer();
     const { error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(storageKey, file, {
+      .upload(storageKey, fileBuffer, {
         contentType: file.type,
         upsert: false,
       });
