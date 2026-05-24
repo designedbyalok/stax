@@ -82,10 +82,10 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
         "group relative isolate bg-card text-card-foreground rounded-[10px] border border-border",
         "transition-[border-color,background-color,box-shadow] duration-200 ease-out",
         "cursor-grab active:cursor-grabbing select-none overflow-hidden",
-        // Hover border picks up the column's stage tint via the
-        // --tint-band variable (set by [data-stage] on the parent
-        // Column), so the card visually belongs to its column.
-        "hover:border-[var(--tint-band,hsl(var(--foreground)/0.2))] hover:shadow-[var(--shadow-pop)]",
+        // Quiet neutral hover border. The accent — the stripe
+        // inside the card — does the column-color signaling, so
+        // the outer chrome stays calm.
+        "hover:border-[hsl(var(--foreground)/0.18)] hover:shadow-[var(--shadow-pop)]",
         isOverlay &&
           "shadow-2xl ring-1 ring-foreground/10 cursor-grabbing rotate-[1deg] scale-[1.02] z-50"
       )}

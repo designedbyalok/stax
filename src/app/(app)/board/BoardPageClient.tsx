@@ -11,6 +11,7 @@ import { ManualEntryForm } from "@/components/capture/ManualEntryForm";
 import { StatsStrip } from "@/components/stats/StatsStrip";
 import { SearchFilters } from "@/components/filters/SearchFilters";
 import { RemindersBell } from "@/components/reminders/RemindersBell";
+import { ViewToggle } from "@/components/board/ViewToggle";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
 import { api } from "@/lib/api-client";
 
@@ -98,8 +99,11 @@ export default function BoardPageClient() {
         </div>
 
         {/* Filter row */}
-        <div className="mb-3">
-          <SearchFilters />
+        <div className="mb-3 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <SearchFilters />
+          </div>
+          <ViewToggle />
         </div>
       </div>
 

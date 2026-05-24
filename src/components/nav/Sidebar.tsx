@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { signOut } from "next-auth/react";
 import {
   LayoutGrid,
-  List,
   Bell,
   FileText,
   LogOut,
@@ -33,12 +32,20 @@ type Item = {
   icon: typeof LayoutGrid;
   kbd?: string;
   countKey?: "reminders" | "interviews";
+  /** Additional path prefixes that should mark this item active.
+   *  e.g. Pipeline owns both /board and /list views. */
+  matches?: string[];
 };
 
 const NAV_WORKSPACE: Item[] = [
-  { href: "/board", label: "Pipeline", icon: LayoutGrid, kbd: "⌘1" },
+  {
+    href: "/board",
+    label: "Pipeline",
+    icon: LayoutGrid,
+    kbd: "⌘1",
+    matches: ["/board", "/list"],
+  },
   { href: "/interviews", label: "Interviews", icon: Calendar, countKey: "interviews" },
-  { href: "/list", label: "List", icon: List, kbd: "⌘2" },
   { href: "/reminders", label: "Reminders", icon: Bell, countKey: "reminders" },
   { href: "/documents", label: "Documents", icon: FileText },
 ];
@@ -210,8 +217,10 @@ function NavLink({
   pathname: string;
   count?: number;
 }) {
-  const active =
-    pathname === item.href || pathname.startsWith(item.href + "/");
+  const patterns = item.matches ?? [item.href];
+  const active = patterns.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
   const Icon = item.icon;
   return (
     <Link

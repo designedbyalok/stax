@@ -1,36 +1,120 @@
 "use client";
 
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import { ApplicationList } from "@/components/list/ApplicationList";
 import { ManualEntryForm } from "@/components/capture/ManualEntryForm";
 import { PreviewCard } from "@/components/capture/PreviewCard";
 import { DuplicateDialog } from "@/components/capture/DuplicateDialog";
 import { SearchFilters } from "@/components/filters/SearchFilters";
 import { RemindersBell } from "@/components/reminders/RemindersBell";
+import { ViewToggle } from "@/components/board/ViewToggle";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
+import { api } from "@/lib/api-client";
 
 export default function ListPageClient() {
   const select = useSelectedCard((s) => s.select);
 
+  const appsQuery = useQuery({
+    queryKey: ["applications"],
+    queryFn: () => api.listApplications().then((r) => r.applications),
+  });
+
+  const heroMeta = useMemo(() => {
+    const apps = appsQuery.data ?? [];
+    const active = apps.length;
+    const today = format(new Date(), "EEEE, MMM d");
+    const mostRecent = apps
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      )[0];
+    const lastUpdate = mostRecent
+      ? formatDistanceToNowStrict(new Date(mostRecent.updatedAt), {
+          addSuffix: true,
+        })
+      : null;
+    return { active, today, lastUpdate };
+  }, [appsQuery.data]);
+
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
-      <header className="px-6 h-12 border-b flex items-center justify-between gap-4 shrink-0">
-        <h1 className="text-sm font-semibold tracking-tight">List</h1>
+      {/* Top bar — matches /board */}
+      <header className="px-6 h-[52px] border-b border-border flex items-center justify-between gap-4 shrink-0 bg-card">
+        <div className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
+          <span>Workspace</span>
+          <ChevronRightInline />
+          <span className="text-foreground font-semibold">Pipeline</span>
+        </div>
         <div className="flex items-center gap-2">
           <RemindersBell />
           <ManualEntryForm />
         </div>
       </header>
 
-      <div className="px-6 py-3 border-b shrink-0">
-        <SearchFilters />
+      <div className="px-6 pt-5 pb-2 shrink-0">
+        {/* Hero */}
+        <div className="flex items-end justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-[18px] font-semibold tracking-[-0.01em] leading-[1.3] text-foreground">
+              Pipeline{" "}
+              <span className="font-normal text-muted-foreground">
+                · {heroMeta.active} active{" "}
+                {heroMeta.active === 1 ? "application" : "applications"}
+              </span>
+            </h1>
+            <div className="flex items-center gap-2 mt-1 text-[12px] text-muted-foreground">
+              <span>{heroMeta.today}</span>
+              {heroMeta.lastUpdate && (
+                <>
+                  <span className="w-[3px] h-[3px] rounded-full bg-muted-foreground/50" />
+                  <span>
+                    Last update{" "}
+                    <span className="text-foreground font-medium">
+                      {heroMeta.lastUpdate}
+                    </span>
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Filter row with view toggle */}
+        <div className="mb-3 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <SearchFilters />
+          </div>
+          <ViewToggle />
+        </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      {/* List table fills remaining height */}
+      <div className="flex-1 min-h-0 overflow-hidden px-6 pb-4">
         <ApplicationList />
       </div>
 
       <PreviewCard />
       <DuplicateDialog onOpenExisting={(id) => select(id)} />
     </div>
+  );
+}
+
+function ChevronRightInline() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-3 h-3 text-muted-foreground/70"
+      aria-hidden
+    >
+      <path d="M9 18l6-6-6-6" />
+    </svg>
   );
 }

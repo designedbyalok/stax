@@ -46,6 +46,9 @@ export function SettingsModal() {
       <DialogContent
         // Centered modal, two-column layout: nav rail + content.
         // Wider than the default to fit settings comfortably.
+        // showCloseButton=false because we render our own X at the
+        // top-right; without this we'd get two close buttons.
+        showCloseButton={false}
         className={cn(
           "!w-[min(900px,calc(100vw-2rem))] sm:!max-w-[900px]",
           "!p-0 !gap-0 h-[min(680px,calc(100vh-2rem))]",

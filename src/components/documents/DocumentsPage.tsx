@@ -2,23 +2,16 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
-import { FileText, Upload, Eye } from "lucide-react";
+import { FileText, Upload } from "lucide-react";
 import { api, ApiDocument } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { UploadModal } from "./UploadModal";
 import { DocumentsByApplicationView } from "./DocumentsByApplicationView";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PdfPreview } from "./PdfPreview";
 import { DocxPreview } from "./DocxPreview";
-
-function formatSize(bytes: number) {
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+import { DocumentCard } from "./DocumentCard";
 
 export function DocumentsPage() {
   const [tab, setTab] = useState<"RESUME" | "COVER_LETTER">("RESUME");
@@ -111,43 +104,17 @@ export function DocumentsPage() {
             </Button>
           </div>
         ) : (
-          <div key={tab} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger-list">
+          <div
+            key={tab}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 stagger-list"
+          >
             {data?.map((doc: ApiDocument) => (
-              <Card key={doc.id} className="p-4 flex flex-col gap-3 group relative overflow-hidden card-lift hover:bg-muted/30 hover:border-foreground/15">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-medium truncate">{doc.name}</h3>
-                    <p className="text-xs text-muted-foreground truncate" title={doc.filename}>
-                      {doc.filename} · {formatSize(doc.sizeBytes)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    {doc.isPrimary && (
-                      <Badge variant="secondary" className="text-[10px] uppercase font-semibold rounded-sm px-1.5 py-0">
-                        Primary
-                      </Badge>
-                    )}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-7 w-7" 
-                      onClick={() => setPreviewDoc(doc)}
-                      title="Preview Document"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-1 pt-3 border-t">
-                  <span className="text-[11px] text-muted-foreground">
-                    Used on {tab === "RESUME" ? doc._count?.resumeApplications : doc._count?.coverLetterApplications} apps
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {formatDistanceToNow(new Date(doc.updatedAt), { addSuffix: true })}
-                  </span>
-                </div>
-              </Card>
+              <DocumentCard
+                key={doc.id}
+                doc={doc}
+                type={tab}
+                onPreview={setPreviewDoc}
+              />
             ))}
           </div>
         )}
