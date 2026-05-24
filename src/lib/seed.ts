@@ -11,6 +11,15 @@ const DEFAULT_COLUMNS = [
 ];
 
 export async function seedDefaultsForUser(userId: string) {
+  // Belt-and-suspenders: confirm the user actually exists before we try to
+  // create rows that reference it. The caller (app layout) already checks
+  // this, but we want this helper safe to call from anywhere.
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+  if (!user) return;
+
   const existing = await prisma.column.count({ where: { userId } });
   if (existing > 0) return;
 

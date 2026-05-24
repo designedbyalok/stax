@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,19 @@ function LoginContent({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/board";
+  const errorParam = searchParams.get("error");
   const [submitting, setSubmitting] = useState(false);
+
+  // Surface session-expired bounces from the app layout. Also call signOut
+  // to clear the stale JWT cookie — otherwise auth() keeps returning the
+  // dead session and we'd bounce here forever.
+  useEffect(() => {
+    if (errorParam === "session_expired") {
+      toast.error("Your session expired. Please log in again.");
+      signOut({ redirect: false }).then(() => router.replace("/login"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
