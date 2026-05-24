@@ -1,20 +1,35 @@
 import { google } from "googleapis";
 
-// In production, these should be properly configured in Google Cloud Console
-// For local development, they should be set in .env
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
-
-// We need a stable callback URL
-const NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const REDIRECT_URI = `${NEXT_PUBLIC_APP_URL}/api/integrations/google-calendar/callback`;
+// We share the same OAuth client with Auth.js v5 (AUTH_GOOGLE_ID/SECRET).
+// Older `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` names are kept as a fallback
+// so existing local setups don't break. Resolved lazily inside the helper so
+// missing env doesn't silently produce an empty client_id at module load.
+function readEnv() {
+  const clientId = process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID || "";
+  const clientSecret =
+    process.env.AUTH_GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET || "";
+  const appUrl =
+    process.env.AUTH_URL ||
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "http://localhost:3000";
+  return {
+    clientId,
+    clientSecret,
+    redirectUri: `${appUrl.replace(/\/$/, "")}/api/integrations/google-calendar/callback`,
+  };
+}
 
 export function getGoogleOAuthClient() {
-  return new google.auth.OAuth2(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    REDIRECT_URI
-  );
+  const { clientId, clientSecret, redirectUri } = readEnv();
+  if (!clientId || !clientSecret) {
+    // Fail loudly instead of letting Google reject with the cryptic
+    // "Missing required parameter: client_id" error.
+    throw new Error(
+      "Google OAuth env missing: set AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET"
+    );
+  }
+  return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
 
 export function getGoogleAuthUrl() {
