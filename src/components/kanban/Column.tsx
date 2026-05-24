@@ -8,7 +8,7 @@ import { KanbanCard } from "./Card";
 import { cn } from "@/lib/utils";
 
 interface ColumnProps {
-  column: { id: string; title: string };
+  column: { id: string; title: string; color?: string };
   cards: ApiApplication[];
   onCardClick: (card: ApiApplication) => void;
   showEmptyHint?: boolean;
@@ -57,6 +57,7 @@ export function Column({
 
       <div
         ref={setNodeRef}
+        style={column.color ? { borderTopWidth: 3, borderTopColor: column.color } : {}}
         className={cn(
           "flex-1 flex flex-col gap-1.5 rounded-md p-1.5 min-h-[120px] transition-colors",
           isOver ? "bg-foreground/[0.04]" : "bg-muted/30"

@@ -25,6 +25,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api, ApiColumn } from "@/lib/api-client";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const PRESET_COLORS = [
+  "#E2E8F0", // Slate 200 (Default)
+  "#FECACA", // Red 200
+  "#FED7AA", // Orange 200
+  "#FEF08A", // Yellow 200
+  "#BBF7D0", // Green 200
+  "#BFDBFE", // Blue 200
+  "#E9D5FF", // Purple 200
+  "#FBCFE8", // Pink 200
+];
 
 export default function PipelineSettings() {
   const queryClient = useQueryClient();
@@ -47,7 +64,7 @@ export default function PipelineSettings() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, ...data }: { id: string; name?: string; position?: number }) =>
+    mutationFn: ({ id, ...data }: { id: string; name?: string; position?: number; color?: string }) =>
       api.updateColumn(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["columns"] }),
     onError: (err) =>
@@ -128,6 +145,7 @@ export default function PipelineSettings() {
                   key={col.id}
                   column={col}
                   onRename={(name) => updateMutation.mutate({ id: col.id, name })}
+                  onChangeColor={(color) => updateMutation.mutate({ id: col.id, color })}
                   onDelete={() => {
                     if (
                       confirm(
@@ -174,11 +192,13 @@ export default function PipelineSettings() {
 function ColumnRow({
   column,
   onRename,
+  onChangeColor,
   onDelete,
   disableDelete,
 }: {
   column: ApiColumn;
   onRename: (name: string) => void;
+  onChangeColor: (color: string) => void;
   onDelete: () => void;
   disableDelete: boolean;
 }) {
@@ -257,10 +277,32 @@ function ColumnRow({
         </button>
       )}
 
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="icon-sm" variant="ghost" className="shrink-0" aria-label="Change color">
+            <div
+              className="w-3.5 h-3.5 rounded-full border border-foreground/10"
+              style={{ backgroundColor: column.color || PRESET_COLORS[0] }}
+            />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-[120px] p-1.5 flex flex-wrap gap-1">
+          {PRESET_COLORS.map((c) => (
+            <DropdownMenuItem
+              key={c}
+              onClick={() => onChangeColor(c)}
+              className="p-1 h-8 w-8 flex items-center justify-center cursor-pointer"
+            >
+              <div className="w-5 h-5 rounded-full border border-foreground/10" style={{ backgroundColor: c }} />
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <Button
         size="icon-sm"
         variant="ghost"
-        className="text-muted-foreground hover:text-destructive"
+        className="text-muted-foreground hover:text-destructive shrink-0"
         disabled={disableDelete}
         onClick={onDelete}
         aria-label="Delete column"

@@ -222,7 +222,7 @@ export default function Board() {
           {visibleColumns.map((col) => (
             <Column
               key={col.id}
-              column={{ id: col.id, title: col.name }}
+              column={{ id: col.id, title: col.name, color: col.color }}
               cards={cardsByColumn.get(col.id) ?? []}
               onCardClick={(card) => setSelectedCardId(card.id)}
               showEmptyHint={!hasCards && isFirstColumn(col)}
