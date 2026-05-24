@@ -13,7 +13,7 @@ const NAV_LINKS = [
 export function LandingNav() {
   const [open, setOpen] = useState(false);
 
-  // Close panel when a hash link is tapped.
+  // Close on hash navigation (smooth-scroll then collapse).
   useEffect(() => {
     if (!open) return;
     function onHash() {
@@ -23,7 +23,7 @@ export function LandingNav() {
     return () => window.removeEventListener("hashchange", onHash);
   }, [open]);
 
-  // Prevent body scroll while the panel is open on mobile.
+  // Lock body scroll while overlay is open.
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -33,14 +33,25 @@ export function LandingNav() {
     };
   }, [open]);
 
+  // Close on Escape.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
-    <div className="nav-wrap">
-      <nav
-        className={"nav glass-dark" + (open ? " nav--open" : "")}
-        data-open={open ? "true" : "false"}
-      >
-        <div className="nav-row">
-          <Link href="/" className="nav-logo" onClick={() => setOpen(false)}>
+    <>
+      <div className="nav-wrap">
+        <nav className="nav glass-dark" data-open={open ? "true" : "false"}>
+          <Link
+            href="/"
+            className="nav-logo"
+            onClick={() => setOpen(false)}
+          >
             <span className="nav-logo-mark">
               <span />
               <span />
@@ -71,6 +82,7 @@ export function LandingNav() {
             className="nav-mobile-toggle"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
+            aria-controls="mobile-nav-overlay"
             onClick={() => setOpen((o) => !o)}
           >
             <span className="nav-burger" data-open={open}>
@@ -79,30 +91,58 @@ export function LandingNav() {
               <span />
             </span>
           </button>
-        </div>
+        </nav>
+      </div>
 
-        <div className="nav-mobile-panel" aria-hidden={!open}>
-          <div className="nav-mobile-links">
-            {NAV_LINKS.map((l) => (
-              <a
+      {/* Mobile full-viewport menu overlay. Renders outside the pill so the
+          pill stays compact + stable while the menu fades over the page. */}
+      <div
+        id="mobile-nav-overlay"
+        className="nav-mobile-overlay"
+        data-open={open ? "true" : "false"}
+        aria-hidden={!open}
+        onClick={(e) => {
+          // Tap on the empty space dismisses; tap on the inner content doesn't.
+          if (e.target === e.currentTarget) setOpen(false);
+        }}
+      >
+        <div className="nav-mobile-overlay-inner">
+          <ul className="nav-mobile-list">
+            {NAV_LINKS.map((l, i) => (
+              <li
                 key={l.href}
-                className="nav-mobile-link"
-                href={l.href}
-                onClick={() => setOpen(false)}
+                style={{ ["--i" as string]: i }}
+                className="nav-mobile-item"
               >
-                {l.label}
-              </a>
+                <a href={l.href} onClick={() => setOpen(false)}>
+                  {l.label}
+                </a>
+              </li>
             ))}
+            <li
+              style={{ ["--i" as string]: NAV_LINKS.length }}
+              className="nav-mobile-item nav-mobile-item--signin"
+            >
+              <Link href="/login" onClick={() => setOpen(false)}>
+                Sign in
+              </Link>
+            </li>
+          </ul>
+
+          <div
+            className="nav-mobile-cta-wrap"
+            style={{ ["--i" as string]: NAV_LINKS.length + 1 }}
+          >
             <Link
-              className="nav-mobile-link nav-mobile-link--signin"
-              href="/login"
+              className="nav-mobile-cta"
+              href="/signup"
               onClick={() => setOpen(false)}
             >
-              Sign in
+              Start tracking →
             </Link>
           </div>
         </div>
-      </nav>
-    </div>
+      </div>
+    </>
   );
 }
