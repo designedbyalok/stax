@@ -219,7 +219,7 @@ export default function Board() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-3 h-full overflow-x-auto pb-2">
+        <div className="flex gap-3 h-full overflow-x-auto scroll-soft pb-2">
           {visibleColumns.map((col) => (
             <Column
               key={col.id}

@@ -91,6 +91,7 @@ export default function TrashSettings() {
           <Button
             size="sm"
             variant="outline"
+            nativeButton={false}
             render={
               <a href="/api/export/csv" download>
                 <Download className="h-3.5 w-3.5" />

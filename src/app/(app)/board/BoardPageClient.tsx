@@ -58,64 +58,63 @@ export default function BoardPageClient() {
         </div>
       </header>
 
-      {/* Canvas — single scroll surface */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="px-6 pt-5 pb-2">
-          {/* Hero */}
-          <div className="flex items-end justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-[18px] font-semibold tracking-[-0.01em] leading-[1.3] text-foreground">
-                Pipeline{" "}
-                <span className="font-normal text-muted-foreground">
-                  · {heroMeta.active} active{" "}
-                  {heroMeta.active === 1 ? "application" : "applications"}
-                </span>
-              </h1>
-              <div className="flex items-center gap-2 mt-1 text-[12px] text-muted-foreground">
-                <span>{heroMeta.today}</span>
-                {heroMeta.lastUpdate && (
-                  <>
-                    <span className="w-[3px] h-[3px] rounded-full bg-muted-foreground/50" />
-                    <span>
-                      Last update{" "}
-                      <span className="text-foreground font-medium">
-                        {heroMeta.lastUpdate}
-                      </span>
+      {/* Canvas — fixed hero/stats, board fills remaining height */}
+      <div className="px-6 pt-5 pb-2 shrink-0">
+        {/* Hero */}
+        <div className="flex items-end justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-[18px] font-semibold tracking-[-0.01em] leading-[1.3] text-foreground">
+              Pipeline{" "}
+              <span className="font-normal text-muted-foreground">
+                · {heroMeta.active} active{" "}
+                {heroMeta.active === 1 ? "application" : "applications"}
+              </span>
+            </h1>
+            <div className="flex items-center gap-2 mt-1 text-[12px] text-muted-foreground">
+              <span>{heroMeta.today}</span>
+              {heroMeta.lastUpdate && (
+                <>
+                  <span className="w-[3px] h-[3px] rounded-full bg-muted-foreground/50" />
+                  <span>
+                    Last update{" "}
+                    <span className="text-foreground font-medium">
+                      {heroMeta.lastUpdate}
                     </span>
-                  </>
-                )}
-              </div>
+                  </span>
+                </>
+              )}
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="mb-3">
-            <StatsStrip />
-          </div>
-
-          {/* Capture */}
-          <div className="mb-3">
-            <PasteBar />
-          </div>
-
-          {/* Filter row */}
-          <div className="mb-3">
-            <SearchFilters />
-          </div>
         </div>
 
-        {/* Board with right-edge fade hint */}
-        <div className="relative px-6 pb-6 min-h-[300px]">
-          <Board />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute right-0 top-0 bottom-6 w-20"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, hsl(var(--background)) 85%)",
-            }}
-          />
+        {/* Stats */}
+        <div className="mb-3">
+          <StatsStrip />
         </div>
+
+        {/* Capture */}
+        <div className="mb-3">
+          <PasteBar />
+        </div>
+
+        {/* Filter row */}
+        <div className="mb-3">
+          <SearchFilters />
+        </div>
+      </div>
+
+      {/* Board fills the remaining height, with its own horizontal
+          scroll. Right-edge fade hints at off-screen columns. */}
+      <div className="relative flex-1 min-h-0 px-6 pb-4">
+        <Board />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 bottom-4 w-20"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, hsl(var(--background)) 85%)",
+          }}
+        />
       </div>
 
       <PreviewCard />

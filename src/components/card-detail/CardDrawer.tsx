@@ -127,7 +127,17 @@ export function CardDrawer({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="!w-[440px] sm:!max-w-[440px] p-0 gap-0 flex flex-col">
+      <SheetContent
+        // Floating drawer: inset from the viewport edges, rounded
+        // corners, soft elevation. `!` overrides the side= preset
+        // from the shadcn Sheet primitive.
+        className={[
+          "!inset-y-3 !right-3 !h-[calc(100vh-1.5rem)]",
+          "!w-[min(640px,calc(100vw-1.5rem))] sm:!max-w-[640px]",
+          "rounded-xl border bg-popover shadow-2xl",
+          "p-0 gap-0 flex flex-col overflow-hidden",
+        ].join(" ")}
+      >
         <SheetHeader className="px-5 pt-5 pb-4 border-b space-y-2.5">
           <SheetTitle className="sr-only">{card.roleTitle}</SheetTitle>
           <SheetDescription className="sr-only">{card.companyName}</SheetDescription>

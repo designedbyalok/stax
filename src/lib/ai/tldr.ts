@@ -31,14 +31,15 @@ export type JobTldr = {
   keywords: string[];
 };
 
-const PROMPT_PREFIX = `You are a job-application analyzer. Read the job description below and produce a structured TL;DR and analysis for someone deciding whether to apply.
+const PROMPT_PREFIX = `Summarize this job posting. Output JSON only.
 
-Requirements:
-- "headline": one short, declarative line (max 90 chars) capturing the most distinctive thing about this role. Avoid generic phrases like "Exciting opportunity". Lead with the role's actual focus.
-- "bullets": 3-4 short bullets, each at most 14 words. Cover core focus, must-haves, compensation, and notable terms.
-- "responsibilities": 3-5 succinct points on what the candidate will actually do day-to-day.
-- "qualifications": 3-5 succinct points on the core requirements (e.g. "3+ years React", "B.S. Computer Science").
-- "keywords": an array of 5-10 specific technologies, tools, or domain skills (e.g. "React", "TypeScript", "Product Design", "Figma").
+- headline: 1 declarative line, max 80 chars. Lead with the role's actual focus, not filler.
+- bullets: 2-3 short bullets, max 12 words each. Cover focus, must-haves, comp/notable terms.
+- responsibilities: 2-3 succinct day-to-day items.
+- qualifications: 2-3 core requirements.
+- keywords: 4-6 specific technologies, tools, or domain skills.
+
+Be concrete. Skip filler.
 
 Job description:
 `;
@@ -87,26 +88,26 @@ export async function generateJobTldr(
               bullets: {
                 type: "array",
                 items: { type: "string" },
-                minItems: 3,
-                maxItems: 4,
+                minItems: 2,
+                maxItems: 3,
               },
               responsibilities: {
                 type: "array",
                 items: { type: "string" },
-                minItems: 3,
-                maxItems: 5,
+                minItems: 2,
+                maxItems: 3,
               },
               qualifications: {
                 type: "array",
                 items: { type: "string" },
-                minItems: 3,
-                maxItems: 5,
+                minItems: 2,
+                maxItems: 3,
               },
               keywords: {
                 type: "array",
                 items: { type: "string" },
-                minItems: 5,
-                maxItems: 10,
+                minItems: 4,
+                maxItems: 6,
               }
             },
             required: ["headline", "bullets", "responsibilities", "qualifications", "keywords"],
@@ -144,11 +145,11 @@ export async function generateJobTldr(
     }
 
     return {
-      headline: parsed.headline.slice(0, 140),
-      bullets: parsed.bullets.slice(0, 4).map((b) => b.slice(0, 200)),
-      responsibilities: parsed.responsibilities.slice(0, 5),
-      qualifications: parsed.qualifications.slice(0, 5),
-      keywords: parsed.keywords.slice(0, 10),
+      headline: parsed.headline.slice(0, 120),
+      bullets: parsed.bullets.slice(0, 3).map((b) => b.slice(0, 160)),
+      responsibilities: parsed.responsibilities.slice(0, 3),
+      qualifications: parsed.qualifications.slice(0, 3),
+      keywords: parsed.keywords.slice(0, 6),
     };
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {

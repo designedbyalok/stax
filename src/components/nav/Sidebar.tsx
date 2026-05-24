@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import { StaxMark } from "@/components/StaxMark";
 import { api } from "@/lib/api-client";
+import { useSettingsModal } from "@/lib/settings-modal-store";
 
 type Item = {
   href: string;
@@ -53,9 +54,9 @@ export function Sidebar({
   user: { name?: string | null; email?: string | null; image?: string | null };
 }) {
   const pathname = usePathname();
+  const openSettings = useSettingsModal((s) => s.openModal);
   const initial = (user.name || user.email || "U").trim().charAt(0).toUpperCase();
 
-  // Read reminders off the shared cache the bell already populates.
   const remindersQuery = useQuery({
     queryKey: ["reminders"],
     queryFn: () => api.listReminders().then((r) => r.reminders),
@@ -65,9 +66,6 @@ export function Sidebar({
       (r) => r.status === "PENDING" || r.status === "SNOOZED"
     ).length || 0;
 
-  // User payload is already fetched by ConnectButton + EmailSettings;
-  // we just reuse the same cache key. inboundEmailToken comes through
-  // when /api/user includes it.
   const userQuery = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
@@ -85,7 +83,7 @@ export function Sidebar({
   return (
     <aside className="hidden md:flex w-[232px] shrink-0 flex-col border-r border-border bg-card">
       {/* Brand */}
-      <div className="px-3 pt-4 pb-2">
+      <div className="px-3 pt-4 pb-3">
         <Link
           href="/board"
           className="flex items-center gap-2 px-2 font-semibold tracking-[-0.01em] text-foreground text-[14px]"
@@ -95,8 +93,54 @@ export function Sidebar({
         </Link>
       </div>
 
-      {/* Workspace chip */}
-      <div className="px-3 pb-3">
+      {/* Sections */}
+      <nav className="flex-1 overflow-y-auto scroll-soft px-3 space-y-4">
+        <Section label="Workspace">
+          {NAV_WORKSPACE.map((item) => (
+            <NavLink
+              key={item.href}
+              item={item}
+              pathname={pathname}
+              count={item.countKey ? counts[item.countKey] : undefined}
+            />
+          ))}
+        </Section>
+
+        <Section label="Library">
+          {NAV_LIBRARY.map((item) => (
+            <NavLink key={item.href} item={item} pathname={pathname} />
+          ))}
+        </Section>
+      </nav>
+
+      {/* Inbound email tip */}
+      {inboundEmail && (
+        <div className="px-3 pb-2">
+          <div className="bg-background border border-border rounded-lg px-3 py-2.5 text-[12px] text-muted-foreground leading-[1.5]">
+            <div className="flex items-center gap-1.5 text-foreground font-semibold mb-0.5">
+              <Mail className="h-3 w-3" strokeWidth={2} />
+              Forward emails →
+            </div>
+            <span className="break-all">{inboundEmail}</span>
+            <span className="block mt-0.5">to auto-update cards.</span>
+          </div>
+        </div>
+      )}
+
+      {/* Settings — opens a global modal instead of navigating */}
+      <div className="px-3 pb-2 pt-1">
+        <button
+          type="button"
+          onClick={() => openSettings()}
+          className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[14px] font-medium text-foreground/80 hover:bg-background hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+        >
+          <Settings className="h-4 w-4 shrink-0" strokeWidth={1.7} />
+          Settings
+        </button>
+      </div>
+
+      {/* User chip — anchored at the very bottom */}
+      <div className="px-3 pb-3 pt-1 border-t border-border">
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -116,63 +160,21 @@ export function Sidebar({
               </button>
             }
           />
-          <DropdownMenuContent align="start" className="w-[208px]">
+          <DropdownMenuContent
+            align="start"
+            side="top"
+            className="w-[208px]"
+          >
+            <DropdownMenuItem onClick={() => openSettings()}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
               <LogOut className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-
-      {/* Sections */}
-      <nav className="flex-1 overflow-y-auto px-3 space-y-4">
-        <Section label="Workspace">
-          {NAV_WORKSPACE.map((item) => (
-            <NavLink
-              key={item.href}
-              item={item}
-              pathname={pathname}
-              count={item.countKey ? counts[item.countKey] : undefined}
-            />
-          ))}
-        </Section>
-
-        <Section label="Library">
-          {NAV_LIBRARY.map((item) => (
-            <NavLink key={item.href} item={item} pathname={pathname} />
-          ))}
-        </Section>
-      </nav>
-
-      {/* Inbound email tip — Stax delight beat */}
-      {inboundEmail && (
-        <div className="px-3 pb-2">
-          <div className="bg-background border border-border rounded-lg px-3 py-2.5 text-[12px] text-muted-foreground leading-[1.5]">
-            <div className="flex items-center gap-1.5 text-foreground font-semibold mb-0.5">
-              <Mail className="h-3 w-3" strokeWidth={2} />
-              Forward emails →
-            </div>
-            <span className="break-all">{inboundEmail}</span>
-            <span className="block mt-0.5">to auto-update cards.</span>
-          </div>
-        </div>
-      )}
-
-      {/* Foot */}
-      <div className="px-3 pb-3 pt-1">
-        <Link
-          href="/settings/account"
-          className={cn(
-            "flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[14px] font-medium transition-colors",
-            pathname.startsWith("/settings")
-              ? "bg-background text-foreground"
-              : "text-foreground/80 hover:bg-background hover:text-foreground"
-          )}
-        >
-          <Settings className="h-4 w-4 shrink-0" strokeWidth={1.7} />
-          Settings
-        </Link>
       </div>
     </aside>
   );

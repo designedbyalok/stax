@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { Sidebar } from "@/components/nav/Sidebar";
 import { seedDefaultsForUser } from "@/lib/seed";
 import { WelcomeModal } from "@/components/layout/WelcomeModal";
+import { SettingsModal } from "@/components/settings/SettingsModal";
 import prisma from "@/lib/db";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -32,6 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {children}
       </main>
       <WelcomeModal />
+      <SettingsModal />
     </div>
   );
 }
