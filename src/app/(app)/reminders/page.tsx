@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { api, ApiReminder } from "@/lib/api-client";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
 import { CardDrawer } from "@/components/card-detail/CardDrawer";
+import { UnmatchedInbox } from "@/components/email/UnmatchedInbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SNOOZE_DAYS = [3, 7, 14];
 
@@ -85,9 +87,20 @@ export default function RemindersPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="max-w-2xl mx-auto">
-          {remindersQuery.isLoading ? (
-            <div className="text-xs text-muted-foreground">Loading…</div>
+        <div className="max-w-2xl mx-auto space-y-8">
+          <UnmatchedInbox />
+          
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-3">
+              <Clock className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold tracking-tight">Reminders</h2>
+            </div>
+            {remindersQuery.isLoading ? (
+            <div className="space-y-1.5 mt-2">
+              <Skeleton className="h-[76px] w-full rounded-md" />
+              <Skeleton className="h-[76px] w-full rounded-md" />
+              <Skeleton className="h-[76px] w-full rounded-md" />
+            </div>
           ) : reminders.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-sm text-muted-foreground">
@@ -166,6 +179,7 @@ export default function RemindersPage() {
               ))}
             </ul>
           )}
+          </div>
         </div>
       </div>
 

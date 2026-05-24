@@ -24,6 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api, ApiColumn } from "@/lib/api-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PipelineSettings() {
   const queryClient = useQueryClient();
@@ -105,16 +106,23 @@ export default function PipelineSettings() {
           Drag to reorder. Click a name to rename.
         </p>
 
-        <div className="rounded-md border bg-card divide-y">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={onDragEnd}
-          >
-            <SortableContext
-              items={visibleColumns.map((c) => c.id)}
-              strategy={verticalListSortingStrategy}
+        {columnsQuery.isLoading ? (
+          <div className="rounded-md border bg-card p-2 space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <div className="rounded-md border bg-card divide-y">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={onDragEnd}
             >
+              <SortableContext
+                items={visibleColumns.map((c) => c.id)}
+                strategy={verticalListSortingStrategy}
+              >
               {visibleColumns.map((col) => (
                 <ColumnRow
                   key={col.id}
@@ -132,9 +140,10 @@ export default function PipelineSettings() {
                   disableDelete={visibleColumns.length <= 1}
                 />
               ))}
-            </SortableContext>
-          </DndContext>
-        </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Input

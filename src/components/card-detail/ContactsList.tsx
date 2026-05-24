@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Mail, Trash2 } from "lucide-react";
+import { Plus, Mail, Phone, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,7 @@ export function ContactsList({
     name: "",
     role: "OTHER" as ApiContact["role"],
     email: "",
+    phone: "",
   });
 
   function invalidate() {
@@ -54,10 +55,11 @@ export function ContactsList({
         name: draft.name.trim(),
         role: draft.role,
         email: draft.email.trim() || null,
+        phone: draft.phone.trim() || null,
       }),
     onSuccess: () => {
       invalidate();
-      setDraft({ name: "", role: "OTHER", email: "" });
+      setDraft({ name: "", role: "OTHER", email: "", phone: "" });
       setAdding(false);
     },
     onError: (err) => {
@@ -113,13 +115,40 @@ export function ContactsList({
                 </span>
               </div>
               {c.email && (
-                <a
-                  href={`mailto:${c.email}`}
-                  className="inline-flex items-center gap-1 mt-0.5 text-[11px] text-muted-foreground hover:text-foreground hover:underline"
-                >
+                <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-muted-foreground">
                   <Mail className="h-2.5 w-2.5" />
-                  {c.email}
-                </a>
+                  <a href={`mailto:${c.email}`} className="hover:text-foreground hover:underline">
+                    {c.email}
+                  </a>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(c.email!);
+                      toast.success("Copied email");
+                    }}
+                    className="p-1 opacity-0 group-hover:opacity-100 hover:text-foreground transition-opacity"
+                    title="Copy email"
+                  >
+                    <Copy className="h-2.5 w-2.5" />
+                  </button>
+                </div>
+              )}
+              {c.phone && (
+                <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-muted-foreground">
+                  <Phone className="h-2.5 w-2.5" />
+                  <a href={`tel:${c.phone}`} className="hover:text-foreground hover:underline">
+                    {c.phone}
+                  </a>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(c.phone!);
+                      toast.success("Copied phone number");
+                    }}
+                    className="p-1 opacity-0 group-hover:opacity-100 hover:text-foreground transition-opacity"
+                    title="Copy phone"
+                  >
+                    <Copy className="h-2.5 w-2.5" />
+                  </button>
+                </div>
               )}
             </div>
             <Button
@@ -169,6 +198,12 @@ export function ContactsList({
               type="email"
               placeholder="email (optional)"
             />
+            <Input
+              value={draft.phone}
+              onChange={(e) => setDraft((d) => ({ ...d, phone: e.target.value }))}
+              type="tel"
+              placeholder="phone (optional)"
+            />
           </div>
           <div className="flex justify-end gap-1.5">
             <Button
@@ -177,7 +212,7 @@ export function ContactsList({
               variant="ghost"
               onClick={() => {
                 setAdding(false);
-                setDraft({ name: "", role: "OTHER", email: "" });
+                setDraft({ name: "", role: "OTHER", email: "", phone: "" });
               }}
             >
               Cancel

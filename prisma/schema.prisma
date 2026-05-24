@@ -17,6 +17,7 @@ model User {
   image         String?
   passwordHash  String?
   timezone      String    @default("UTC")
+  inboundEmailToken String? @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -27,6 +28,12 @@ model User {
   reminders     Reminder[]
   settings      UserSettings?
   passwordResets PasswordResetToken[]
+  documents     Document[]
+  emailEvents   EmailEvent[]
+  calendarEvents CalendarEvent[]
+  googleIntegration GoogleIntegration?
+  questions     InterviewQuestion[]
+  starStories   StarStory[]
 }
 
 model Account {
@@ -77,26 +84,29 @@ model PasswordResetToken {
 
 // --- App models ---
 model UserSettings {
-  id              String  @id @default(cuid())
-  userId          String  @unique
-  digestEnabled   Boolean @default(true)
-  digestDay       Int     @default(1)     // 0 = Sun, 1 = Mon, etc.
-  digestHour      Int     @default(9)     // user-local hour
-  staleDaysApplied Int    @default(7)
-  staleDaysInterview Int  @default(5)
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  digestEnabled       Boolean @default(true)
+  digestDay           Int     @default(1)     // 0 = Sun, 1 = Mon, etc.
+  digestHour          Int     @default(9)     // user-local hour
+  staleDaysApplied    Int     @default(7)
+  staleDaysInterview  Int     @default(5)
+  skipApplyCheckpoint Boolean @default(false)
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Column {
-  id          String        @id @default(cuid())
-  userId      String
-  name        String
-  position    Int
-  color       String        @default("#94A3B8")
-  isArchive   Boolean       @default(false)
-  createdAt   DateTime      @default(now())
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applications Application[]
+  id               String        @id @default(cuid())
+  userId           String
+  name             String
+  position         Int
+  color            String        @default("#E2E8F0")
+  isArchive        Boolean       @default(false)
+  isInterviewStage Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now()) @updatedAt
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications     Application[]
 
   @@index([userId, position])
 }
@@ -119,8 +129,10 @@ model Application {
   jobDescription      String?   @db.Text
 
   notes               String?   @db.Text
-  resumeVersion       String?
-  coverLetterVersion  String?
+  resumeVersion       String?           // V1 legacy — deprecated, read-only
+  coverLetterVersion  String?           // V1 legacy — deprecated, read-only
+  resumeId            String?
+  coverLetterId       String?
 
   nextAction          String?
   nextActionDate      DateTime?
@@ -134,9 +146,15 @@ model Application {
 
   user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   column              Column    @relation(fields: [columnId], references: [id])
+  resume              Document? @relation("ApplicationResume", fields: [resumeId], references: [id], onDelete: SetNull)
+  coverLetter         Document? @relation("ApplicationCoverLetter", fields: [coverLetterId], references: [id], onDelete: SetNull)
   contacts            Contact[]
   activities          Activity[]
   reminders           Reminder[]
+  emailEvents         EmailEvent[]
+  calendarEvents      CalendarEvent[]
+  checklist           InterviewChecklist?
+  questions           InterviewQuestion[]
 
   @@index([userId, columnId, position])
   @@index([userId, deletedAt])
@@ -148,6 +166,7 @@ model Contact {
   name          String
   role          ContactRole @default(OTHER)
   email         String?
+  phone         String?
   notes         String?     @db.Text
   createdAt     DateTime    @default(now())
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
@@ -211,11 +230,15 @@ enum ActivityType {
   CONTACT_ADDED
   NOTE_ADDED
   USER_EVENT
+  EMAIL_RECEIVED
 }
 
 enum ReminderType {
   AUTO_FOLLOWUP
   NEXT_ACTION_DUE
+  STALE_APPLICATION
+  CUSTOM
+  INTERVIEW_PREP_DUE
 }
 
 enum ReminderStatus {
@@ -223,4 +246,143 @@ enum ReminderStatus {
   SNOOZED
   DISMISSED
   COMPLETED
+}
+
+// --- V2: Document management ---
+model Document {
+  id          String        @id @default(cuid())
+  userId      String
+  type        DocumentType
+  name        String
+  filename    String
+  mimeType    String
+  sizeBytes   Int
+  storageKey  String
+  notes       String?       @db.Text
+  isPrimary   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeApplications      Application[] @relation("ApplicationResume")
+  coverLetterApplications Application[] @relation("ApplicationCoverLetter")
+
+  @@index([userId, type])
+}
+
+enum DocumentType {
+  RESUME
+  COVER_LETTER
+}
+
+// --- V2: Email Integration ---
+model EmailEvent {
+  id              String        @id @default(cuid())
+  userId          String
+  applicationId   String?
+  messageId       String        @unique // From Postmark, for deduplication
+  
+  senderEmail     String
+  senderName      String?
+  subject         String
+  bodyHtml        String?       @db.Text
+  bodyText        String?       @db.Text
+  
+  intent          EmailIntent   @default(GENERIC)
+  autoAttached    Boolean       @default(false)
+  matchConfidence Float?        // 0 to 1
+  
+  date            DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application     Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date(sort: Desc)])
+  @@index([applicationId, date(sort: Desc)])
+}
+
+enum EmailIntent {
+  INTERVIEW_INVITE
+  REJECTION
+  OFFER
+  OUTREACH
+  GENERIC
+}
+
+// --- V2: Calendar Integration ---
+model GoogleIntegration {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  email           String
+  encryptedToken  String        @db.Text
+  iv              String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CalendarEvent {
+  id              String        @id @default(cuid())
+  userId          String
+  applicationId   String
+  googleEventId   String        @unique
+  
+  title           String
+  startTime       DateTime
+  endTime         DateTime
+  meetLink        String?
+  notes           String?       @db.Text
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application     Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startTime])
+  @@index([applicationId, startTime])
+}
+
+// --- V2: Interview Prep System ---
+model InterviewQuestion {
+  id            String       @id @default(cuid())
+  userId        String
+  applicationId String?
+  questionText  String       @db.Text
+  yourAnswer    String?      @db.Text
+  tags          String[]
+  isFrequent    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+model StarStory {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  situation   String   @db.Text
+  task        String   @db.Text
+  action      String   @db.Text
+  result      String   @db.Text
+  tags        String[]
+  workedWell  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InterviewChecklist {
+  id            String      @id @default(cuid())
+  applicationId String      @unique
+  items         Json        // [{ text: string, checked: boolean }]
+  notes         String?     @db.Text  // pre-interview prep notes
+  reflection    String?     @db.Text  // post-interview reflection
+  questionsToAsk Json?      // [{ text: string }]
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }

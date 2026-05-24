@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -48,6 +49,28 @@ export default function NotificationsSettings() {
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Couldn't save."),
   });
+
+  if (settingsQuery.isLoading) {
+    return (
+      <div className="space-y-6">
+        <Section title="Weekly digest">
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-full" />
+            <div className="grid grid-cols-2 gap-3">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          </div>
+        </Section>
+        <Section title="Auto follow-up thresholds">
+          <div className="grid grid-cols-2 gap-3">
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+        </Section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -15,6 +15,8 @@ export type ApiApplication = {
   notes: string | null;
   resumeVersion: string | null;
   coverLetterVersion: string | null;
+  resumeId: string | null;
+  coverLetterId: string | null;
   nextAction: string | null;
   nextActionDate: string | null;
   appliedAt: string | null;
@@ -40,6 +42,7 @@ export type ApiContact = {
   name: string;
   role: "RECRUITER" | "HIRING_MANAGER" | "REFERRER" | "OTHER";
   email: string | null;
+  phone: string | null;
   notes: string | null;
   createdAt: string;
 };
@@ -53,9 +56,104 @@ export type ApiActivity = {
   createdAt: string;
 };
 
+export type ApiDocument = {
+  id: string;
+  userId: string;
+  type: "RESUME" | "COVER_LETTER";
+  name: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  notes: string | null;
+  isPrimary: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { resumeApplications: number; coverLetterApplications: number };
+};
+
+export type ApiEmailEvent = {
+  id: string;
+  userId: string;
+  applicationId: string | null;
+  messageId: string;
+  senderEmail: string;
+  senderName: string | null;
+  subject: string;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  intent: "INTERVIEW_INVITE" | "REJECTION" | "OFFER" | "OUTREACH" | "GENERIC";
+  autoAttached: boolean;
+  matchConfidence: number | null;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ApiGoogleIntegration = {
+  id: string;
+  email: string;
+  createdAt: string;
+};
+
+export type ApiCalendarEvent = {
+  id: string;
+  userId: string;
+  applicationId: string;
+  googleEventId: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  meetLink: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  application?: ApiApplication;
+};
+
+export type ApiInterviewQuestion = {
+  id: string;
+  userId: string;
+  applicationId: string | null;
+  questionText: string;
+  yourAnswer: string | null;
+  tags: string[];
+  isFrequent: boolean;
+  createdAt: string;
+  application?: ApiApplication;
+};
+
+export type ApiStarStory = {
+  id: string;
+  userId: string;
+  title: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+  tags: string[];
+  workedWell: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ApiInterviewChecklist = {
+  id: string;
+  applicationId: string;
+  items: Array<{ text: string; checked: boolean }>;
+  notes: string | null;
+  reflection: string | null;
+  questionsToAsk: Array<{ text: string }>;
+};
+
 export type ApiApplicationDetail = ApiApplication & {
   contacts: ApiContact[];
   activities: ApiActivity[];
+  resume: ApiDocument | null;
+  coverLetter: ApiDocument | null;
+  emailEvents: ApiEmailEvent[];
+  calendarEvents: ApiCalendarEvent[];
+  checklist?: ApiInterviewChecklist | null;
+  questions?: ApiInterviewQuestion[];
 };
 
 export type ApiStatsSummary = {
@@ -79,12 +177,23 @@ export type ApiReminder = {
   };
 };
 
+export type ApiUserWithIntegrations = {
+  id: string;
+  email: string;
+  name: string | null;
+  image: string | null;
+  timezone: string;
+  inboundEmailToken: string | null;
+  googleIntegration: ApiGoogleIntegration | null;
+};
+
 export type ApiUserSettings = {
   digestEnabled: boolean;
   digestDay: number;
   digestHour: number;
   staleDaysApplied: number;
   staleDaysInterview: number;
+  skipApplyCheckpoint: boolean;
   name?: string;
   email?: string;
   timezone?: string;
@@ -156,7 +265,7 @@ export const api = {
     id: string,
     data: Partial<Pick<
       ApiApplication,
-      "roleTitle" | "companyName" | "location" | "salaryRange" | "originalUrl" | "notes" | "nextAction" | "resumeVersion" | "coverLetterVersion"
+      "roleTitle" | "companyName" | "location" | "salaryRange" | "originalUrl" | "notes" | "nextAction" | "resumeVersion" | "coverLetterVersion" | "resumeId" | "coverLetterId"
     >>
   ) =>
     request<{ application: ApiApplication }>(`/api/applications/${id}`, {
@@ -236,4 +345,100 @@ export const api = {
     }),
   // Trash
   listTrash: () => request<{ applications: ApiApplication[] }>("/api/applications/trash"),
+  // Documents
+  listDocuments: (type?: "RESUME" | "COVER_LETTER") =>
+    request<{ documents: ApiDocument[] }>(
+      `/api/documents${type ? `?type=${type}` : ""}`
+    ),
+  uploadDocument: (file: File, name: string, type: "RESUME" | "COVER_LETTER", isPrimary: boolean, notes?: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", name);
+    formData.append("type", type);
+    formData.append("isPrimary", String(isPrimary));
+    if (notes) formData.append("notes", notes);
+    return fetch("/api/documents/upload", { method: "POST", body: formData }).then(async (res) => {
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Upload failed (${res.status})`);
+      }
+      return res.json() as Promise<{ document: ApiDocument }>;
+    });
+  },
+  getDocument: (id: string) =>
+    request<{ document: ApiDocument }>(`/api/documents/${id}`),
+  updateDocument: (id: string, data: Partial<Pick<ApiDocument, "name" | "notes" | "isPrimary">>) =>
+    request<{ document: ApiDocument }>(`/api/documents/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteDocument: (id: string) =>
+    request<{ ok: true; affectedCards: string[] }>(`/api/documents/${id}`, { method: "DELETE" }),
+  getDocumentUrl: (id: string) =>
+    request<{ url: string }>(`/api/documents/${id}/url`),
+  getDocxPreview: (id: string) =>
+    request<{ html: string }>(`/api/documents/${id}/preview`),
+  // Emails
+  listUnmatchedEmails: () => 
+    request<{ emails: ApiEmailEvent[] }>("/api/emails/unmatched"),
+  getEmailEvent: (id: string) =>
+    request<{ emailEvent: ApiEmailEvent }>(`/api/emails/${id}`),
+  updateEmailEvent: (id: string, data: Partial<Pick<ApiEmailEvent, "applicationId">>) =>
+    request<{ emailEvent: ApiEmailEvent }>(`/api/emails/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteEmailEvent: (id: string) =>
+    request<{ ok: true }>(`/api/emails/${id}`, { method: "DELETE" }),
+  // Calendar
+  disconnectGoogleCalendar: () =>
+    request<{ ok: true }>("/api/integrations/google-calendar/disconnect", { method: "POST" }),
+  createCalendarEvent: (applicationId: string, data: { title: string; startTime: string; endTime: string; notes?: string; addMeet?: boolean }) =>
+    request<{ event: ApiCalendarEvent }>(`/api/cards/${applicationId}/calendar-event`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  listCalendarEvents: () =>
+    request<{ events: ApiCalendarEvent[] }>("/api/calendar-events"),
+    
+  // Interview Prep
+  getPrepChecklist: (applicationId: string) =>
+    request<{ checklist: ApiInterviewChecklist }>(`/api/prep/${applicationId}`),
+  updatePrepChecklist: (applicationId: string, data: Partial<ApiInterviewChecklist>) =>
+    request<{ checklist: ApiInterviewChecklist }>(`/api/prep/${applicationId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+    
+  // Library: Questions
+  listQuestions: () =>
+    request<{ questions: ApiInterviewQuestion[] }>("/api/library/questions"),
+  createQuestion: (data: Partial<ApiInterviewQuestion>) =>
+    request<{ question: ApiInterviewQuestion }>("/api/library/questions", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateQuestion: (id: string, data: Partial<ApiInterviewQuestion>) =>
+    request<{ question: ApiInterviewQuestion }>(`/api/library/questions/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteQuestion: (id: string) =>
+    request<{ ok: true }>(`/api/library/questions/${id}`, { method: "DELETE" }),
+    
+  // Library: STAR Stories
+  listStories: () =>
+    request<{ stories: ApiStarStory[] }>("/api/library/stories"),
+  createStory: (data: Partial<ApiStarStory>) =>
+    request<{ story: ApiStarStory }>("/api/library/stories", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateStory: (id: string, data: Partial<ApiStarStory>) =>
+    request<{ story: ApiStarStory }>(`/api/library/stories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteStory: (id: string) =>
+    request<{ ok: true }>(`/api/library/stories/${id}`, { method: "DELETE" }),
 };

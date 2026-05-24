@@ -5,6 +5,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import posthog from "posthog-js";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "next-themes";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -22,14 +23,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <PosthogIdentifier />
-          {children}
-        </TooltipProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <SessionProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <PosthogIdentifier />
+            {children}
+          </TooltipProvider>
+        </QueryClientProvider>
+      </SessionProvider>
+    </ThemeProvider>
   );
 }
 

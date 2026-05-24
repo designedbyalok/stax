@@ -6,6 +6,7 @@ import { Undo2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TrashSettings() {
   const queryClient = useQueryClient();
@@ -39,7 +40,11 @@ export default function TrashSettings() {
         </p>
 
         {trashQuery.isLoading ? (
-          <div className="text-xs text-muted-foreground">Loading…</div>
+          <div className="space-y-2">
+            <Skeleton className="h-[60px] w-full rounded-md" />
+            <Skeleton className="h-[60px] w-full rounded-md" />
+            <Skeleton className="h-[60px] w-full rounded-md" />
+          </div>
         ) : (trashQuery.data?.length ?? 0) === 0 ? (
           <div className="rounded-md border border-dashed bg-card p-6 text-center text-xs text-muted-foreground">
             Trash is empty.

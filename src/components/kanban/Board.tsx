@@ -21,6 +21,8 @@ import { CardDrawer } from "../card-detail/CardDrawer";
 import { useSelectedCard } from "./selected-card-store";
 import { api, ApiApplication, ApiColumn } from "@/lib/api-client";
 import { useFilteredApplications } from "@/lib/use-filtered-applications";
+import { ApplyCheckpointModal } from "@/components/apply-checkpoint/ApplyCheckpointModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export type Application = ApiApplication;
 
@@ -29,6 +31,8 @@ export default function Board() {
   const [activeCard, setActiveCard] = useState<ApiApplication | null>(null);
   const selectedCardId = useSelectedCard((s) => s.selectedCardId);
   const setSelectedCardId = useSelectedCard((s) => s.select);
+  
+  const [checkpointData, setCheckpointData] = useState<{ card: ApiApplication; columnId: string; beforeId: string | null } | null>(null);
 
   const columnsQuery = useQuery({
     queryKey: ["columns"],
@@ -37,6 +41,11 @@ export default function Board() {
   const applicationsQuery = useQuery({
     queryKey: ["applications"],
     queryFn: () => api.listApplications().then((r) => r.applications),
+  });
+
+  const settingsQuery = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: api.getUserSettings,
   });
 
   const sensors = useSensors(
@@ -119,6 +128,17 @@ export default function Board() {
     // No-op if dropped onto itself.
     if (beforeId === activeCardData.id) return;
 
+    // Check for Apply checkpoint
+    const targetColumn = (columnsQuery.data ?? []).find(c => c.id === targetColumnId);
+    if (targetColumn?.name.toLowerCase() === "applied" && !settingsQuery.data?.skipApplyCheckpoint) {
+      setCheckpointData({ card: activeCardData, columnId: targetColumnId, beforeId });
+      return; // Wait for user confirmation
+    }
+
+    doMove(activeCardData, targetColumnId, beforeId);
+  }
+
+  function doMove(activeCardData: ApiApplication, targetColumnId: string, beforeId: string | null) {
     // Optimistic update.
     queryClient.setQueryData<ApiApplication[]>(["applications"], (prev) => {
       if (!prev) return prev;
@@ -155,8 +175,17 @@ export default function Board() {
 
   if (columnsQuery.isLoading || applicationsQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
-        Loading…
+      <div className="flex gap-3 h-full overflow-hidden pb-2 opacity-50">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex-shrink-0 w-[280px] flex flex-col gap-3">
+            <Skeleton className="h-12 w-full rounded-md" />
+            <div className="space-y-2">
+              <Skeleton className="h-24 w-full rounded-md" />
+              <Skeleton className="h-24 w-full rounded-md" />
+              {i % 2 === 0 && <Skeleton className="h-24 w-full rounded-md" />}
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -211,6 +240,19 @@ export default function Board() {
         isOpen={!!selectedCard}
         onClose={() => setSelectedCardId(null)}
       />
+
+      {checkpointData && (
+        <ApplyCheckpointModal
+          open={!!checkpointData}
+          onOpenChange={(open) => !open && setCheckpointData(null)}
+          card={checkpointData.card}
+          onConfirm={() => {
+            doMove(checkpointData.card, checkpointData.columnId, checkpointData.beforeId);
+            setCheckpointData(null);
+          }}
+          onCancel={() => setCheckpointData(null)}
+        />
+      )}
     </div>
   );
 }

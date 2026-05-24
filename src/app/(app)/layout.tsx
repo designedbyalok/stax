@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { Sidebar } from "@/components/nav/Sidebar";
 import { seedDefaultsForUser } from "@/lib/seed";
+import { WelcomeModal } from "@/components/layout/WelcomeModal";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -17,6 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {children}
       </main>
+      <WelcomeModal />
     </div>
   );
 }

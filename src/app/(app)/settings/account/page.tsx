@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TIMEZONES = [
   "UTC",
@@ -51,6 +52,20 @@ export default function AccountSettings() {
   });
 
   const email = settingsQuery.data?.email;
+
+  if (settingsQuery.isLoading) {
+    return (
+      <div className="space-y-6">
+        <Section title="Profile">
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </Section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

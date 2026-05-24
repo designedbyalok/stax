@@ -33,6 +33,10 @@ export async function GET(_req: Request, { params }: Params) {
     include: {
       contacts: { orderBy: { createdAt: "asc" } },
       activities: { orderBy: { createdAt: "desc" }, take: 50 },
+      resume: { select: { id: true, name: true, filename: true, mimeType: true, isPrimary: true, type: true } },
+      coverLetter: { select: { id: true, name: true, filename: true, mimeType: true, isPrimary: true, type: true } },
+      emailEvents: { orderBy: { date: "desc" } },
+      calendarEvents: true,
     },
   });
   if (!application) {
@@ -84,6 +88,8 @@ export async function PATCH(request: Request, { params }: Params) {
       ...(data.coverLetterVersion !== undefined && {
         coverLetterVersion: data.coverLetterVersion || null,
       }),
+      ...(data.resumeId !== undefined && { resumeId: data.resumeId || null }),
+      ...(data.coverLetterId !== undefined && { coverLetterId: data.coverLetterId || null }),
       ...(data.nextAction !== undefined && { nextAction: data.nextAction || null }),
       ...(data.nextActionDate !== undefined && {
         nextActionDate: data.nextActionDate ? new Date(data.nextActionDate) : null,

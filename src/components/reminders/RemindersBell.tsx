@@ -11,19 +11,15 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { api, ApiReminder } from "@/lib/api-client";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
 
-const SNOOZE_DAYS = [3, 7, 14];
-
 const TYPE_LABEL: Record<ApiReminder["type"], string> = {
   AUTO_FOLLOWUP: "Follow up",
   NEXT_ACTION_DUE: "Next action due",
+  INTERVIEW_PREP_DUE: "Interview prep",
 };
 
 export function RemindersBell() {
@@ -134,7 +130,12 @@ export function RemindersBell() {
                     <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
                       <Clock className="h-2.5 w-2.5" strokeWidth={1.75} />
                       <span>
-                        {TYPE_LABEL[r.type]} ·{" "}
+                        {r.type === "INTERVIEW_PREP_DUE" ? (
+                          <span className="text-primary font-medium">Open prep tab</span>
+                        ) : (
+                          TYPE_LABEL[r.type]
+                        )}
+                        {" · "}
                         {formatDistanceToNow(new Date(r.dueAt), { addSuffix: true })}
                       </span>
                     </div>
@@ -143,33 +144,17 @@ export function RemindersBell() {
                     className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger
-                        render={
-                          <Button
-                            type="button"
-                            size="icon-xs"
-                            variant="ghost"
-                            className="text-muted-foreground hover:text-foreground"
-                            aria-label="Snooze"
-                          >
-                            <ChevronDown className="h-3 w-3" />
-                          </Button>
-                        }
-                      />
-                      <DropdownMenuSubContent>
-                        <DropdownMenuLabel>Snooze for</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {SNOOZE_DAYS.map((days) => (
-                          <DropdownMenuItem
-                            key={days}
-                            onClick={() => snoozeMutation.mutate({ id: r.id, days })}
-                          >
-                            {days} day{days > 1 ? "s" : ""}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
+                    <Button
+                      type="button"
+                      size="icon-xs"
+                      variant="ghost"
+                      className="text-muted-foreground hover:text-foreground w-auto px-1.5 text-[10px]"
+                      aria-label="Snooze 3 days"
+                      onClick={() => snoozeMutation.mutate({ id: r.id, days: 3 })}
+                    >
+                      <Clock className="h-3 w-3 mr-1" />
+                      3d
+                    </Button>
                     <Button
                       type="button"
                       size="icon-xs"

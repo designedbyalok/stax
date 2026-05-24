@@ -109,6 +109,27 @@ function LoginContent({ googleEnabled }: { googleEnabled: boolean }) {
             Sign up
           </Link>
         </p>
+
+        {process.env.NODE_ENV === "development" && (
+          <Button 
+            type="button" 
+            variant="secondary" 
+            className="w-full h-9 border-dashed border-2"
+            onClick={async () => {
+              setSubmitting(true);
+              const res = await signIn("credentials", { email: "dev@example.com", password: "dev-bypass", redirect: false });
+              if (res?.error) {
+                toast.error("Dev login failed.");
+                setSubmitting(false);
+                return;
+              }
+              router.push(callbackUrl);
+              router.refresh();
+            }}
+          >
+            Dev Auto-Login
+          </Button>
+        )}
       </div>
     </div>
   );

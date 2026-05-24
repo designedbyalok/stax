@@ -8,6 +8,7 @@ const SECTIONS = [
   { href: "/settings/account", label: "Account" },
   { href: "/settings/pipeline", label: "Pipeline" },
   { href: "/settings/notifications", label: "Notifications" },
+  { href: "/settings/integrations", label: "Integrations" },
   { href: "/settings/trash", label: "Trash" },
 ];
 

@@ -9,6 +9,7 @@ import { CardDrawer } from "@/components/card-detail/CardDrawer";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
 import { useFilteredApplications } from "@/lib/use-filtered-applications";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type SortKey =
   | "company"
@@ -118,8 +119,31 @@ export function ApplicationList() {
 
   if (appsQuery.isLoading || columnsQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
-        Loading…
+      <div className="h-full overflow-auto">
+        <table className="w-full text-[13px] border-separate border-spacing-0">
+          <thead className="sticky top-0 z-10 bg-background">
+            <tr>
+              {HEADERS.map((h) => (
+                <th key={h.key} className={cn("text-left text-[11px] font-medium text-muted-foreground tracking-wide px-3 py-2 border-b", h.className)}>
+                  {h.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <tr key={i}>
+                <td className="px-3 py-2.5 border-b"><Skeleton className="h-4 w-32" /></td>
+                <td className="px-3 py-2.5 border-b"><Skeleton className="h-4 w-48" /></td>
+                <td className="px-3 py-2.5 border-b"><Skeleton className="h-5 w-20" /></td>
+                <td className="px-3 py-2.5 border-b"><Skeleton className="h-4 w-24" /></td>
+                <td className="px-3 py-2.5 border-b"><Skeleton className="h-4 w-16" /></td>
+                <td className="px-3 py-2.5 border-b"><Skeleton className="h-4 w-12" /></td>
+                <td className="px-3 py-2.5 border-b"><Skeleton className="h-4 w-32" /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }

@@ -35,6 +35,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const parsed = credentialsSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
+        // Dev login bypass: log in as the first user
+        if (process.env.NODE_ENV === "development" && parsed.data.password === "dev-bypass") {
+          const user = await prisma.user.findFirst();
+          if (user) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+            };
+          }
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: parsed.data.email.toLowerCase() },
         });

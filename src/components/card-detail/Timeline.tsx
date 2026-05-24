@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api, ApiActivity } from "@/lib/api-client";
+import { api, ApiActivity, ApiEmailEvent } from "@/lib/api-client";
+import { EmailEventEntry } from "@/components/email/EmailEventEntry";
 
 const TYPE_DOT: Record<ApiActivity["type"], string> = {
   CREATED: "bg-foreground/30",
@@ -21,9 +22,11 @@ const TYPE_DOT: Record<ApiActivity["type"], string> = {
 export function Timeline({
   applicationId,
   activities,
+  emailEvents = [],
 }: {
   applicationId: string;
   activities: ApiActivity[];
+  emailEvents?: ApiEmailEvent[];
 }) {
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
@@ -45,6 +48,12 @@ export function Timeline({
     if (!value) return;
     createMutation.mutate(value);
   }
+
+  // Merge activities and emails, sorted by date descending
+  const mergedTimeline = [
+    ...activities.filter(a => a.type !== "EMAIL_RECEIVED").map(a => ({ type: "activity" as const, date: new Date(a.createdAt).getTime(), data: a })),
+    ...emailEvents.map(e => ({ type: "email" as const, date: new Date(e.date).getTime(), data: e }))
+  ].sort((a, b) => b.date - a.date);
 
   return (
     <div className="space-y-2">
@@ -71,31 +80,38 @@ export function Timeline({
         </Button>
       </form>
 
-      {activities.length === 0 ? (
+      {mergedTimeline.length === 0 ? (
         <p className="text-[12px] text-muted-foreground pt-1">No events yet.</p>
       ) : (
-        <ol className="relative pl-3 space-y-2.5 mt-1">
+        <div className="relative pl-3 space-y-2.5 mt-1">
           <span
             className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-border"
             aria-hidden
           />
-          {activities.map((a) => (
-            <li key={a.id} className="relative flex items-start gap-2.5">
-              <span
-                className={`absolute -left-3 top-1.5 w-2 h-2 rounded-full ring-2 ring-background ${TYPE_DOT[a.type]}`}
-                aria-hidden
-              />
-              <div className="flex-1 min-w-0">
-                <div className="text-[12px] text-foreground leading-snug">
-                  {a.description}
-                </div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  {formatDistanceToNow(new Date(a.createdAt), { addSuffix: true })}
+          {mergedTimeline.map((item) => {
+            if (item.type === "email") {
+              return <EmailEventEntry key={item.data.id} email={item.data as ApiEmailEvent} />;
+            }
+            
+            const a = item.data as ApiActivity;
+            return (
+              <div key={a.id} className="relative flex items-start gap-2.5">
+                <span
+                  className={`absolute -left-3 top-1.5 w-2 h-2 rounded-full ring-2 ring-background ${TYPE_DOT[a.type]}`}
+                  aria-hidden
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] text-foreground leading-snug">
+                    {a.description}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
+                    {formatDistanceToNow(new Date(a.createdAt), { addSuffix: true })}
+                  </div>
                 </div>
               </div>
-            </li>
-          ))}
-        </ol>
+            );
+          })}
+        </div>
       )}
     </div>
   );

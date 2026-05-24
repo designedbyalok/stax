@@ -11,6 +11,7 @@ const createSchema = z.object({
   name: z.string().trim().min(1).max(200),
   role: z.enum(CONTACT_ROLES).default("OTHER"),
   email: z.string().email().max(200).optional().nullable().or(z.literal("")),
+  phone: z.string().max(100).optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(5000).optional().nullable(),
 });
 
@@ -46,6 +47,7 @@ export async function POST(request: Request, { params }: Params) {
       name: parsed.data.name,
       role: parsed.data.role,
       email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
       notes: parsed.data.notes || null,
     },
   });
