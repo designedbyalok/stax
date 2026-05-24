@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
 import { nextPositionAfter } from "@/lib/positions";
 import { getAverageColor } from "fast-average-color-node";
+import { generateJobTldr } from "@/lib/ai/tldr";
 
 export async function GET() {
   const authResult = await requireUserId();
@@ -87,15 +88,23 @@ export async function POST(request: Request) {
     select: { position: true },
   });
 
-  let logoColor = null;
-  if (parsed.data.companyLogoUrl) {
-    try {
-      const color = await getAverageColor(parsed.data.companyLogoUrl);
-      logoColor = color.hex;
-    } catch (e) {
-      console.error("Failed to get average color for logo:", e);
-    }
-  }
+  // Run the two best-effort enrichments in parallel so we don't stack
+  // their latency on top of each other: average-color from the logo and
+  // Gemini-generated TL;DR from the job description. Both resolve to
+  // null on failure so creation never blocks on them.
+  const [logoColor, tldr] = await Promise.all([
+    parsed.data.companyLogoUrl
+      ? getAverageColor(parsed.data.companyLogoUrl)
+          .then((c) => c.hex)
+          .catch((e) => {
+            console.error("Failed to get average color for logo:", e);
+            return null;
+          })
+      : Promise.resolve(null),
+    parsed.data.jobDescription
+      ? generateJobTldr(parsed.data.jobDescription)
+      : Promise.resolve(null),
+  ]);
 
   const application = await prisma.application.create({
     data: {
@@ -111,6 +120,11 @@ export async function POST(request: Request) {
       companyLogoUrl: parsed.data.companyLogoUrl || null,
       logoColor,
       sourcePlatform: parsed.data.sourcePlatform || "MANUAL",
+      tldrHeadline: tldr?.headline ?? null,
+      tldrBullets: tldr?.bullets ?? undefined,
+      responsibilities: tldr?.responsibilities ?? [],
+      qualifications: tldr?.qualifications ?? [],
+      keywords: tldr?.keywords ?? [],
       activities: {
         create: {
           type: "CREATED",

@@ -203,8 +203,13 @@ export function ApplicationList() {
                 <td className="px-3 py-2.5 border-b font-medium truncate max-w-0">
                   {row.company}
                 </td>
-                <td className="px-3 py-2.5 border-b text-foreground truncate max-w-0">
-                  {row.role}
+                <td className="px-3 py-2.5 border-b text-foreground max-w-0">
+                  <div className="truncate">{row.role}</div>
+                  {row.app.tldrHeadline && (
+                    <div className="truncate text-[11px] text-muted-foreground mt-0.5">
+                      {row.app.tldrHeadline}
+                    </div>
+                  )}
                 </td>
                 <td className="px-3 py-2.5 border-b">
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] bg-muted text-foreground">

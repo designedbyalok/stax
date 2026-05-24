@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
@@ -13,15 +14,15 @@ pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 export default function PdfPreviewClient({
   documentId,
+  width = 340,
 }: {
   documentId: string;
+  width?: number;
 }) {
   const [numPages, setNumPages] = useState<number>();
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // /api/documents/<id>/url returns { url: signedUrl }. We need the URL
-  // *here*, not the API endpoint — react-pdf streams bytes from the
-  // `file` prop directly.
+  // Fetch the signed URL to display the PDF securely
   const urlQuery = useQuery({
     queryKey: ["documentUrl", documentId],
     queryFn: () => api.getDocumentUrl(documentId).then((r) => r.url),
@@ -36,7 +37,7 @@ export default function PdfPreviewClient({
         {urlQuery.isLoading || !signedUrl ? (
           <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin mb-2" />
-            <span className="text-xs">Loading PDF…</span>
+            <span className="text-xs">Loading PDF securely...</span>
           </div>
         ) : (
           <Document
@@ -61,15 +62,16 @@ export default function PdfPreviewClient({
               </div>
             }
           >
-            {!loadError && (
+            {!loadError && numPages && Array.from(new Array(numPages), (el, index) => (
               <Page
-                pageNumber={1}
-                width={340}
+                key={`page_${index + 1}`}
+                pageNumber={index + 1}
+                width={width}
                 renderTextLayer={false}
-                renderAnnotationLayer={false}
-                className="shadow-sm border rounded-sm overflow-hidden"
+                renderAnnotationLayer={true}
+                className="shadow-sm border rounded-sm overflow-hidden mb-6 max-w-full"
               />
-            )}
+            ))}
           </Document>
         )}
       </div>
@@ -82,7 +84,8 @@ export default function PdfPreviewClient({
           size="sm"
           className="h-7 text-[11px] gap-1 px-2"
           disabled={!signedUrl}
-          onClick={() => signedUrl && window.open(signedUrl, "_blank")}
+          nativeButton={!signedUrl}
+          render={signedUrl ? <a href={signedUrl} target="_blank" rel="noopener noreferrer" /> : undefined}
         >
           Open full
           <ExternalLink className="h-3 w-3" />

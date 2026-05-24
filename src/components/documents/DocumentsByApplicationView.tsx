@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Eye } from "lucide-react";
 import { useState } from "react";
 import { ApiDocument } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils";
 export function DocumentsByApplicationView({
   type,
   documents,
+  onPreview,
 }: {
   type: "RESUME" | "COVER_LETTER";
   documents: ApiDocument[];
+  onPreview: (doc: ApiDocument) => void;
 }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -32,9 +34,11 @@ export function DocumentsByApplicationView({
 
           return (
             <div key={doc.id} className="flex flex-col">
-              <button
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => toggle(doc.id)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left cursor-pointer"
               >
                 {isExpanded ? (
                   <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -54,10 +58,22 @@ export function DocumentsByApplicationView({
                     {doc.filename}
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground shrink-0">
-                  {count} {count === 1 ? "application" : "applications"}
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="text-xs text-muted-foreground">
+                    {count} {count === 1 ? "application" : "applications"}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPreview(doc);
+                    }}
+                    className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                    title="Preview Document"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
                 </div>
-              </button>
+              </div>
               
               {isExpanded && (
                 <div className="bg-muted/20 px-11 py-3 border-t text-sm">

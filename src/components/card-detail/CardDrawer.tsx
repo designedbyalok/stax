@@ -135,7 +135,14 @@ export function CardDrawer({
           <div className="flex gap-4 items-start">
             <div className="flex-1 space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="card-role">Role</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="card-role">Role</Label>
+                  {card.matchScore != null && (
+                    <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-900/30 dark:text-green-400">
+                      Job Match Score: {card.matchScore}
+                    </span>
+                  )}
+                </div>
                 <Input
                   id="card-role"
                   value={draft.roleTitle}

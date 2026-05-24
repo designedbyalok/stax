@@ -16,6 +16,6 @@ const PdfPreviewClient = dynamic(
   }
 );
 
-export function PdfPreview({ documentId }: { documentId: string }) {
-  return <PdfPreviewClient documentId={documentId} />;
+export function PdfPreview({ documentId, width }: { documentId: string, width?: number }) {
+  return <PdfPreviewClient documentId={documentId} width={width} />;
 }

@@ -7,6 +7,7 @@ import { ExternalLink } from "lucide-react";
 import { ContactsList } from "./ContactsList";
 import { CalendarSection } from "./CalendarSection";
 import { Timeline } from "./Timeline";
+import { JobTldrBlock } from "@/components/job-tldr/JobTldrBlock";
 import { ApiApplication, ApiApplicationDetail } from "@/lib/api-client";
 
 function toDateInputValue(isoString?: string | null) {
@@ -36,6 +37,14 @@ export function OverviewTab({
 
   return (
     <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+      <JobTldrBlock
+        headline={card.tldrHeadline}
+        bullets={card.tldrBullets}
+        responsibilities={card.responsibilities}
+        qualifications={card.qualifications}
+        keywords={card.keywords}
+      />
+
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="card-location">Location</Label>

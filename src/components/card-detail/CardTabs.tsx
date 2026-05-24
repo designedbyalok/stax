@@ -4,6 +4,7 @@ import { useState } from "react";
 import { OverviewTab } from "./OverviewTab";
 import { PrepTab } from "./PrepTab";
 import { DocumentsTab } from "./DocumentsTab";
+import { TailorTab } from "./TailorTab";
 import { ApiApplication, ApiApplicationDetail } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
@@ -22,7 +23,7 @@ export function CardTabs({
   draft: Partial<ApiApplicationDetail>;
   updateField: (key: string, value: unknown) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<"OVERVIEW" | "PREP" | "DOCUMENTS">("OVERVIEW");
+  const [activeTab, setActiveTab] = useState<"OVERVIEW" | "PREP" | "DOCUMENTS" | "TAILOR">("OVERVIEW");
 
   // Check if the current column is an interview stage
   const { data: columns } = useQuery({
@@ -62,6 +63,14 @@ export function CardTabs({
         >
           Documents
         </button>
+        <button
+          onClick={() => setActiveTab("TAILOR")}
+          className={`pb-2 text-[13px] font-medium border-b-2 transition-colors flex items-center gap-1 ${
+            activeTab === "TAILOR" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          AI Tailor
+        </button>
       </div>
 
       <div key={activeTab} className="tab-content flex-1 flex flex-col overflow-hidden">
@@ -79,6 +88,9 @@ export function CardTabs({
               Object.entries(fields).forEach(([k, v]) => updateField(k, v));
             }}
           />
+        )}
+        {activeTab === "TAILOR" && (
+          <TailorTab card={card} detail={detail} />
         )}
       </div>
     </div>

@@ -13,6 +13,13 @@ export type ApiApplication = {
   originalUrl: string | null;
   sourcePlatform: string | null;
   jobDescription: string | null;
+  tldrHeadline: string | null;
+  tldrBullets: string[] | null;
+  responsibilities: string[];
+  qualifications: string[];
+  keywords: string[];
+  matchScore: number | null;
+  matchDetails: Record<string, unknown> | null;
   notes: string | null;
   resumeVersion: string | null;
   coverLetterVersion: string | null;

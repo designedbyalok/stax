@@ -213,6 +213,7 @@ export default function Board() {
   return (
     <div className="h-full flex flex-col">
       <DndContext
+        id="board-dnd-context"
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}

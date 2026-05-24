@@ -95,9 +95,9 @@ export function PasteBar() {
     <form onSubmit={onSubmit} className="w-full">
       <div className="relative">
         {isParsing ? (
-          <Loader2 className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground animate-spin pointer-events-none z-10" />
+          <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin pointer-events-none z-10" />
         ) : (
-          <Link2 className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
+          <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
         )}
         <Input
           ref={inputRef}
@@ -111,7 +111,7 @@ export function PasteBar() {
           disabled={isParsing}
           autoComplete="off"
           spellCheck={false}
-          className="pl-7 h-8 text-[13px] md:text-[13px] bg-background"
+          className="pl-9 h-10 text-sm bg-background shadow-sm rounded-lg border-muted/60 transition-colors hover:border-primary/30 focus-visible:ring-primary/20"
         />
       </div>
     </form>

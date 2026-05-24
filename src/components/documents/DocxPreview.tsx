@@ -44,9 +44,8 @@ export function DocxPreview({ documentId }: { documentId: string }) {
           size="sm"
           className="h-7 text-[11px] gap-1 px-2"
           disabled={!urlData?.url}
-          onClick={() => {
-            if (urlData?.url) window.open(urlData.url, "_blank");
-          }}
+          nativeButton={!urlData?.url}
+          render={urlData?.url ? <a href={urlData.url} target="_blank" rel="noopener noreferrer" /> : undefined}
         >
           Download
           <Download className="h-3 w-3" />

@@ -44,12 +44,13 @@ export function Column({
 
   return (
     <div className="flex flex-col flex-shrink-0 w-72">
-      <div className="flex items-center justify-between px-1 pb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-medium text-foreground tracking-tight">
+      <div className="flex items-center px-1 pb-3">
+        <div className="flex items-center gap-2 bg-background border shadow-sm px-3 py-1.5 rounded-full">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: column.color || 'var(--primary)' }} />
+          <span className="text-xs font-semibold text-foreground tracking-tight">
             {column.title}
           </span>
-          <span className="text-[11px] text-muted-foreground tabular-nums">
+          <span className="text-[10px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full tabular-nums">
             {cards.length}
           </span>
         </div>
@@ -57,10 +58,9 @@ export function Column({
 
       <div
         ref={setNodeRef}
-        style={column.color ? { borderTopWidth: 3, borderTopColor: column.color } : {}}
         className={cn(
-          "flex-1 flex flex-col gap-1.5 rounded-md p-1.5 min-h-[120px] transition-colors",
-          isOver ? "bg-foreground/[0.04]" : "bg-muted/30"
+          "flex-1 flex flex-col gap-4 rounded-xl p-1 min-h-[120px] transition-colors",
+          isOver ? "bg-primary/5" : "bg-transparent"
         )}
       >
         <SortableContext

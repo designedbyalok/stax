@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { FileText, Upload } from "lucide-react";
+import { FileText, Upload, Eye } from "lucide-react";
 import { api, ApiDocument } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,9 @@ import { Card } from "@/components/ui/card";
 import { UploadModal } from "./UploadModal";
 import { DocumentsByApplicationView } from "./DocumentsByApplicationView";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PdfPreview } from "./PdfPreview";
+import { DocxPreview } from "./DocxPreview";
 
 function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -21,6 +24,7 @@ export function DocumentsPage() {
   const [tab, setTab] = useState<"RESUME" | "COVER_LETTER">("RESUME");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [viewByApp, setViewByApp] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<ApiDocument | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["documents", tab],
@@ -87,7 +91,7 @@ export function DocumentsPage() {
             ))}
           </div>
         ) : viewByApp ? (
-          <DocumentsByApplicationView type={tab} documents={data ?? []} />
+          <DocumentsByApplicationView type={tab} documents={data ?? []} onPreview={setPreviewDoc} />
         ) : data?.length === 0 ? (
           <div className="h-[40vh] flex flex-col items-center justify-center text-center">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -117,11 +121,22 @@ export function DocumentsPage() {
                       {doc.filename} · {formatSize(doc.sizeBytes)}
                     </p>
                   </div>
-                  {doc.isPrimary && (
-                    <Badge variant="secondary" className="text-[10px] uppercase font-semibold shrink-0 rounded-sm px-1.5 py-0">
-                      Primary
-                    </Badge>
-                  )}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    {doc.isPrimary && (
+                      <Badge variant="secondary" className="text-[10px] uppercase font-semibold rounded-sm px-1.5 py-0">
+                        Primary
+                      </Badge>
+                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7" 
+                      onClick={() => setPreviewDoc(doc)}
+                      title="Preview Document"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between mt-1 pt-3 border-t">
@@ -143,6 +158,23 @@ export function DocumentsPage() {
         onOpenChange={setUploadOpen}
         defaultType={tab}
       />
+
+      <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
+        <DialogContent className="sm:max-w-4xl max-w-[95vw] h-[85vh] p-0 flex flex-col overflow-hidden">
+          <DialogHeader className="px-5 py-4 border-b shrink-0 bg-muted/30">
+            <DialogTitle className="text-base font-semibold">{previewDoc?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden relative bg-muted/10">
+            {previewDoc && (
+              previewDoc.mimeType === "application/pdf" ? (
+                <PdfPreview documentId={previewDoc.id} width={750} />
+              ) : (
+                <DocxPreview documentId={previewDoc.id} />
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

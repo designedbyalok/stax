@@ -23,8 +23,8 @@ export default function BoardPageClient() {
         </div>
       </header>
 
-      <div className="px-6 py-3 border-b bg-muted/20 shrink-0 flex items-center gap-6">
-        <div className="flex-1 max-w-md">
+      <div className="px-6 pt-6 pb-2 flex flex-col xl:flex-row xl:items-center justify-between gap-4 shrink-0">
+        <div className="w-full xl:max-w-sm">
           <PasteBar />
         </div>
         <div className="hidden md:block">
@@ -32,7 +32,7 @@ export default function BoardPageClient() {
         </div>
       </div>
 
-      <div className="px-6 py-3 border-b shrink-0">
+      <div className="px-6 pb-2 shrink-0">
         <SearchFilters />
       </div>
 

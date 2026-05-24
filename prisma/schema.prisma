@@ -129,6 +129,20 @@ model Application {
   sourcePlatform      SourcePlatform?
   jobDescription      String?   @db.Text
 
+  // Gemini-generated summary of the job description. Headline is a single
+  // line; bullets is an array of 3-4 short strings stored as JSON.
+  tldrHeadline        String?   @db.Text
+  tldrBullets         Json?
+  
+  // Enhanced AI Job Insights
+  responsibilities    String[]  @default([])
+  qualifications      String[]  @default([])
+  keywords            String[]  @default([])
+
+  // AI Resume Match Scoring
+  matchScore          Int?
+  matchDetails        Json?
+
   notes               String?   @db.Text
   resumeVersion       String?           // V1 legacy — deprecated, read-only
   coverLetterVersion  String?           // V1 legacy — deprecated, read-only

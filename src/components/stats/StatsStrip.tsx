@@ -33,13 +33,13 @@ export function StatsStrip() {
   );
 
   return (
-    <div className="flex items-center gap-6 px-1">
+    <div className="flex items-center gap-3">
       {stats.map((s) => (
-        <div key={s.label} className="flex items-baseline gap-1.5">
-          <span className="text-[13px] font-semibold tabular-nums text-foreground">
+        <div key={s.label} className="flex items-center gap-2.5 bg-background border border-muted/60 shadow-sm px-3.5 py-2 rounded-lg">
+          <span className="text-sm font-bold tabular-nums text-foreground">
             {s.value}
           </span>
-          <span className="text-[11px] text-muted-foreground">{s.label}</span>
+          <span className="text-[11px] font-medium text-muted-foreground">{s.label}</span>
         </div>
       ))}
     </div>

@@ -81,7 +81,79 @@ export function DocumentsTab({
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-4 border-b">
+            <h3 className="font-semibold leading-none tracking-tight">Application Packet Checklist</h3>
+            <p className="text-sm text-muted-foreground">Ensure your materials are ready before applying.</p>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className={`mt-0.5 w-4 h-4 rounded-full border ${card.matchScore != null ? 'bg-primary border-primary text-primary-foreground flex items-center justify-center' : 'border-muted-foreground'}`}>
+                {card.matchScore != null && <Star className="w-2.5 h-2.5 fill-current" />}
+              </div>
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium leading-none">Improve Your Resume Score</p>
+                <p className="text-[13px] text-muted-foreground">
+                  Your current match score is {card.matchScore ? <strong className="text-foreground">{card.matchScore}%</strong> : "Not analyzed"}. Run AI Tailor to optimize it.
+                </p>
+                {card.resumeId && (
+                  <div className="flex gap-2 mt-2">
+                    <Button variant="outline" size="sm" className="h-7 text-xs">Run AI Tailor</Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className={`mt-0.5 w-4 h-4 rounded-full border ${card.coverLetterId ? 'bg-primary border-primary text-primary-foreground flex items-center justify-center' : 'border-muted-foreground'}`}>
+                {card.coverLetterId && <Star className="w-2.5 h-2.5 fill-current" />}
+              </div>
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium leading-none">Review Cover Letter</p>
+                <p className="text-[13px] text-muted-foreground">
+                  Attach and review your cover letter for this role.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 w-4 h-4 rounded-full border border-muted-foreground" />
+              <div className="flex-1 space-y-2">
+                <p className="text-sm font-medium leading-none">Download & Apply</p>
+                <p className="text-[13px] text-muted-foreground">
+                  Once ready, download your packet (Resume & Cover Letter) and apply.
+                </p>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="h-8 text-xs" 
+                    disabled={!card.resumeId && !card.coverLetterId}
+                    onClick={() => {
+                      toast.info("Downloading packet...");
+                      // Implementation for zip download would go here
+                    }}
+                  >
+                    Download Packet
+                  </Button>
+                  {card.originalUrl && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 text-xs" 
+                      nativeButton={false}
+                      render={<a href={card.originalUrl} target="_blank" rel="noreferrer" />}
+                    >
+                      Go to Job Post
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
         <div 
           className={`relative p-3 -mx-3 rounded-lg border-2 transition-colors ${dragType === "RESUME" ? "border-primary bg-primary/5 border-dashed" : "border-transparent"}`}
           onDragEnter={(e) => { e.preventDefault(); setDragType("RESUME"); }}
