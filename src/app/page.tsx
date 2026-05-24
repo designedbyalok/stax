@@ -9,11 +9,14 @@ import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
 import { LandingMotion } from "@/components/landing/motion";
+import { auth } from "@/lib/auth";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await auth();
+  
   return (
     <div className="landing-page" data-glass="on">
-      <LandingNav />
+      <LandingNav user={session?.user} />
       <Hero />
       <TrustedBy />
       <Stats />

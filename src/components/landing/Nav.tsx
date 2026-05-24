@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { href: "#faq", label: "FAQ" },
 ];
 
-export function LandingNav() {
+export function LandingNav({ user }: { user?: { name?: string | null; email?: string | null } }) {
   const [open, setOpen] = useState(false);
 
   // Close on hash navigation (smooth-scroll then collapse).
@@ -70,12 +70,20 @@ export function LandingNav() {
 
           <span className="nav-spacer" />
 
-          <Link className="nav-signin" href="/login">
-            Sign in
-          </Link>
-          <Link className="nav-cta" href="/signup">
-            Start tracking
-          </Link>
+          {user ? (
+            <Link className="nav-signin" href="/board">
+              {user.name || user.email?.split("@")[0] || "Dashboard"}
+            </Link>
+          ) : (
+            <>
+              <Link className="nav-signin" href="/login">
+                Sign in
+              </Link>
+              <Link className="nav-cta" href="/signup">
+                Start tracking
+              </Link>
+            </>
+          )}
 
           <button
             type="button"
@@ -123,24 +131,32 @@ export function LandingNav() {
               style={{ ["--i" as string]: NAV_LINKS.length }}
               className="nav-mobile-item nav-mobile-item--signin"
             >
-              <Link href="/login" onClick={() => setOpen(false)}>
-                Sign in
-              </Link>
+              {user ? (
+                <Link href="/board" onClick={() => setOpen(false)}>
+                  {user.name || user.email?.split("@")[0] || "Dashboard"}
+                </Link>
+              ) : (
+                <Link href="/login" onClick={() => setOpen(false)}>
+                  Sign in
+                </Link>
+              )}
             </li>
           </ul>
 
-          <div
-            className="nav-mobile-cta-wrap"
-            style={{ ["--i" as string]: NAV_LINKS.length + 1 }}
-          >
-            <Link
-              className="nav-mobile-cta"
-              href="/signup"
-              onClick={() => setOpen(false)}
+          {!user && (
+            <div
+              className="nav-mobile-cta-wrap"
+              style={{ ["--i" as string]: NAV_LINKS.length + 1 }}
             >
-              Start tracking →
-            </Link>
-          </div>
+              <Link
+                className="nav-mobile-cta"
+                href="/signup"
+                onClick={() => setOpen(false)}
+              >
+                Start tracking →
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </>
