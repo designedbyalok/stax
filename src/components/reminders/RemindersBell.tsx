@@ -5,13 +5,10 @@ import { formatDistanceToNow } from "date-fns";
 import { Bell, Clock, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { api, ApiReminder } from "@/lib/api-client";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
@@ -78,8 +75,8 @@ export function RemindersBell() {
   });
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
+    <Popover>
+      <PopoverTrigger
         render={
           <Button
             variant="ghost"
@@ -96,11 +93,9 @@ export function RemindersBell() {
           </Button>
         }
       />
-      <DropdownMenuContent align="end" className="w-[320px] p-0">
+      <PopoverContent align="end" className="!w-[320px] p-0 overflow-hidden">
         <div className="flex items-center justify-between px-3 py-2 border-b">
-          <DropdownMenuLabel className="px-0 py-0 text-sm font-medium">
-            Reminders
-          </DropdownMenuLabel>
+          <span className="text-sm font-medium text-foreground">Reminders</span>
           <Button
             type="button"
             size="xs"
@@ -176,7 +171,7 @@ export function RemindersBell() {
             ))}
           </ul>
         )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
 }
