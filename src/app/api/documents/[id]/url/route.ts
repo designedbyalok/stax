@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export async function GET(
   req: NextRequest,
@@ -9,7 +9,14 @@ export async function GET(
 ) {
   const auth = await requireUserId();
   if (!auth.ok) return auth.response;
-  
+
+  if (!isSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "File storage isn't configured." },
+      { status: 503 }
+    );
+  }
+
   const { id } = await params;
 
   const document = await prisma.document.findUnique({

@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { nanoid } from "nanoid";
 
 export async function POST(req: NextRequest) {
   const auth = await requireUserId();
   if (!auth.ok) return auth.response;
+
+  if (!isSupabaseConfigured) {
+    return NextResponse.json(
+      {
+        error:
+          "File storage isn't configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in env, and create a 'documents' bucket in Supabase Storage.",
+      },
+      { status: 503 }
+    );
+  }
 
   try {
     const formData = await req.formData();
