@@ -31,7 +31,10 @@ export function RemindersBell() {
   const remindersQuery = useQuery({
     queryKey: ["reminders"],
     queryFn: () => api.listReminders().then((r) => r.reminders),
-    refetchInterval: 60_000,
+    // Reminder writes (snooze/dismiss/runDetection) all invalidate this key,
+    // so we mostly rely on mutations to keep the count fresh. Background
+    // polling just covers reminders Inngest creates on its own.
+    refetchInterval: 5 * 60_000,
   });
 
   const reminders = remindersQuery.data ?? [];

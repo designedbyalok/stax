@@ -13,7 +13,8 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export default function NotificationsSettings() {
   const queryClient = useQueryClient();
   const settingsQuery = useQuery({
-    queryKey: ["user", "settings"],
+    // Same key the Board uses so the cache is shared.
+    queryKey: ["userSettings"],
     queryFn: api.getUserSettings,
   });
 
@@ -44,7 +45,7 @@ export default function NotificationsSettings() {
       }),
     onSuccess: () => {
       toast.success("Saved.");
-      queryClient.invalidateQueries({ queryKey: ["user", "settings"] });
+      queryClient.invalidateQueries({ queryKey: ["userSettings"] });
     },
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Couldn't save."),

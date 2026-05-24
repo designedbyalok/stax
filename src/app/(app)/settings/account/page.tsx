@@ -27,7 +27,8 @@ const TIMEZONES = [
 export default function AccountSettings() {
   const queryClient = useQueryClient();
   const settingsQuery = useQuery({
-    queryKey: ["user", "settings"],
+    // Same key the Board uses so the cache is shared.
+    queryKey: ["userSettings"],
     queryFn: api.getUserSettings,
   });
 
@@ -45,7 +46,7 @@ export default function AccountSettings() {
     mutationFn: () => api.updateUserSettings({ name, timezone }),
     onSuccess: () => {
       toast.success("Saved.");
-      queryClient.invalidateQueries({ queryKey: ["user", "settings"] });
+      queryClient.invalidateQueries({ queryKey: ["userSettings"] });
     },
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Couldn't save."),

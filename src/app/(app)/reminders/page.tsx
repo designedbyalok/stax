@@ -37,7 +37,7 @@ export default function RemindersPage() {
   const remindersQuery = useQuery({
     queryKey: ["reminders"],
     queryFn: () => api.listReminders().then((r) => r.reminders),
-    refetchInterval: 60_000,
+    refetchInterval: 5 * 60_000,
   });
 
   const appsQuery = useQuery({
