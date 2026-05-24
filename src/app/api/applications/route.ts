@@ -28,11 +28,14 @@ const SOURCE_PLATFORMS = [
   "MANUAL",
 ] as const;
 
+const JOB_TYPES = ["FULL_TIME", "CONTRACT", "INTERNSHIP", "PART_TIME", "OTHER"] as const;
+
 const createSchema = z.object({
   roleTitle: z.string().trim().min(1).max(200),
   companyName: z.string().trim().min(1).max(200),
   location: z.string().trim().max(200).optional().nullable(),
   salaryRange: z.string().trim().max(200).optional().nullable(),
+  jobType: z.enum(JOB_TYPES).optional().nullable(),
   originalUrl: z.string().url().max(2000).optional().nullable(),
   jobDescription: z.string().trim().max(50_000).optional().nullable(),
   companyLogoUrl: z.string().url().max(2000).optional().nullable(),
@@ -115,6 +118,7 @@ export async function POST(request: Request) {
       companyName: parsed.data.companyName,
       location: parsed.data.location || null,
       salaryRange: parsed.data.salaryRange || null,
+      jobType: parsed.data.jobType || null,
       originalUrl: parsed.data.originalUrl || null,
       jobDescription: parsed.data.jobDescription || null,
       companyLogoUrl: parsed.data.companyLogoUrl || null,

@@ -265,6 +265,7 @@ export const api = {
     companyName: string;
     location?: string | null;
     salaryRange?: string | null;
+    jobType?: "FULL_TIME" | "CONTRACT" | "INTERNSHIP" | "PART_TIME" | "OTHER" | null;
     originalUrl?: string | null;
     jobDescription?: string | null;
     companyLogoUrl?: string | null;
