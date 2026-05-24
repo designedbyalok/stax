@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { StaxMark } from "@/components/StaxMark";
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -133,10 +134,11 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-[360px] space-y-6">
-        <Link href="/" className="flex items-center justify-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-foreground flex items-center justify-center">
-            <span className="text-[11px] font-bold text-background">S</span>
-          </div>
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-2 text-foreground"
+        >
+          <StaxMark size={22} strokeWidth={3} gap={2} />
           <span className="text-sm font-semibold tracking-tight">Stax</span>
         </Link>
 

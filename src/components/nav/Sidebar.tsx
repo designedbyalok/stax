@@ -11,6 +11,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StaxMark } from "@/components/StaxMark";
 
 type Item = { href: string; label: string; icon: typeof LayoutGrid };
 
@@ -35,9 +36,7 @@ export function Sidebar({
           href="/board"
           className="flex items-center gap-2 font-semibold tracking-tight text-foreground"
         >
-          <div className="w-5 h-5 rounded-sm bg-foreground flex items-center justify-center">
-            <span className="text-[10px] font-bold text-background">S</span>
-          </div>
+          <StaxMark size={18} strokeWidth={2.5} gap={2} />
           Stax
         </Link>
       </div>
