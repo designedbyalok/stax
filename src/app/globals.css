@@ -214,12 +214,42 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Subtle scrollbars. Apply `.scroll-soft` to any overflow
-   container that's allowed to scroll horizontally or vertically.
-   The thumb fades in only when the user is interacting.
+   Subtle scrollbars — applied globally so every overflow
+   container in the app gets the same soft chrome.
+
+   Firefox uses the `scrollbar-*` properties; WebKit uses the
+   `::-webkit-scrollbar` pseudo-elements. Both are set on `*`.
+   The `.scroll-soft` modifier still exists for opt-in
+   "hover-to-reveal" containers (sidebar, board scroll) where
+   we want the thumb to fully fade away when idle.
    ───────────────────────────────────────────────────────────── */
-.scroll-soft {
+* {
   scrollbar-width: thin;
+  scrollbar-color: hsl(var(--foreground) / 0.18) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground) / 0.18);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 180ms ease;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground) / 0.32);
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.scroll-soft {
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 200ms ease;
 }
@@ -227,24 +257,13 @@ input[type="number"]::-webkit-inner-spin-button {
 .scroll-soft:focus-within {
   scrollbar-color: hsl(var(--foreground) / 0.18) transparent;
 }
-.scroll-soft::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.scroll-soft::-webkit-scrollbar-track {
-  background: transparent;
-}
 .scroll-soft::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 3px;
-  transition: background-color 200ms ease;
 }
 .scroll-soft:hover::-webkit-scrollbar-thumb,
 .scroll-soft:focus-within::-webkit-scrollbar-thumb {
   background: hsl(var(--foreground) / 0.18);
-}
-.scroll-soft::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--foreground) / 0.32);
+  background-clip: padding-box;
 }
 
 @media (prefers-reduced-motion: reduce) {

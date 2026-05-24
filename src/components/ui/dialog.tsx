@@ -31,7 +31,9 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        // Slightly deeper scrim + a real frosted-glass blur so the
+        // canvas recedes when a modal opens.
+        "fixed inset-0 isolate z-50 bg-foreground/20 duration-150 supports-backdrop-filter:backdrop-blur-md supports-backdrop-filter:backdrop-saturate-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}

@@ -91,18 +91,18 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
       )}
     >
       {/* Left accent stripe — appears on hover, picks up the
-          brand color (logoColor) when available. */}
+          column's stage tint so a hovered card visually belongs
+          to its column. Falls back to a neutral ink when there's
+          no stage context (e.g. inside the drag overlay). */}
       <span
         aria-hidden
         className={cn(
           "absolute left-0 top-2.5 bottom-2.5 w-[2px] rounded-r-sm",
           "opacity-0 scale-y-[0.4] origin-center",
           "group-hover:opacity-100 group-hover:scale-y-100",
-          "transition-[opacity,transform] duration-300 ease-out"
+          "transition-[opacity,transform] duration-300 ease-out",
+          "bg-[var(--tint-strong,hsl(var(--foreground)/0.5))]"
         )}
-        style={{
-          background: tint ?? "hsl(var(--foreground) / 0.5)",
-        }}
       />
 
       <div className="relative z-10 p-3 pb-2.5">
