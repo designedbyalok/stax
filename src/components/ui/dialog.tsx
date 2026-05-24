@@ -31,10 +31,11 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        // Heavy frosted-glass backdrop: a deeper scrim + a strong
-        // 2xl (40px) blur with reduced saturation so background
-        // text and chrome aren't legible behind the modal.
-        "fixed inset-0 isolate z-50 bg-foreground/35 duration-150 supports-backdrop-filter:backdrop-blur-2xl supports-backdrop-filter:backdrop-saturate-125 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        // Dark frosted-glass backdrop. 25px blur distorts letter
+        // shapes; a rgba(0,0,0,0.6) tint blocks contrast so text
+        // behind the modal isn't readable. Stays dark in both
+        // themes (foreground/* would invert in dark mode).
+        "fixed inset-0 isolate z-50 bg-black/60 duration-150 supports-backdrop-filter:backdrop-blur-[25px] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
