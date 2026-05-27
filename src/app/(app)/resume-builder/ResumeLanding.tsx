@@ -2,18 +2,19 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, FileUp, LayoutTemplate, X, ArrowRight } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2, Plus, FileUp, LayoutTemplate, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ApiResume, ResumeData } from "@/lib/types/resume";
 import { ResumePreview } from "./ResumePreview";
+import { ResumeCard } from "./ResumeCard";
+import { cn } from "@/lib/utils";
 
 const MOCK_RESUME_DATA: ResumeData = {
   basics: {
@@ -78,6 +79,17 @@ export function ResumeLanding() {
 
   const [isImporting, setIsImporting] = useState(false);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
+
+  const resumesQuery = useQuery({
+    queryKey: ["resumes"],
+    queryFn: async () => {
+      const res = await fetch("/api/resume");
+      if (!res.ok) throw new Error("Failed to fetch resumes");
+      const data = await res.json();
+      return data.resumes as ApiResume[];
+    },
+  });
+  const resumes = resumesQuery.data ?? [];
 
   const createMutation = useMutation({
     mutationFn: async (template?: string) => {
@@ -185,10 +197,15 @@ export function ResumeLanding() {
   }[gridSize];
 
   return (
-    <div className="flex-1 w-full h-full bg-muted/20 flex flex-col items-center justify-center p-8">
-      
-      <div className="max-w-4xl w-full flex flex-col items-center">
-        
+    <div
+      className={cn(
+        "flex-1 w-full h-full bg-muted/20 overflow-y-auto flex flex-col items-center p-8",
+        resumes.length === 0 ? "justify-center" : "py-12"
+      )}
+    >
+
+      <div className="max-w-5xl w-full flex flex-col items-center">
+
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground drop-shadow-sm">Resume Builder</h1>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
@@ -266,6 +283,24 @@ export function ResumeLanding() {
           </div>
 
         </div>
+
+        {/* Saved resumes */}
+        {resumes.length > 0 && (
+          <div className="w-full mt-16">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-5">
+              Your resumes
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {resumes.map((r) => (
+                <ResumeCard
+                  key={r.id}
+                  resume={r}
+                  onClick={() => router.push(`/resume-builder?id=${r.id}`)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Template Selector Modal */}

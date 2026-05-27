@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Download, Printer, Save, FileUp, Sparkles, ArrowLeft, Plus } from "lucide-react";
+import { Loader2, Printer, Save, Sparkles, ArrowLeft, Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,11 @@ import { toast } from "sonner";
 import { ApiResume, ResumeData } from "@/lib/types/resume";
 import { ResumePreview } from "./ResumePreview";
 import { ResumeLanding } from "./ResumeLanding";
+
+// Snapshot used to detect unsaved edits for autosave.
+function serializeResume(r: ApiResume): string {
+  return JSON.stringify({ title: r.title, content: r.content });
+}
 
 export function ResumeClient() {
   const queryClient = useQueryClient();
@@ -24,6 +29,12 @@ export function ResumeClient() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Autosave bookkeeping. savedSnapshotRef holds the last-persisted
+  // serialization; loadedIdRef tracks which resume that snapshot is for.
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
+  const savedSnapshotRef = useRef<string>("");
+  const loadedIdRef = useRef<string | null>(null);
 
   const resumesQuery = useQuery({
     queryKey: ["resumes"],
@@ -91,11 +102,19 @@ export function ResumeClient() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, content }: { id: string; content: ResumeData }) => {
+    mutationFn: async ({
+      id,
+      title,
+      content,
+    }: {
+      id: string;
+      title?: string;
+      content: ResumeData;
+    }) => {
       const res = await fetch(`/api/resume/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ title, content }),
       });
       if (!res.ok) throw new Error("Failed to update resume");
       return res.json();
@@ -127,6 +146,42 @@ export function ResumeClient() {
     setActiveResume({ ...activeResume, content: newContent });
   };
 
+  // When a different resume is adopted, capture its snapshot so the
+  // initial load doesn't look like an unsaved edit.
+  useEffect(() => {
+    if (activeResume && loadedIdRef.current !== activeResume.id) {
+      loadedIdRef.current = activeResume.id;
+      savedSnapshotRef.current = serializeResume(activeResume);
+      setSaveStatus("saved");
+    }
+  }, [activeResume]);
+
+  // Debounced autosave: 900ms after the user stops editing, persist
+  // title + content. Status drives the header indicator.
+  useEffect(() => {
+    if (!activeResume) return;
+    const snapshot = serializeResume(activeResume);
+    if (snapshot === savedSnapshotRef.current) return;
+
+    setSaveStatus("unsaved");
+    const resume = activeResume;
+    const timer = setTimeout(() => {
+      setSaveStatus("saving");
+      updateMutation.mutate(
+        { id: resume.id, title: resume.title, content: resume.content },
+        {
+          onSuccess: () => {
+            savedSnapshotRef.current = snapshot;
+            setSaveStatus("saved");
+          },
+          onError: () => setSaveStatus("unsaved"),
+        }
+      );
+    }, 900);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeResume]);
+
   if (resumesQuery.isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -146,11 +201,6 @@ export function ResumeClient() {
       </div>
     );
   }
-
-  const handleSave = () => {
-    updateMutation.mutate({ id: activeResume.id, content: activeResume.content });
-    toast.success("Resume saved");
-  };
 
   const handlePrint = () => {
     window.print();
@@ -211,27 +261,32 @@ export function ResumeClient() {
       <div className="w-full md:w-[450px] border-r bg-card flex flex-col h-full z-10 shadow-sm print:hidden">
         <div className="p-4 border-b flex flex-col gap-3 shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button size="icon" variant="ghost" className="h-8 w-8 -ml-2 text-muted-foreground hover:text-foreground" onClick={() => router.push("/documents")}>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Button size="icon" variant="ghost" className="h-8 w-8 -ml-2 shrink-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/resume-builder")}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <h2 className="font-semibold text-sm">Editor</h2>
+              <input
+                value={activeResume.title}
+                onChange={(e) =>
+                  setActiveResume({ ...activeResume, title: e.target.value })
+                }
+                placeholder="Untitled resume"
+                aria-label="Resume title"
+                className="font-semibold text-sm bg-transparent border border-transparent rounded px-1.5 py-0.5 -ml-1.5 min-w-0 flex-1 outline-none hover:bg-muted/50 focus:bg-muted/50 focus:border-border transition-colors"
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <input 
-                type="file" 
-                accept=".pdf" 
-                className="hidden" 
-                ref={fileInputRef} 
-                onChange={handleImportFile} 
+            <div className="flex items-center gap-2 shrink-0">
+              <SaveStatus status={saveStatus} />
+              <input
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleImportFile}
               />
               <Button size="sm" variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary" onClick={() => fileInputRef.current?.click()} disabled={isImporting}>
                 {isImporting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
                 Import with AI
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleSave} disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : null}
-                Save Draft
               </Button>
             </div>
           </div>
@@ -620,5 +675,31 @@ export function ResumeClient() {
         <ResumePreview resume={activeResume.content} />
       </div>
     </div>
+  );
+}
+
+// Compact autosave status pill shown in the editor header.
+function SaveStatus({ status }: { status: "saved" | "saving" | "unsaved" }) {
+  if (status === "saving") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Saving…
+      </span>
+    );
+  }
+  if (status === "unsaved") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400">
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        Unsaved
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+      <Check className="h-3 w-3 text-emerald-600" />
+      Saved
+    </span>
   );
 }
