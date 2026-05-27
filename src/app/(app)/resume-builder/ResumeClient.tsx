@@ -643,6 +643,198 @@ export function ResumeClient() {
               ))}
             </div>
           </section>
+
+          {/* Projects */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Projects</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.projects ?? []), { id: crypto.randomUUID(), name: "", description: "", url: "" }];
+                handleUpdateContent({ ...activeResume.content, projects: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {(activeResume.content.projects ?? []).map((proj, idx) => (
+                <div key={proj.id} className="p-3 border rounded-lg space-y-3 bg-muted/20 relative group">
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.projects ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, projects: items });
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                    Remove
+                  </button>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Name</Label>
+                      <Input className="h-7 text-xs" value={proj.name} onChange={(e) => {
+                        const items = [...(activeResume.content.projects ?? [])];
+                        items[idx] = { ...items[idx], name: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, projects: items });
+                      }} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Link</Label>
+                      <Input className="h-7 text-xs" placeholder="github.com/…" value={proj.url ?? ""} onChange={(e) => {
+                        const items = [...(activeResume.content.projects ?? [])];
+                        items[idx] = { ...items[idx], url: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, projects: items });
+                      }} />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]">Description</Label>
+                    <Textarea className="text-xs" rows={2} value={proj.description} onChange={(e) => {
+                      const items = [...(activeResume.content.projects ?? [])];
+                      items[idx] = { ...items[idx], description: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, projects: items });
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Certifications */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Certifications</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.certifications ?? []), { id: crypto.randomUUID(), name: "", issuer: "", date: "" }];
+                handleUpdateContent({ ...activeResume.content, certifications: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {(activeResume.content.certifications ?? []).map((cert, idx) => (
+                <div key={cert.id} className="p-3 border rounded-lg space-y-3 bg-muted/20 relative group">
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.certifications ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, certifications: items });
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                    Remove
+                  </button>
+                  <div className="space-y-1.5 pt-2">
+                    <Label className="text-[11px]">Name</Label>
+                    <Input className="h-7 text-xs" value={cert.name} onChange={(e) => {
+                      const items = [...(activeResume.content.certifications ?? [])];
+                      items[idx] = { ...items[idx], name: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, certifications: items });
+                    }} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Issuer</Label>
+                      <Input className="h-7 text-xs" value={cert.issuer} onChange={(e) => {
+                        const items = [...(activeResume.content.certifications ?? [])];
+                        items[idx] = { ...items[idx], issuer: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, certifications: items });
+                      }} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Date</Label>
+                      <Input className="h-7 text-xs" placeholder="2024" value={cert.date} onChange={(e) => {
+                        const items = [...(activeResume.content.certifications ?? [])];
+                        items[idx] = { ...items[idx], date: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, certifications: items });
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Awards */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Awards</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.awards ?? []), { id: crypto.randomUUID(), title: "", awarder: "", date: "" }];
+                handleUpdateContent({ ...activeResume.content, awards: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {(activeResume.content.awards ?? []).map((award, idx) => (
+                <div key={award.id} className="p-3 border rounded-lg space-y-3 bg-muted/20 relative group">
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.awards ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, awards: items });
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                    Remove
+                  </button>
+                  <div className="space-y-1.5 pt-2">
+                    <Label className="text-[11px]">Title</Label>
+                    <Input className="h-7 text-xs" value={award.title} onChange={(e) => {
+                      const items = [...(activeResume.content.awards ?? [])];
+                      items[idx] = { ...items[idx], title: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, awards: items });
+                    }} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Awarder</Label>
+                      <Input className="h-7 text-xs" value={award.awarder} onChange={(e) => {
+                        const items = [...(activeResume.content.awards ?? [])];
+                        items[idx] = { ...items[idx], awarder: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, awards: items });
+                      }} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Date</Label>
+                      <Input className="h-7 text-xs" placeholder="2023" value={award.date} onChange={(e) => {
+                        const items = [...(activeResume.content.awards ?? [])];
+                        items[idx] = { ...items[idx], date: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, awards: items });
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Languages */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Languages</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.languages ?? []), { id: crypto.randomUUID(), name: "", fluency: "" }];
+                handleUpdateContent({ ...activeResume.content, languages: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {(activeResume.content.languages ?? []).map((lang, idx) => (
+                <div key={lang.id} className="flex items-center gap-2 group">
+                  <Input className="h-7 text-xs flex-1" placeholder="Spanish" value={lang.name} onChange={(e) => {
+                    const items = [...(activeResume.content.languages ?? [])];
+                    items[idx] = { ...items[idx], name: e.target.value };
+                    handleUpdateContent({ ...activeResume.content, languages: items });
+                  }} />
+                  <Input className="h-7 text-xs flex-1" placeholder="Fluent" value={lang.fluency} onChange={(e) => {
+                    const items = [...(activeResume.content.languages ?? [])];
+                    items[idx] = { ...items[idx], fluency: e.target.value };
+                    handleUpdateContent({ ...activeResume.content, languages: items });
+                  }} />
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.languages ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, languages: items });
+                  }} className="text-muted-foreground hover:text-destructive text-xs px-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
             </div>
           )}
 

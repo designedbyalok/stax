@@ -35,6 +35,29 @@ export interface ResumeData {
     name: string;
     level: string;
   }>;
+  projects?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    url?: string;
+  }>;
+  certifications?: Array<{
+    id: string;
+    name: string;
+    issuer: string;
+    date: string;
+  }>;
+  languages?: Array<{
+    id: string;
+    name: string;
+    fluency: string;
+  }>;
+  awards?: Array<{
+    id: string;
+    title: string;
+    awarder: string;
+    date: string;
+  }>;
   design?: {
     template: string;
     themeColor: string;
