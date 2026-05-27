@@ -175,15 +175,13 @@ export function UnifiedDocumentsGrid({
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-between mb-6">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 text-sm font-medium text-foreground hover:bg-muted px-2 py-1.5 rounded-md transition-colors">
-              <ListFilter className="w-4 h-4 text-muted-foreground" />
-              <span>
-                {filter === "ALL" && "Last Updated"}
-                {filter === "GENERATED" && "Generated Resumes"}
-                {filter === "UPLOADED" && "Uploaded Files"}
-              </span>
-            </button>
+          <DropdownMenuTrigger className="flex items-center gap-2 text-sm font-medium text-foreground hover:bg-muted px-2 py-1.5 rounded-md transition-colors outline-none">
+            <ListFilter className="w-4 h-4 text-muted-foreground" />
+            <span>
+              {filter === "ALL" && "Last Updated"}
+              {filter === "GENERATED" && "Generated Resumes"}
+              {filter === "UPLOADED" && "Uploaded Files"}
+            </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
             <DropdownMenuItem onClick={() => setFilter("ALL")}>

@@ -106,10 +106,8 @@ export function DocumentCard({
         {/* Dropdown Menu - Top Left (Stop propagation so it doesn't open preview) */}
         <div className="absolute top-2 left-2 z-20" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm text-foreground">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+            <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors outline-none disabled:pointer-events-none disabled:opacity-50 h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm text-foreground">
+              <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-40">
               <DropdownMenuItem onClick={() => onPreview(doc)}>

@@ -59,7 +59,7 @@ export default function RootLayout({
         jetbrainsMono.variable
       )}
     >
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         <Providers>
           {children}
           <Toaster />

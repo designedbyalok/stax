@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Download, Printer, Save, FileUp, Sparkles, ArrowLeft } from "lucide-react";
+import { Loader2, Download, Printer, Save, FileUp, Sparkles, ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ApiResume, ResumeData } from "@/lib/types/resume";
 import { ResumePreview } from "./ResumePreview";
+import { ResumeLanding } from "./ResumeLanding";
 
 export function ResumeClient() {
   const queryClient = useQueryClient();
@@ -106,28 +107,17 @@ export function ResumeClient() {
 
   const [gridSize, setGridSize] = useState<"small" | "medium" | "large">("medium");
 
-  if (resumesQuery.isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   React.useEffect(() => {
     if (resumesQuery.data) {
-      if (!resumeId) {
-        // No ID, go back to documents
-        router.push("/documents");
-        return;
-      }
-      const resume = resumesQuery.data.find(r => r.id === resumeId);
-      if (resume) {
-        // Only set if we haven't already set this exact resume to avoid overwriting edits
-        setActiveResume((current) => current?.id === resume.id ? current : resume);
-      } else {
-        toast.error("Resume not found");
-        router.push("/documents");
+      if (resumeId) {
+        const resume = resumesQuery.data.find(r => r.id === resumeId);
+        if (resume) {
+          // Only set if we haven't already set this exact resume to avoid overwriting edits
+          setActiveResume((current) => current?.id === resume.id ? current : resume);
+        } else {
+          toast.error("Resume not found");
+          router.push("/documents");
+        }
       }
     }
   }, [resumeId, resumesQuery.data, router]);
@@ -137,8 +127,19 @@ export function ResumeClient() {
     setActiveResume({ ...activeResume, content: newContent });
   };
 
-  if (resumesQuery.isLoading || !activeResume) {
-    
+  if (resumesQuery.isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!resumeId) {
+    return <ResumeLanding />;
+  }
+
+  if (!activeResume) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
