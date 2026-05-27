@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
@@ -13,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { api, ApiDocument } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { PdfPreview } from "./PdfPreview";
+import { DocxPreview } from "./DocxPreview";
 
 function formatSize(bytes: number) {
   if (!bytes || Number.isNaN(bytes)) return "—";
@@ -35,11 +38,11 @@ const EXT_TINT: Record<string, { bg: string; text: string }> = {
   FILE: { bg: "bg-muted", text: "text-foreground/60" },
 };
 
-// Document grid card. The body is a static file-type badge — we
-// deliberately do NOT render a live PDF/DOCX preview per card,
-// since that spins up a pdfjs web worker + fetches + parses the
-// document for every card on the page. Real previews open in the
-// modal (one at a time) via onPreview.
+// Document grid card with a real rendered thumbnail. The live
+// preview (PdfPreview / DocxPreview) is only mounted once the card
+// scrolls into view — so opening the Documents page doesn't spin up
+// a pdfjs worker per card; only visible cards render. Full-size
+// previews still open one-at-a-time in the modal via onPreview.
 export function DocumentCard({
   doc,
   type,
@@ -52,9 +55,44 @@ export function DocumentCard({
   onPreview: (doc: ApiDocument) => void;
 }) {
   const queryClient = useQueryClient();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  const [thumbWidth, setThumbWidth] = useState(300);
+
   const ext = extensionOf(doc);
   const tint = EXT_TINT[ext] || EXT_TINT.FILE;
   const tagLabel = type === "RESUME" ? "Resume" : "Cover Letter";
+  const canRenderThumb = ext === "PDF" || ext === "DOCX";
+
+  // Lazy-mount the thumbnail when the card first enters the viewport.
+  useEffect(() => {
+    if (!canRenderThumb || inView) return;
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" } // start a little before it's visible
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [canRenderThumb, inView]);
+
+  // Track the thumbnail container width so the PDF page renders crisply.
+  useEffect(() => {
+    const el = thumbRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) setThumbWidth(entry.contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const deleteMutation = useMutation({
     mutationFn: () => api.deleteDocument(doc.id),
@@ -80,6 +118,7 @@ export function DocumentCard({
 
   return (
     <div
+      ref={cardRef}
       className="group flex flex-col cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5"
       onClick={() => onPreview(doc)}
     >
@@ -91,28 +130,31 @@ export function DocumentCard({
           </span>
         </div>
 
-        {/* Doc-shaped body with static file-type badge */}
+        {/* Doc-shaped body: real thumbnail once in view, else a badge */}
         <div
+          ref={thumbRef}
           className={cn(
-            "relative w-full aspect-[8.5/11] flex items-center justify-center overflow-hidden",
+            "relative w-full aspect-[8.5/11] overflow-hidden flex items-center justify-center",
             tint.bg
           )}
         >
-          <div
-            className={cn(
-              "flex flex-col items-center justify-center gap-2 px-6 py-5 rounded-2xl bg-background/60 shadow-sm backdrop-blur-md border border-white/20",
-              tint.text
-            )}
-          >
-            <div className="text-3xl font-bold tracking-tighter">{ext}</div>
-            <div className="text-[10px] uppercase tracking-widest font-semibold opacity-60">
-              {formatSize(doc.sizeBytes)}
+          {canRenderThumb && inView ? (
+            <div className="absolute inset-0 pointer-events-none select-none">
+              {ext === "PDF" ? (
+                <PdfPreview documentId={doc.id} width={thumbWidth} isThumbnail />
+              ) : (
+                <div className="w-full h-full overflow-hidden">
+                  <DocxPreview documentId={doc.id} />
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            <FileBadge ext={ext} sizeLabel={formatSize(doc.sizeBytes)} tintText={tint.text} />
+          )}
         </div>
 
         {/* Glass footer overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 pt-8 bg-gradient-to-t from-background/90 via-background/60 to-transparent backdrop-blur-[2px]">
+        <div className="absolute bottom-0 left-0 right-0 p-4 pt-8 z-10 bg-gradient-to-t from-background/90 via-background/60 to-transparent backdrop-blur-[2px]">
           <h3
             className="font-semibold text-sm truncate text-foreground drop-shadow-sm pr-8"
             title={doc.name}
@@ -155,6 +197,30 @@ export function DocumentCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function FileBadge({
+  ext,
+  sizeLabel,
+  tintText,
+}: {
+  ext: string;
+  sizeLabel: string;
+  tintText: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center gap-2 px-6 py-5 rounded-2xl bg-background/60 shadow-sm backdrop-blur-md border border-white/20",
+        tintText
+      )}
+    >
+      <div className="text-3xl font-bold tracking-tighter">{ext}</div>
+      <div className="text-[10px] uppercase tracking-widest font-semibold opacity-60">
+        {sizeLabel}
       </div>
     </div>
   );
