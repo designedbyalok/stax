@@ -3,7 +3,17 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
-  serverExternalPackages: ["pdfjs-dist", "pdf-parse"],
+  // Keep heavy, server-only parsers out of the Webpack bundle —
+  // Next loads them at runtime via require() instead of analyzing
+  // + bundling them, which speeds up builds.
+  serverExternalPackages: [
+    "pdfjs-dist",
+    "pdf-parse",
+    "cheerio",
+    "mammoth",
+    "@googleapis/calendar",
+    "google-auth-library",
+  ],
   // Tree-shake icon + util libraries more aggressively. Next compiles them
   // as if you wrote per-icon imports, which shrinks bundles + speeds up
   // RSC module-graph analysis during build.

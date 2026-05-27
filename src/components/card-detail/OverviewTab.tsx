@@ -35,14 +35,20 @@ export function OverviewTab({
 }) {
   const sourceLabel = card.sourcePlatform ? SOURCE_LABEL[card.sourcePlatform] : null;
 
+  // The board/list payload omits the heavy AI fields (bullets,
+  // responsibilities, qualifications, keywords) to stay light, so
+  // read them from the full `detail` record once it loads, falling
+  // back to whatever `card` happens to carry.
+  const ai = detail ?? card;
+
   return (
     <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
       <JobTldrBlock
-        headline={card.tldrHeadline}
-        bullets={card.tldrBullets}
-        responsibilities={card.responsibilities}
-        qualifications={card.qualifications}
-        keywords={card.keywords}
+        headline={ai.tldrHeadline}
+        bullets={ai.tldrBullets}
+        responsibilities={ai.responsibilities}
+        qualifications={ai.qualifications}
+        keywords={ai.keywords}
       />
 
       <div className="grid grid-cols-2 gap-3">

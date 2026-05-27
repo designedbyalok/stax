@@ -1,5 +1,6 @@
 import "server-only";
 import prisma from "@/lib/db";
+import { APPLICATION_LIST_SELECT } from "@/lib/application-select";
 
 // Server-side data loaders that mirror the JSON shapes returned by the
 // matching /api routes. Used to prefetch React Query caches in server
@@ -9,9 +10,13 @@ import prisma from "@/lib/db";
 // any divergence shows up as a flash when the client re-fetches.
 
 export async function loadApplications(userId: string) {
+  // Mirror the /api/applications GET shape exactly (shared LIST_SELECT)
+  // so the SSR-prefetched cache matches the client payload and stays
+  // small — heavy text/JSON columns are excluded.
   return prisma.application.findMany({
     where: { userId, deletedAt: null },
     orderBy: [{ columnId: "asc" }, { position: "asc" }],
+    select: APPLICATION_LIST_SELECT,
   });
 }
 

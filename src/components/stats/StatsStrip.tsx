@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNowStrict } from "date-fns";
 import { api, ApiApplication, ApiColumn } from "@/lib/api-client";
 import { StatCard } from "./StatCard";
 

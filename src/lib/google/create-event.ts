@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { calendar as googleCalendar } from "@googleapis/calendar";
 import { getGoogleOAuthClient } from "./calendar-auth";
 import { decrypt } from "@/lib/crypto/encrypt";
 import prisma from "@/lib/db";
@@ -31,7 +31,7 @@ export async function createGoogleCalendarEvent(args: CreateEventArgs) {
   const oauth2Client = getGoogleOAuthClient();
   oauth2Client.setCredentials({ refresh_token: refreshToken });
 
-  const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+  const calendar = googleCalendar({ version: "v3", auth: oauth2Client });
 
   const eventRequestBody: any = {
     summary: args.title,

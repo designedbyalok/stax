@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { OAuth2Client } from "google-auth-library";
 
 // We share the same OAuth client with Auth.js v5 (AUTH_GOOGLE_ID/SECRET).
 // Older `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` names are kept as a fallback
@@ -29,7 +29,11 @@ export function getGoogleOAuthClient() {
       "Google OAuth env missing: set AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET"
     );
   }
-  return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
+  return new OAuth2Client({
+    clientId,
+    clientSecret,
+    redirectUri,
+  });
 }
 
 export function getGoogleAuthUrl() {

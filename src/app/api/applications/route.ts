@@ -1,18 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
 import { nextPositionAfter } from "@/lib/positions";
 import { getAverageColor } from "fast-average-color-node";
 import { generateJobTldr } from "@/lib/ai/tldr";
+import { APPLICATION_LIST_SELECT } from "@/lib/application-select";
 
 export async function GET() {
   const authResult = await requireUserId();
   if (!authResult.ok) return authResult.response;
-
   const applications = await prisma.application.findMany({
     where: { userId: authResult.userId, deletedAt: null },
     orderBy: [{ columnId: "asc" }, { position: "asc" }],
+    select: APPLICATION_LIST_SELECT,
   });
 
   return NextResponse.json({ applications });
@@ -91,24 +92,22 @@ export async function POST(request: Request) {
     select: { position: true },
   });
 
-  // Run the two best-effort enrichments in parallel so we don't stack
-  // their latency on top of each other: average-color from the logo and
-  // Gemini-generated TL;DR from the job description. Both resolve to
-  // null on failure so creation never blocks on them.
-  const [logoColor, tldr] = await Promise.all([
-    parsed.data.companyLogoUrl
-      ? getAverageColor(parsed.data.companyLogoUrl)
-          .then((c) => c.hex)
-          .catch((e) => {
-            console.error("Failed to get average color for logo:", e);
-            return null;
-          })
-      : Promise.resolve(null),
-    parsed.data.jobDescription
-      ? generateJobTldr(parsed.data.jobDescription)
-      : Promise.resolve(null),
-  ]);
+  // Average-color from the logo is cheap + drives the card tint, so
+  // we keep it inline. (Resolves to null on failure.)
+  const logoColor = parsed.data.companyLogoUrl
+    ? await getAverageColor(parsed.data.companyLogoUrl)
+        .then((c) => c.hex)
+        .catch((e) => {
+          console.error("Failed to get average color for logo:", e);
+          return null;
+        })
+    : null;
 
+  // The card is created immediately with empty AI fields — we do NOT
+  // block the response on Gemini (it can take several seconds). The
+  // TL;DR is generated in the background via after() and the row is
+  // updated when it resolves; the client picks it up on its next
+  // ["applications"] refetch / when the card detail is opened.
   const application = await prisma.application.create({
     data: {
       userId,
@@ -124,11 +123,6 @@ export async function POST(request: Request) {
       companyLogoUrl: parsed.data.companyLogoUrl || null,
       logoColor,
       sourcePlatform: parsed.data.sourcePlatform || "MANUAL",
-      tldrHeadline: tldr?.headline ?? null,
-      tldrBullets: tldr?.bullets ?? undefined,
-      responsibilities: tldr?.responsibilities ?? [],
-      qualifications: tldr?.qualifications ?? [],
-      keywords: tldr?.keywords ?? [],
       activities: {
         create: {
           type: "CREATED",
@@ -137,6 +131,30 @@ export async function POST(request: Request) {
       },
     },
   });
+
+  // Background TL;DR generation — runs after the response is sent.
+  if (parsed.data.jobDescription) {
+    const appId = application.id;
+    const jd = parsed.data.jobDescription;
+    after(async () => {
+      try {
+        const tldr = await generateJobTldr(jd);
+        if (!tldr) return;
+        await prisma.application.update({
+          where: { id: appId },
+          data: {
+            tldrHeadline: tldr.headline,
+            tldrBullets: tldr.bullets,
+            responsibilities: tldr.responsibilities,
+            qualifications: tldr.qualifications,
+            keywords: tldr.keywords,
+          },
+        });
+      } catch (e) {
+        console.error("Async TL;DR generation failed:", e);
+      }
+    });
+  }
 
   return NextResponse.json({ application }, { status: 201 });
 }

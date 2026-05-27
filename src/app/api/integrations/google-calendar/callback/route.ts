@@ -3,7 +3,6 @@ import { getGoogleOAuthClient } from "@/lib/google/calendar-auth";
 import { encrypt } from "@/lib/crypto/encrypt";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
-import { google } from "googleapis";
 
 export async function GET(req: NextRequest) {
   const auth = await requireUserId();
@@ -28,13 +27,22 @@ export async function GET(req: NextRequest) {
       console.warn("No refresh token received. We may need to force re-consent.");
     }
 
-    // Get user email from google to store in integration
-    const oauth2 = google.oauth2({
-      auth: oauth2Client,
-      version: "v2",
-    });
-    const userInfo = await oauth2.userinfo.get();
-    const email = userInfo.data.email || "Unknown";
+    // Get user email from Google's userinfo endpoint. A plain fetch
+    // with the access token avoids pulling in the @googleapis/oauth2
+    // package just for one field.
+    let email = "Unknown";
+    try {
+      const infoRes = await fetch(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+      );
+      if (infoRes.ok) {
+        const info = (await infoRes.json()) as { email?: string };
+        email = info.email || "Unknown";
+      }
+    } catch (e) {
+      console.warn("Failed to fetch Google userinfo:", e);
+    }
 
     const refreshToken = tokens.refresh_token || tokens.access_token || "";
     
