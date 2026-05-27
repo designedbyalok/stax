@@ -1,3 +1,13 @@
+// Shape of Application.matchDetails (written by the AI Tailor flow).
+export type MatchDetails = {
+  score: number;
+  summary: string;
+  matchedSkills: string[];
+  missingKeywords: string[];
+  suggestions: string[];
+  generatedAt: string;
+};
+
 export type ApiApplication = {
   id: string;
   userId: string;
@@ -289,6 +299,11 @@ export const api = {
     }),
   deleteApplication: (id: string) =>
     request<{ ok: true }>(`/api/applications/${id}`, { method: "DELETE" }),
+  tailorApplication: (id: string) =>
+    request<{ matchScore: number; matchDetails: MatchDetails }>(
+      `/api/applications/${id}/tailor`,
+      { method: "POST" }
+    ),
   moveApplication: (id: string, data: { columnId: string; beforeId?: string | null }) =>
     request<{ ok: true }>(`/api/applications/${id}/move`, {
       method: "POST",
