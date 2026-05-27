@@ -7,6 +7,7 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
 
 // Self-hosted worker — same origin, no CORS, no flaky CDN. The file is
 // shipped from public/pdf.worker.min.mjs (copied out of node_modules).
@@ -15,9 +16,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 export default function PdfPreviewClient({
   documentId,
   width = 340,
+  isThumbnail = false,
 }: {
   documentId: string;
   width?: number;
+  isThumbnail?: boolean;
 }) {
   const [numPages, setNumPages] = useState<number>();
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -32,8 +35,8 @@ export default function PdfPreviewClient({
   const signedUrl = urlQuery.data;
 
   return (
-    <div className="flex flex-col h-full bg-muted/20 border rounded-md overflow-hidden">
-      <div className="flex-1 overflow-auto flex justify-center p-4 bg-black/5">
+    <div className={cn("flex flex-col h-full", !isThumbnail && "bg-muted/20 border rounded-md overflow-hidden")}>
+      <div className={cn("flex-1 flex justify-center", isThumbnail ? "overflow-hidden p-0 m-0" : "overflow-auto p-4 bg-black/5")}>
         {urlQuery.isLoading || !signedUrl ? (
           <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin mb-2" />
@@ -62,35 +65,47 @@ export default function PdfPreviewClient({
               </div>
             }
           >
-            {!loadError && numPages && Array.from(new Array(numPages), (el, index) => (
+            {!loadError && numPages && (isThumbnail ? (
               <Page
-                key={`page_${index + 1}`}
-                pageNumber={index + 1}
+                pageNumber={1}
                 width={width}
                 renderTextLayer={false}
-                renderAnnotationLayer={true}
-                className="shadow-sm border rounded-sm overflow-hidden mb-6 max-w-full"
+                renderAnnotationLayer={false}
+                className="max-w-full"
               />
+            ) : (
+              Array.from(new Array(numPages), (el, index) => (
+                <Page
+                  key={`page_${index + 1}`}
+                  pageNumber={index + 1}
+                  width={width}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={true}
+                  className="shadow-sm border rounded-sm overflow-hidden mb-6 max-w-full"
+                />
+              ))
             ))}
           </Document>
         )}
       </div>
-      <div className="p-2 border-t bg-background flex items-center justify-between shrink-0">
-        <span className="text-[10px] text-muted-foreground uppercase font-medium">
-          {numPages ? `Page 1 of ${numPages}` : "Preview"}
-        </span>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-7 text-[11px] gap-1 px-2"
-          disabled={!signedUrl}
-          nativeButton={!signedUrl}
-          render={signedUrl ? <a href={signedUrl} target="_blank" rel="noopener noreferrer" /> : undefined}
-        >
-          Open full
-          <ExternalLink className="h-3 w-3" />
-        </Button>
-      </div>
+      {!isThumbnail && (
+        <div className="p-2 border-t bg-background flex items-center justify-between shrink-0">
+          <span className="text-[10px] text-muted-foreground uppercase font-medium">
+            {numPages ? `Page 1 of ${numPages}` : "Preview"}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-7 text-[11px] gap-1 px-2"
+            disabled={!signedUrl}
+            nativeButton={!signedUrl}
+            render={signedUrl ? <a href={signedUrl} target="_blank" rel="noopener noreferrer" /> : undefined}
+          >
+            Open full
+            <ExternalLink className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

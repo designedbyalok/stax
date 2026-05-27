@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
@@ -14,10 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { api, ApiDocument } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
-
-// Card layout inspired by the documents-grid reference: prominent
-// file-type badge in the center, title + metadata below, type tag
-// + ⋯ menu at the bottom, owner/time footer outside the card.
+import { PdfPreview } from "./PdfPreview";
+import { DocxPreview } from "./DocxPreview";
 
 function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -31,18 +30,11 @@ function extensionOf(doc: ApiDocument): string {
   return ext && ext.length <= 5 ? ext : "FILE";
 }
 
-// File-type → soft tint (bg + text). Designed against the warm
-// canvas palette; matches the reference's softly-tinted badges.
 const EXT_TINT: Record<string, { bg: string; text: string }> = {
   PDF:  { bg: "bg-rose-50 dark:bg-rose-950/40",     text: "text-rose-700 dark:text-rose-300" },
   DOCX: { bg: "bg-sky-50 dark:bg-sky-950/40",       text: "text-sky-700 dark:text-sky-300" },
   TXT:  { bg: "bg-violet-50 dark:bg-violet-950/40", text: "text-violet-700 dark:text-violet-300" },
   FILE: { bg: "bg-muted",                            text: "text-foreground/70" },
-};
-
-const TYPE_PILL: Record<string, { label: string; cls: string }> = {
-  RESUME:       { label: "Resume",       cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
-  COVER_LETTER: { label: "Cover Letter", cls: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300" },
 };
 
 export function DocumentCard({
@@ -58,14 +50,20 @@ export function DocumentCard({
   onPreview: (doc: ApiDocument) => void;
 }) {
   const queryClient = useQueryClient();
-  const ext = extensionOf(doc);
-  const tint = EXT_TINT[ext] ?? EXT_TINT.FILE;
-  const pill = TYPE_PILL[type];
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(300);
 
-  const usage =
-    (type === "RESUME"
-      ? doc._count?.resumeApplications
-      : doc._count?.coverLetterApplications) ?? 0;
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   const deleteMutation = useMutation({
     mutationFn: () => api.deleteDocument(doc.id),
@@ -87,129 +85,83 @@ export function DocumentCard({
     }
   }
 
+  const ext = extensionOf(doc);
+  const tint = EXT_TINT[ext] || EXT_TINT.FILE;
+  const tagLabel = type === "RESUME" ? "Uploaded Resume" : "Cover Letter";
+
   return (
-    <div className="group flex flex-col gap-2">
-      <div
-        onClick={() => onPreview(doc)}
-        className={cn(
-          "relative cursor-pointer rounded-xl border bg-card p-4 flex flex-col gap-3",
-          "transition-all duration-200 ease-out",
-          "hover:border-foreground/15 hover:shadow-[var(--shadow-pop)]"
-        )}
-      >
-        {/* Top-right corner: primary badge (optional) */}
-        {doc.isPrimary && (
-          <span className="absolute top-3 right-3 inline-flex items-center px-2 py-0.5 rounded-md border bg-background text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Primary
+    <div 
+      className="group flex flex-col gap-2 cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02]"
+      onClick={() => onPreview(doc)}
+    >
+      <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm group-hover:shadow-md transition-shadow">
+        
+        {/* Type Badge - Top Right */}
+        <div className="absolute top-3 right-3 z-20">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide shadow-sm backdrop-blur-md bg-white/80 dark:bg-black/60 text-foreground border border-black/5 dark:border-white/10">
+            {tagLabel}
           </span>
-        )}
-
-        {/* File-type icon block */}
-        <div className="flex items-center justify-center py-4">
-          <div
-            className={cn(
-              "rounded-xl border border-foreground/[0.06] w-[120px] h-[88px]",
-              "grid place-items-center",
-              tint.bg
-            )}
-          >
-            <span
-              className={cn(
-                "inline-flex items-center px-2.5 py-0.5 rounded-full bg-background/80 backdrop-blur-sm text-[11px] font-semibold tracking-wide ring-1 ring-foreground/5",
-                tint.text
-              )}
-            >
-              {ext}
-            </span>
-          </div>
         </div>
 
-        {/* Title + metadata */}
-        <div className="space-y-0.5">
-          <h3
-            className="text-[14px] font-semibold text-foreground truncate"
-            title={doc.name}
-          >
-            {doc.name}
-          </h3>
-          <p
-            className="text-[12px] text-muted-foreground truncate"
-            title={doc.filename}
-          >
-            {ext} · {formatSize(doc.sizeBytes)}
-          </p>
-        </div>
-
-        {/* Bottom row: type tag + menu */}
-        <div className="flex items-center justify-between pt-3 border-t">
-          <span
-            className={cn(
-              "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium",
-              pill.cls
-            )}
-          >
-            {pill.label}
-          </span>
-
+        {/* Dropdown Menu - Top Left (Stop propagation so it doesn't open preview) */}
+        <div className="absolute top-2 left-2 z-20" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <button
-                  type="button"
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-7 h-7 grid place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                  title="More actions"
-                  aria-label="More actions"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-              }
-            />
-            <DropdownMenuContent
-              align="end"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPreview(doc);
-                }}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm text-foreground">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-40">
+              <DropdownMenuItem onClick={() => onPreview(doc)}>
+                <Eye className="mr-2 h-4 w-4" /> Preview
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDownload}>
-                <Download className="mr-2 h-4 w-4" />
-                Download
+                <Download className="mr-2 h-4 w-4" /> Download
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => {
-                  if (
-                    confirm(
-                      `Delete "${doc.name}"? This can't be undone.`
-                    )
-                  ) {
-                    deleteMutation.mutate();
-                  }
-                }}
                 className="text-destructive focus:text-destructive"
+                onClick={() => deleteMutation.mutate()}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
 
-      {/* Footer outside the card */}
-      <div className="flex items-center justify-between px-1 text-[12px] text-muted-foreground">
-        <span className="truncate">{ownerName ?? "You"}</span>
-        <span className="shrink-0">
-          {usage > 0 && `Used on ${usage} · `}
-          {formatDistanceToNow(new Date(doc.updatedAt), { addSuffix: true })}
-        </span>
+        {/* Aspect Ratio Container for 8.5x11 */}
+        <div ref={containerRef} className={cn("relative w-full aspect-[8.5/11] flex flex-col items-center justify-center overflow-hidden", tint.bg)}>
+          {/* We will render a PDF Preview if it's a PDF, otherwise an icon */}
+          {ext === "PDF" ? (
+             <div className="w-full h-full pointer-events-none select-none flex items-start justify-center overflow-hidden">
+                <PdfPreview documentId={doc.id} width={containerWidth} isThumbnail={true} />
+             </div>
+          ) : ext === "DOCX" ? (
+             <div className="w-full h-full pointer-events-none select-none opacity-90 scale-[1.01] flex items-center justify-center p-4">
+                <DocxPreview documentId={doc.id} />
+             </div>
+          ) : (
+            <div className={cn("flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-background/60 shadow-sm backdrop-blur-md border border-white/20", tint.text)}>
+              <div className="text-3xl font-bold tracking-tighter">
+                {ext}
+              </div>
+              <div className="text-[10px] uppercase tracking-widest font-semibold opacity-60">
+                {formatSize(doc.size)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Glassmorphic Footer Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 pt-8 bg-gradient-to-t from-background/90 via-background/60 to-transparent backdrop-blur-[2px]">
+          <h3 className="font-semibold text-sm truncate text-foreground drop-shadow-sm">
+            {doc.filename}
+          </h3>
+          <p className="text-xs text-foreground/80 mt-0.5 flex items-center justify-between font-medium drop-shadow-sm">
+            <span>{formatDistanceToNow(new Date(doc.updatedAt), { addSuffix: true })}</span>
+            <span>{ownerName || "You"}</span>
+          </p>
+        </div>
       </div>
     </div>
   );

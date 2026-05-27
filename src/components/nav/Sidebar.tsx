@@ -14,6 +14,7 @@ import {
   BookOpen,
   MessageSquare,
   Mail,
+  PenTool,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -48,6 +49,7 @@ const NAV_WORKSPACE: Item[] = [
   { href: "/interviews", label: "Interviews", icon: Calendar, countKey: "interviews" },
   { href: "/reminders", label: "Reminders", icon: Bell, countKey: "reminders" },
   { href: "/documents", label: "Documents", icon: FileText },
+  { href: "/resume-builder", label: "Resume Builder", icon: PenTool },
 ];
 
 const NAV_LIBRARY: Item[] = [

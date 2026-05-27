@@ -16,6 +16,6 @@ const PdfPreviewClient = dynamic(
   }
 );
 
-export function PdfPreview({ documentId, width }: { documentId: string, width?: number }) {
-  return <PdfPreviewClient documentId={documentId} width={width} />;
+export function PdfPreview({ documentId, width, isThumbnail }: { documentId: string, width?: number, isThumbnail?: boolean }) {
+  return <PdfPreviewClient documentId={documentId} width={width} isThumbnail={isThumbnail} />;
 }

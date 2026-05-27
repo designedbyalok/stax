@@ -34,6 +34,7 @@ model User {
   googleIntegration GoogleIntegration?
   questions     InterviewQuestion[]
   starStories   StarStory[]
+  resumes       Resume[]
 }
 
 model Account {
@@ -401,4 +402,17 @@ model InterviewChecklist {
   reflection    String?     @db.Text  // post-interview reflection
   questionsToAsk Json?      // [{ text: string }]
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+// --- V2: Resume Builder ---
+model Resume {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String   @default("My Resume")
+  content     Json     // Stores Basics, Work, Education, Skills
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
 }
