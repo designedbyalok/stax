@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { MoreHorizontal, Plus } from "lucide-react";
@@ -9,9 +10,10 @@ import { Pip } from "@/components/ui/pip";
 import { cn } from "@/lib/utils";
 
 interface ColumnProps {
-  column: { id: string; title: string; color?: string };
+  column: { id: string; name: string; color?: string | null };
   cards: ApiApplication[];
-  onCardClick: (card: ApiApplication) => void;
+  // Stable callback so React.memo holds across drags.
+  onCardSelect: (id: string) => void;
   showEmptyHint?: boolean;
   showPlaceholders?: boolean;
   onAddCard?: () => void;
@@ -36,10 +38,10 @@ const PLACEHOLDERS = [
   { roleTitle: "Frontend Engineer", companyName: "Vercel", location: "San Francisco" },
 ];
 
-export function Column({
+function ColumnImpl({
   column,
   cards,
-  onCardClick,
+  onCardSelect,
   showEmptyHint,
   showPlaceholders,
   onAddCard,
@@ -49,7 +51,7 @@ export function Column({
     data: { type: "Column", column },
   });
 
-  const stageSlug = STAGE_BY_NAME[column.title.toLowerCase().trim()];
+  const stageSlug = STAGE_BY_NAME[column.name.toLowerCase().trim()];
   const pipColor = stageSlug
     ? undefined // pip reads from --tint-strong via [data-stage]
     : column.color || "hsl(var(--muted-foreground))";
@@ -62,7 +64,7 @@ export function Column({
       <div className="flex items-center gap-2 px-1 pb-1 pt-0.5 group/colhead">
         <Pip color={pipColor} />
         <span className="text-[14px] font-semibold text-foreground tracking-[-0.005em]">
-          {column.title}
+          {column.name}
         </span>
         <span className="text-[12px] text-muted-foreground/80 font-medium tabular-nums">
           {cards.length}
@@ -100,11 +102,7 @@ export function Column({
           strategy={verticalListSortingStrategy}
         >
           {cards.map((card) => (
-            <KanbanCard
-              key={card.id}
-              card={card}
-              onClick={() => onCardClick(card)}
-            />
+            <KanbanCard key={card.id} card={card} onSelect={onCardSelect} />
           ))}
         </SortableContext>
 
@@ -130,6 +128,12 @@ export function Column({
     </div>
   );
 }
+
+// Memoized so a drag on one column doesn't re-render the others.
+// Relies on Board passing a stable `column` (the cached ApiColumn),
+// stable `cards` arrays (from the memoized cardsByColumn map), and a
+// stable `onCardSelect`.
+export const Column = memo(ColumnImpl);
 
 function PlaceholderCard({
   roleTitle,

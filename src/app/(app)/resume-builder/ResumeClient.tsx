@@ -168,9 +168,13 @@ export function ResumeClient() {
       const opt = {
         margin: 0,
         filename: `${activeResume.content.basics.name || "Resume"}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "jpeg" as const, quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+        jsPDF: {
+          unit: "in" as const,
+          format: "letter" as const,
+          orientation: "portrait" as const,
+        },
       };
 
       // Generate the PDF as a Blob

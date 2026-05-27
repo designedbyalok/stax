@@ -1,10 +1,15 @@
 export interface ResumeData {
   basics: {
     name: string;
+    /** JSON-Resume style job label (e.g. "Product Designer"). */
+    label?: string;
+    /** Personal site / portfolio URL (JSON-Resume `url`). */
+    url?: string;
     email: string;
     phone: string;
     location: string;
-    headline: string;
+    /** Primary title line. Optional — `label` may be used instead. */
+    headline?: string;
     summary: string;
   };
   work: Array<{

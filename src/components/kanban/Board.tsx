@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -25,6 +25,10 @@ import { ApplyCheckpointModal } from "@/components/apply-checkpoint/ApplyCheckpo
 import { Skeleton } from "@/components/ui/skeleton";
 
 export type Application = ApiApplication;
+
+// Stable empty-array reference so empty columns get the same `cards`
+// prop identity across renders (a fresh `[]` would defeat memo).
+const EMPTY_CARDS: ApiApplication[] = [];
 
 export default function Board() {
   const queryClient = useQueryClient();
@@ -89,6 +93,13 @@ export default function Board() {
     for (const list of map.values()) list.sort((a, b) => a.position - b.position);
     return map;
   }, [filteredApps, columnsQuery.data]);
+
+  // Stable handler passed down to every Column/KanbanCard so memoized
+  // cards don't re-render when the board re-renders (e.g. mid-drag).
+  const handleCardSelect = useCallback(
+    (id: string) => setSelectedCardId(id),
+    [setSelectedCardId]
+  );
 
   const selectedCard =
     applicationsQuery.data?.find((a) => a.id === selectedCardId) ?? null;
@@ -223,9 +234,9 @@ export default function Board() {
           {visibleColumns.map((col) => (
             <Column
               key={col.id}
-              column={{ id: col.id, title: col.name, color: col.color }}
-              cards={cardsByColumn.get(col.id) ?? []}
-              onCardClick={(card) => setSelectedCardId(card.id)}
+              column={col}
+              cards={cardsByColumn.get(col.id) ?? EMPTY_CARDS}
+              onCardSelect={handleCardSelect}
               showEmptyHint={!hasCards && isFirstColumn(col)}
               showPlaceholders={!hasCards && isFirstColumn(col)}
             />

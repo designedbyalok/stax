@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  typescript: { ignoreBuildErrors: true },
+  // Type errors now fail the build — the codebase is type-clean, so
+  // keep it that way and catch regressions at build time.
+  typescript: { ignoreBuildErrors: false },
   // Keep heavy, server-only parsers out of the Webpack bundle —
   // Next loads them at runtime via require() instead of analyzing
   // + bundling them, which speeds up builds.

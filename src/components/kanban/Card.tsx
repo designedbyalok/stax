@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ArrowRight, Globe, MapPin } from "lucide-react";
@@ -13,7 +14,10 @@ import { AINote } from "@/components/ui/ai-note";
 interface CardProps {
   card: ApiApplication;
   isOverlay?: boolean;
-  onClick?: () => void;
+  // Stable callback (id) instead of a per-render () => void closure,
+  // so React.memo can keep untouched cards from re-rendering during
+  // a drag.
+  onSelect?: (id: string) => void;
 }
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -28,7 +32,7 @@ const SOURCE_LABEL: Record<string, string> = {
 
 const DAY = 24 * 60 * 60 * 1000;
 
-export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
+function KanbanCardImpl({ card, isOverlay, onSelect }: CardProps) {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } =
     useSortable({
       id: card.id,
@@ -77,7 +81,7 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
       style={style}
       {...(isOverlay ? {} : attributes)}
       {...(isOverlay ? {} : listeners)}
-      onClick={onClick}
+      onClick={onSelect ? () => onSelect(card.id) : undefined}
       className={cn(
         "group relative isolate bg-card text-card-foreground rounded-[10px] border border-border",
         "transition-[border-color,background-color,box-shadow] duration-200 ease-out",
@@ -164,6 +168,10 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
     </div>
   );
 }
+
+// Memoized: with a stable `card` (from the query cache) and a stable
+// `onSelect`, dragging one card no longer re-renders the whole board.
+export const KanbanCard = memo(KanbanCardImpl);
 
 // ─────────────────────────────────────────────────────────────
 // Helpers

@@ -19,10 +19,8 @@ export function DocumentsPage() {
   const [viewByApp, setViewByApp] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<ApiDocument | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["documents", tab],
-    queryFn: () => api.listDocuments(tab).then((res) => res.documents),
-  });
+  // Fetching lives in <UnifiedDocumentsGrid> (which handles the "ALL"
+  // tab itself); no list query is needed at this level.
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-background">
@@ -79,7 +77,7 @@ export function DocumentsPage() {
       <UploadModal
         open={uploadOpen}
         onOpenChange={setUploadOpen}
-        defaultType={tab}
+        defaultType={tab === "ALL" ? "RESUME" : tab}
       />
 
       <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
