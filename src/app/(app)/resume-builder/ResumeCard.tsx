@@ -1,7 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import { ApiResume } from "@/lib/types/resume";
 import { ResumePreview } from "./ResumePreview";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ResumeCardProps {
   resume: ApiResume;
@@ -9,8 +18,24 @@ interface ResumeCardProps {
 }
 
 export function ResumeCard({ resume, onClick }: ResumeCardProps) {
+  const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/resume/${resume.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete resume");
+    },
+    onSuccess: () => {
+      toast.success("Resume deleted");
+      queryClient.invalidateQueries({ queryKey: ["resumes"] });
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "Couldn't delete"),
+  });
 
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
@@ -65,12 +90,29 @@ export function ResumeCard({ resume, onClick }: ResumeCardProps) {
 
         {/* Glassmorphic Footer Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 pt-8 bg-gradient-to-t from-background/90 via-background/60 to-transparent backdrop-blur-[2px]">
-          <h3 className="font-semibold text-sm truncate text-foreground">
+          <h3 className="font-semibold text-sm truncate text-foreground pr-8">
             {resume.content.basics.name || resume.title || "Untitled Resume"}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             Last updated on {format(new Date(resume.updatedAt), "M/d/yyyy")}
           </p>
+        </div>
+
+        {/* Dropdown Menu - Bottom Right */}
+        <div className="absolute bottom-2 right-2 z-20" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors outline-none disabled:pointer-events-none disabled:opacity-50 h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm text-foreground">
+              <MoreHorizontal className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => deleteMutation.mutate()}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

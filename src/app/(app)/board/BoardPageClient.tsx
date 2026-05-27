@@ -30,14 +30,20 @@ export default function BoardPageClient() {
     const apps = appsQuery.data ?? [];
     const active = apps.length; // server already filters deleted
     const today = format(new Date(), "EEEE, MMM d");
-    const mostRecent = apps
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      )[0];
+    
+    let mostRecent = null;
+    let maxTime = 0;
+    for (let i = 0; i < apps.length; i++) {
+      const app = apps[i];
+      const t = Date.parse(app.updatedAt);
+      if (t > maxTime) {
+        maxTime = t;
+        mostRecent = app;
+      }
+    }
+
     const lastUpdate = mostRecent
-      ? formatDistanceToNowStrict(new Date(mostRecent.updatedAt), {
+      ? formatDistanceToNowStrict(maxTime, {
           addSuffix: true,
         })
       : null;

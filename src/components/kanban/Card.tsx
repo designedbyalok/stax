@@ -63,7 +63,7 @@ export function KanbanCard({ card, isOverlay, onClick }: CardProps) {
   // Live signal: any card touched in the past 24 hours gets a
   // soft pulsing dot next to the company name. Cheap delight.
   const isLive =
-    Date.now() - new Date(card.updatedAt).getTime() < DAY && !card.deletedAt;
+    Date.now() - Date.parse(card.updatedAt) < DAY && !card.deletedAt;
 
   // AI nudge selection priority:
   // 1. Match score → success

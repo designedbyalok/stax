@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { DM_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
@@ -64,6 +65,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );

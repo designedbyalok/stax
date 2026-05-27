@@ -36,7 +36,7 @@ export function useFilteredApplications(apps: ApiApplication[] | undefined) {
       if (source !== "all" && a.sourcePlatform !== source) return false;
       if (cutoff !== null) {
         if (!a.appliedAt) return false;
-        if (new Date(a.appliedAt).getTime() < cutoff) return false;
+        if (Date.parse(a.appliedAt) < cutoff) return false;
       }
       return true;
     });

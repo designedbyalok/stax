@@ -72,6 +72,15 @@ function computeStats(
   ];
   if (!apps || !columns) return empty;
 
+  // Pre-parse timestamps exactly once
+  const parsedApps = apps.map(a => ({
+    ...a,
+    appliedAtTime: a.appliedAt ? Date.parse(a.appliedAt) : null,
+    createdAtTime: Date.parse(a.createdAt),
+    updatedAtTime: Date.parse(a.updatedAt),
+    nextActionDateTime: a.nextActionDate ? Date.parse(a.nextActionDate) : null,
+  }));
+
   const now = Date.now();
   const DAY = 24 * 60 * 60 * 1000;
   const WEEK = 7 * DAY;
@@ -92,7 +101,7 @@ function computeStats(
   );
 
   // Active
-  const activeApps = apps.filter((a) => !excludedIds.has(a.columnId));
+  const activeApps = parsedApps.filter((a) => !excludedIds.has(a.columnId));
   const totalActive = activeApps.length;
 
   // Active trend (14-day): count applications whose createdAt falls in
@@ -101,36 +110,33 @@ function computeStats(
 
   // Applied this week
   const appliedThisWeek = appliedCol
-    ? apps.filter(
-        (a) => a.appliedAt && now - new Date(a.appliedAt).getTime() < WEEK
+    ? parsedApps.filter(
+        (a) => a.appliedAtTime && now - a.appliedAtTime < WEEK
       ).length
     : 0;
   const appliedSpark = bucketByDay(
-    apps.map((a) => a.appliedAt).filter((x): x is string => !!x),
+    parsedApps.map((a) => a.appliedAt).filter((x): x is string => !!x),
     14
   );
   const appliedLastWeek = appliedCol
-    ? apps.filter((a) => {
-        if (!a.appliedAt) return false;
-        const t = new Date(a.appliedAt).getTime();
-        return t < now - WEEK && t > now - 2 * WEEK;
+    ? parsedApps.filter((a) => {
+        if (!a.appliedAtTime) return false;
+        return a.appliedAtTime < now - WEEK && a.appliedAtTime > now - 2 * WEEK;
       }).length
     : 0;
   const appliedDelta = appliedThisWeek - appliedLastWeek;
 
   // Awaiting response: in Applied column for 3+ days
   const awaitingApps = appliedCol
-    ? apps.filter((a) => {
+    ? parsedApps.filter((a) => {
         if (a.columnId !== appliedCol.id) return false;
-        if (a.appliedAt) return now - new Date(a.appliedAt).getTime() > THREE_DAYS;
-        return now - new Date(a.updatedAt).getTime() > THREE_DAYS;
+        if (a.appliedAtTime) return now - a.appliedAtTime > THREE_DAYS;
+        return now - a.updatedAtTime > THREE_DAYS;
       })
     : [];
   const awaitingResponse = awaitingApps.length;
   const awaitingNudgeToday = awaitingApps.filter((a) => {
-    const baseT = a.appliedAt
-      ? new Date(a.appliedAt).getTime()
-      : new Date(a.updatedAt).getTime();
+    const baseT = a.appliedAtTime || a.updatedAtTime;
     return now - baseT > 7 * DAY;
   }).length;
 
@@ -138,20 +144,28 @@ function computeStats(
   const interviewIds = new Set(
     [phoneScreenCol?.id, interviewCol?.id].filter(Boolean) as string[]
   );
-  const upcomingInterviewApps = apps.filter((a) => {
+  const upcomingInterviewApps = parsedApps.filter((a) => {
     if (!interviewIds.has(a.columnId)) return false;
-    if (!a.nextActionDate) return false;
-    const t = new Date(a.nextActionDate).getTime();
-    return t >= now && t <= now + WEEK;
+    if (!a.nextActionDateTime) return false;
+    return a.nextActionDateTime >= now && a.nextActionDateTime <= now + WEEK;
   });
   const upcomingInterviews = upcomingInterviewApps.length;
-  const nextInterview = upcomingInterviewApps
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(a.nextActionDate as string).getTime() -
-        new Date(b.nextActionDate as string).getTime()
-    )[0];
+  
+  let nextInterview = null;
+  let minTime = Infinity;
+  for (let i = 0; i < upcomingInterviewApps.length; i++) {
+    const app = upcomingInterviewApps[i];
+    if (app.nextActionDateTime! < minTime) {
+      minTime = app.nextActionDateTime!;
+      nextInterview = app;
+    }
+  }
+
+  const interviewDelta = nextInterview?.nextActionDateTime
+    ? formatDistanceToNowStrict(nextInterview.nextActionDateTime, {
+        addSuffix: true,
+      })
+    : " ";
 
   return [
     {

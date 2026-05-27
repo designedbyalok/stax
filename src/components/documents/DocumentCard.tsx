@@ -103,29 +103,7 @@ export function DocumentCard({
           </span>
         </div>
 
-        {/* Dropdown Menu - Top Left (Stop propagation so it doesn't open preview) */}
-        <div className="absolute top-2 left-2 z-20" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors outline-none disabled:pointer-events-none disabled:opacity-50 h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm text-foreground">
-              <MoreHorizontal className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-40">
-              <DropdownMenuItem onClick={() => onPreview(doc)}>
-                <Eye className="mr-2 h-4 w-4" /> Preview
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDownload}>
-                <Download className="mr-2 h-4 w-4" /> Download
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => deleteMutation.mutate()}
-              >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+
 
         {/* Aspect Ratio Container for 8.5x11 */}
         <div ref={containerRef} className={cn("relative w-full aspect-[8.5/11] flex flex-col items-center justify-center overflow-hidden", tint.bg)}>
@@ -152,13 +130,36 @@ export function DocumentCard({
 
         {/* Glassmorphic Footer Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 pt-8 bg-gradient-to-t from-background/90 via-background/60 to-transparent backdrop-blur-[2px]">
-          <h3 className="font-semibold text-sm truncate text-foreground drop-shadow-sm">
+          <h3 className="font-semibold text-sm truncate text-foreground drop-shadow-sm pr-8">
             {doc.filename}
           </h3>
           <p className="text-xs text-foreground/80 mt-0.5 flex items-center justify-between font-medium drop-shadow-sm">
             <span>{formatDistanceToNow(new Date(doc.updatedAt), { addSuffix: true })}</span>
-            <span>{ownerName || "You"}</span>
           </p>
+        </div>
+
+        {/* Dropdown Menu - Bottom Right */}
+        <div className="absolute bottom-2 right-2 z-20" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors outline-none disabled:pointer-events-none disabled:opacity-50 h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm text-foreground">
+              <MoreHorizontal className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={() => onPreview(doc)}>
+                <Eye className="mr-2 h-4 w-4" /> Preview
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownload}>
+                <Download className="mr-2 h-4 w-4" /> Download
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => deleteMutation.mutate()}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

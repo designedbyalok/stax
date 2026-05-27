@@ -215,55 +215,6 @@ export function UnifiedDocumentsGrid({
       </div>
 
       <div className={`grid gap-6 ${gridCols} pb-10`}>
-        {/* Create Card (Only shown if we are in Resumes or All, and filter allows Generated) */}
-        {(tab === "ALL" || tab === "RESUME") && filter !== "UPLOADED" && (
-          <div 
-            onClick={() => createMutation.mutate()}
-            className="group flex flex-col gap-3 cursor-pointer"
-          >
-            <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm group-hover:shadow-md transition-all flex items-center justify-center aspect-[8.5/11]">
-              {createMutation.isPending ? (
-                <Loader2 className="w-10 h-10 animate-spin text-muted-foreground" />
-              ) : (
-                <div className="w-16 h-16 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center text-muted-foreground group-hover:border-foreground group-hover:text-foreground transition-colors">
-                  <Plus className="w-8 h-8" />
-                </div>
-              )}
-            </div>
-            <div className="px-1 text-center">
-              <h3 className="font-semibold text-sm text-foreground">Create Resume</h3>
-            </div>
-          </div>
-        )}
-
-        {/* Import Card (Only shown if we are in Resumes or All, and filter allows Generated) */}
-        {(tab === "ALL" || tab === "RESUME") && filter !== "UPLOADED" && (
-          <div 
-            onClick={() => fileInputRef.current?.click()}
-            className="group flex flex-col gap-3 cursor-pointer"
-          >
-            <input 
-              type="file" 
-              accept=".pdf" 
-              className="hidden" 
-              ref={fileInputRef} 
-              onChange={handleImportFile} 
-            />
-            <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm group-hover:shadow-md transition-all flex items-center justify-center aspect-[8.5/11]">
-              {isImporting ? (
-                <Loader2 className="w-10 h-10 animate-spin text-muted-foreground" />
-              ) : (
-                <div className="w-16 h-16 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center text-muted-foreground group-hover:border-foreground group-hover:text-foreground transition-colors">
-                  <Download className="w-8 h-8" />
-                </div>
-              )}
-            </div>
-            <div className="px-1 text-center">
-              <h3 className="font-semibold text-sm text-foreground">Import Resume</h3>
-            </div>
-          </div>
-        )}
-
         {/* Unified Items */}
         {unifiedItems.map(item => {
           if (item.type === "GENERATED_RESUME") {
