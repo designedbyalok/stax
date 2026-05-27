@@ -61,11 +61,18 @@ export function CardDrawer({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch full detail (contacts + activities) when drawer opens.
+  // While a TL;DR is still generating in the background (job
+  // description present, headline not written yet), poll every 2.5s
+  // so the summary fills in live; stop as soon as it lands.
   const detailQuery = useQuery({
     queryKey: ["application", card?.id],
     queryFn: () =>
       card ? api.getApplicationDetail(card.id).then((r) => r.application) : Promise.reject(),
     enabled: !!card && isOpen,
+    refetchInterval: (query) => {
+      const d = query.state.data;
+      return d && d.jobDescription && !d.tldrHeadline ? 2500 : false;
+    },
   });
 
   useEffect(() => {

@@ -41,6 +41,11 @@ export function OverviewTab({
   // back to whatever `card` happens to carry.
   const ai = detail ?? card;
 
+  // A summary is still being generated when the full record has a job
+  // description but no headline yet (background TL;DR hasn't landed).
+  // CardDrawer polls in this state; the block shows a shimmer.
+  const aiPending = !!detail?.jobDescription && !ai.tldrHeadline;
+
   return (
     <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
       <JobTldrBlock
@@ -49,6 +54,7 @@ export function OverviewTab({
         responsibilities={ai.responsibilities}
         qualifications={ai.qualifications}
         keywords={ai.keywords}
+        loading={aiPending}
       />
 
       <div className="grid grid-cols-2 gap-3">

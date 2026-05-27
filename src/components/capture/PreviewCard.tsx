@@ -22,12 +22,26 @@ export function PreviewCard() {
 
   const mutation = useMutation({
     mutationFn: api.createApplication,
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
       track("job_added", {
         source: state.kind === "preview" ? state.source : "url",
       });
       toast.success("Job saved.");
+
+      // The TL;DR is generated server-side in the background (after()),
+      // so it isn't in the row we just created. Nudge the board to
+      // refetch a couple of times so the card's summary footer fills
+      // in within seconds instead of waiting for staleTime to expire.
+      if (variables.jobDescription) {
+        [3000, 8000].forEach((delay) =>
+          setTimeout(
+            () => queryClient.invalidateQueries({ queryKey: ["applications"] }),
+            delay
+          )
+        );
+      }
+
       cancel();
     },
     onError: (err) => {

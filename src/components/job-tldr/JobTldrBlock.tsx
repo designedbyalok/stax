@@ -11,6 +11,7 @@ export function JobTldrBlock({
   qualifications = [],
   keywords = [],
   defaultOpen = true,
+  loading = false,
 }: {
   headline: string | null;
   bullets: string[] | null;
@@ -20,6 +21,9 @@ export function JobTldrBlock({
   /** Whether the detail (responsibilities / qualifications / keywords)
    *  starts expanded. The headline + bullets are always shown. */
   defaultOpen?: boolean;
+  /** The summary is still being generated in the background — show a
+   *  shimmer placeholder instead of nothing. */
+  loading?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -28,7 +32,26 @@ export function JobTldrBlock({
   const hasInsights =
     responsibilities.length > 0 || qualifications.length > 0 || keywords.length > 0;
 
-  if (!hasHeadline && !hasBullets && !hasInsights) return null;
+  // Pending state: a summary is on its way (job description present,
+  // background generation not finished). Show a labelled shimmer.
+  if (!hasHeadline && !hasBullets && !hasInsights) {
+    if (!loading) return null;
+    return (
+      <div className="rounded-md border bg-muted/30 px-4 py-3 space-y-3">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-[var(--tint-strong,hsl(220_91%_60%))] animate-pulse" strokeWidth={2} />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Generating summary…
+          </span>
+        </div>
+        <div className="space-y-2" aria-hidden>
+          <div className="h-3 w-3/4 rounded bg-foreground/10 animate-pulse" />
+          <div className="h-2.5 w-full rounded bg-foreground/[0.07] animate-pulse" />
+          <div className="h-2.5 w-5/6 rounded bg-foreground/[0.07] animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md border bg-muted/30 px-4 py-3 space-y-3">
