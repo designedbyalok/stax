@@ -5,6 +5,33 @@ interface ResumePreviewProps {
   resume: ResumeData;
 }
 
+// Ensure a link has a protocol so it's a valid href.
+function ensureHttp(url: string): string {
+  const u = url.trim();
+  if (!u) return "#";
+  return /^https?:\/\//i.test(u) ? u : `https://${u}`;
+}
+
+// Strip protocol + trailing slash for compact display.
+function displayUrl(url: string): string {
+  return url.trim().replace(/^https?:\/\//i, "").replace(/\/$/, "");
+}
+
+// Website (basics.url) + custom links, normalized into one list of
+// { label, url } pairs for the contact row.
+function contactLinks(basics: ResumeData["basics"]) {
+  const out: Array<{ id: string; label: string; url: string }> = [];
+  if (basics.url?.trim()) {
+    out.push({ id: "__site", label: displayUrl(basics.url), url: basics.url });
+  }
+  for (const l of basics.links ?? []) {
+    if (l.url?.trim()) {
+      out.push({ id: l.id, label: l.label?.trim() || displayUrl(l.url), url: l.url });
+    }
+  }
+  return out;
+}
+
 export function ResumePreview({ resume }: ResumePreviewProps) {
   const design = resume.design || {
     template: "classic",
@@ -42,6 +69,13 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
             {resume.basics.email && <div>{resume.basics.email}</div>}
             {resume.basics.phone && <div>{resume.basics.phone}</div>}
             {resume.basics.location && <div>{resume.basics.location}</div>}
+            {contactLinks(resume.basics).map((l) => (
+              <div key={l.id}>
+                <a href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline break-all">
+                  {l.label}
+                </a>
+              </div>
+            ))}
           </div>
 
           {resume.skills && resume.skills.length > 0 && (
@@ -128,6 +162,11 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
             {resume.basics.email && <span>{resume.basics.email}</span>}
             {resume.basics.phone && <span>{resume.basics.phone}</span>}
             {resume.basics.location && <span>{resume.basics.location}</span>}
+            {contactLinks(resume.basics).map((l) => (
+              <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline hover:text-zinc-600">
+                {l.label}
+              </a>
+            ))}
           </div>
 
           {resume.basics.summary && (
@@ -205,10 +244,18 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
         {resume.basics.headline && (
           <div className="text-lg text-zinc-600 mb-3">{resume.basics.headline}</div>
         )}
-        <div className="flex items-center justify-center gap-4 text-xs text-zinc-500 font-medium">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-zinc-500 font-medium">
           {resume.basics.email && <span>{resume.basics.email}</span>}
           {resume.basics.phone && <span>• {resume.basics.phone}</span>}
           {resume.basics.location && <span>• {resume.basics.location}</span>}
+          {contactLinks(resume.basics).map((l) => (
+            <span key={l.id}>
+              {"• "}
+              <a href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline" style={{ color: "var(--theme-color)" }}>
+                {l.label}
+              </a>
+            </span>
+          ))}
         </div>
       </div>
 

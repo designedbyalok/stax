@@ -11,6 +11,8 @@ export interface ResumeData {
     /** Primary title line. Optional — `label` may be used instead. */
     headline?: string;
     summary: string;
+    /** Website + social links (LinkedIn, GitHub, portfolio, etc.). */
+    links?: Array<{ id: string; label: string; url: string }>;
   };
   work: Array<{
     id: string;

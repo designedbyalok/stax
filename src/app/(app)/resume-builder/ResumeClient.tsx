@@ -378,14 +378,95 @@ export function ResumeClient() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Professional Summary</Label>
-                <Textarea 
+                <Textarea
                   rows={4}
-                  value={activeResume.content.basics.summary} 
+                  value={activeResume.content.basics.summary}
                   onChange={(e) => handleUpdateContent({
                     ...activeResume.content,
                     basics: { ...activeResume.content.basics, summary: e.target.value }
-                  })} 
+                  })}
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Website</Label>
+                <Input
+                  placeholder="yoursite.com"
+                  value={activeResume.content.basics.url ?? ""}
+                  onChange={(e) => handleUpdateContent({
+                    ...activeResume.content,
+                    basics: { ...activeResume.content.basics, url: e.target.value }
+                  })}
+                />
+              </div>
+
+              {/* Links (LinkedIn, GitHub, etc.) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Links</Label>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      const links = [
+                        ...(activeResume.content.basics.links ?? []),
+                        { id: crypto.randomUUID(), label: "", url: "" },
+                      ];
+                      handleUpdateContent({
+                        ...activeResume.content,
+                        basics: { ...activeResume.content.basics, links },
+                      });
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {(activeResume.content.basics.links ?? []).map((link, idx) => (
+                    <div key={link.id} className="flex items-center gap-2 group">
+                      <Input
+                        className="h-7 text-xs w-[34%] shrink-0"
+                        placeholder="LinkedIn"
+                        value={link.label}
+                        onChange={(e) => {
+                          const links = [...(activeResume.content.basics.links ?? [])];
+                          links[idx] = { ...links[idx], label: e.target.value };
+                          handleUpdateContent({
+                            ...activeResume.content,
+                            basics: { ...activeResume.content.basics, links },
+                          });
+                        }}
+                      />
+                      <Input
+                        className="h-7 text-xs flex-1 min-w-0"
+                        placeholder="linkedin.com/in/you"
+                        value={link.url}
+                        onChange={(e) => {
+                          const links = [...(activeResume.content.basics.links ?? [])];
+                          links[idx] = { ...links[idx], url: e.target.value };
+                          handleUpdateContent({
+                            ...activeResume.content,
+                            basics: { ...activeResume.content.basics, links },
+                          });
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          const links = [...(activeResume.content.basics.links ?? [])];
+                          links.splice(idx, 1);
+                          handleUpdateContent({
+                            ...activeResume.content,
+                            basics: { ...activeResume.content.basics, links },
+                          });
+                        }}
+                        className="text-muted-foreground hover:text-destructive text-xs shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Remove link"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
