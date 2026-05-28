@@ -835,6 +835,313 @@ export function ResumeClient() {
               ))}
             </div>
           </section>
+
+          {/* Publications */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Publications</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.publications ?? []), { id: crypto.randomUUID(), name: "", publisher: "", date: "", url: "" }];
+                handleUpdateContent({ ...activeResume.content, publications: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {(activeResume.content.publications ?? []).map((pub, idx) => (
+                <div key={pub.id} className="p-3 border rounded-lg space-y-3 bg-muted/20 relative group">
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.publications ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, publications: items });
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                    Remove
+                  </button>
+                  <div className="space-y-1.5 pt-2">
+                    <Label className="text-[11px]">Title</Label>
+                    <Input className="h-7 text-xs" value={pub.name} onChange={(e) => {
+                      const items = [...(activeResume.content.publications ?? [])];
+                      items[idx] = { ...items[idx], name: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, publications: items });
+                    }} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Publisher</Label>
+                      <Input className="h-7 text-xs" value={pub.publisher} onChange={(e) => {
+                        const items = [...(activeResume.content.publications ?? [])];
+                        items[idx] = { ...items[idx], publisher: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, publications: items });
+                      }} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Date</Label>
+                      <Input className="h-7 text-xs" placeholder="2024" value={pub.date} onChange={(e) => {
+                        const items = [...(activeResume.content.publications ?? [])];
+                        items[idx] = { ...items[idx], date: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, publications: items });
+                      }} />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]">Link</Label>
+                    <Input className="h-7 text-xs" placeholder="example.com/article" value={pub.url ?? ""} onChange={(e) => {
+                      const items = [...(activeResume.content.publications ?? [])];
+                      items[idx] = { ...items[idx], url: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, publications: items });
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Volunteering */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Volunteering</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.volunteer ?? []), { id: crypto.randomUUID(), organization: "", position: "", startDate: "", endDate: "", summary: "" }];
+                handleUpdateContent({ ...activeResume.content, volunteer: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {(activeResume.content.volunteer ?? []).map((v, idx) => (
+                <div key={v.id} className="p-3 border rounded-lg space-y-3 bg-muted/20 relative group">
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.volunteer ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, volunteer: items });
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                    Remove
+                  </button>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Organization</Label>
+                      <Input className="h-7 text-xs" value={v.organization} onChange={(e) => {
+                        const items = [...(activeResume.content.volunteer ?? [])];
+                        items[idx] = { ...items[idx], organization: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, volunteer: items });
+                      }} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Role</Label>
+                      <Input className="h-7 text-xs" value={v.position} onChange={(e) => {
+                        const items = [...(activeResume.content.volunteer ?? [])];
+                        items[idx] = { ...items[idx], position: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, volunteer: items });
+                      }} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">Start Date</Label>
+                      <Input className="h-7 text-xs" placeholder="Jan 2022" value={v.startDate} onChange={(e) => {
+                        const items = [...(activeResume.content.volunteer ?? [])];
+                        items[idx] = { ...items[idx], startDate: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, volunteer: items });
+                      }} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]">End Date</Label>
+                      <Input className="h-7 text-xs" placeholder="Present" value={v.endDate} onChange={(e) => {
+                        const items = [...(activeResume.content.volunteer ?? [])];
+                        items[idx] = { ...items[idx], endDate: e.target.value };
+                        handleUpdateContent({ ...activeResume.content, volunteer: items });
+                      }} />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]">Description</Label>
+                    <Textarea className="text-xs" rows={2} value={v.summary} onChange={(e) => {
+                      const items = [...(activeResume.content.volunteer ?? [])];
+                      items[idx] = { ...items[idx], summary: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, volunteer: items });
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Interests */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Interests</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.interests ?? []), { id: crypto.randomUUID(), name: "", keywords: "" }];
+                handleUpdateContent({ ...activeResume.content, interests: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {(activeResume.content.interests ?? []).map((it, idx) => (
+                <div key={it.id} className="flex items-center gap-2 group">
+                  <Input className="h-7 text-xs w-[38%] shrink-0" placeholder="Photography" value={it.name} onChange={(e) => {
+                    const items = [...(activeResume.content.interests ?? [])];
+                    items[idx] = { ...items[idx], name: e.target.value };
+                    handleUpdateContent({ ...activeResume.content, interests: items });
+                  }} />
+                  <Input className="h-7 text-xs flex-1 min-w-0" placeholder="film, travel" value={it.keywords ?? ""} onChange={(e) => {
+                    const items = [...(activeResume.content.interests ?? [])];
+                    items[idx] = { ...items[idx], keywords: e.target.value };
+                    handleUpdateContent({ ...activeResume.content, interests: items });
+                  }} />
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.interests ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, interests: items });
+                  }} className="text-muted-foreground hover:text-destructive text-xs px-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* References */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">References</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const items = [...(activeResume.content.references ?? []), { id: crypto.randomUUID(), name: "", reference: "" }];
+                handleUpdateContent({ ...activeResume.content, references: items });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {(activeResume.content.references ?? []).map((ref, idx) => (
+                <div key={ref.id} className="p-3 border rounded-lg space-y-3 bg-muted/20 relative group">
+                  <button onClick={() => {
+                    const items = [...(activeResume.content.references ?? [])];
+                    items.splice(idx, 1);
+                    handleUpdateContent({ ...activeResume.content, references: items });
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                    Remove
+                  </button>
+                  <div className="space-y-1.5 pt-2">
+                    <Label className="text-[11px]">Name & Role</Label>
+                    <Input className="h-7 text-xs" placeholder="Jane Smith, CTO at Acme" value={ref.name} onChange={(e) => {
+                      const items = [...(activeResume.content.references ?? [])];
+                      items[idx] = { ...items[idx], name: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, references: items });
+                    }} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]">Reference</Label>
+                    <Textarea className="text-xs" rows={3} placeholder="What they said about you, or their contact details." value={ref.reference} onChange={(e) => {
+                      const items = [...(activeResume.content.references ?? [])];
+                      items[idx] = { ...items[idx], reference: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, references: items });
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Custom Sections */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Custom Sections</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const sections = [...(activeResume.content.customSections ?? []), { id: crypto.randomUUID(), title: "", items: [] as Array<{ id: string; title?: string; subtitle?: string; date?: string; description?: string }> }];
+                handleUpdateContent({ ...activeResume.content, customSections: sections });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-5">
+              {(activeResume.content.customSections ?? []).map((cs, sIdx) => (
+                <div key={cs.id} className="p-3 border rounded-lg space-y-3 bg-muted/20 relative group">
+                  <button onClick={() => {
+                    const sections = [...(activeResume.content.customSections ?? [])];
+                    sections.splice(sIdx, 1);
+                    handleUpdateContent({ ...activeResume.content, customSections: sections });
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                    Remove section
+                  </button>
+                  <div className="space-y-1.5 pt-2">
+                    <Label className="text-[11px]">Section title</Label>
+                    <Input className="h-7 text-xs" placeholder="Speaking engagements" value={cs.title} onChange={(e) => {
+                      const sections = [...(activeResume.content.customSections ?? [])];
+                      sections[sIdx] = { ...sections[sIdx], title: e.target.value };
+                      handleUpdateContent({ ...activeResume.content, customSections: sections });
+                    }} />
+                  </div>
+                  <div className="space-y-3 pt-1">
+                    {(cs.items ?? []).map((item, iIdx) => (
+                      <div key={item.id} className="p-2.5 border rounded-md bg-background space-y-2 relative group/item">
+                        <button onClick={() => {
+                          const sections = [...(activeResume.content.customSections ?? [])];
+                          const items = [...sections[sIdx].items];
+                          items.splice(iIdx, 1);
+                          sections[sIdx] = { ...sections[sIdx], items };
+                          handleUpdateContent({ ...activeResume.content, customSections: sections });
+                        }} className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover/item:opacity-100 text-[11px]">
+                          Remove
+                        </button>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-1">
+                            <Label className="text-[10px]">Title</Label>
+                            <Input className="h-7 text-xs" value={item.title ?? ""} onChange={(e) => {
+                              const sections = [...(activeResume.content.customSections ?? [])];
+                              const items = [...sections[sIdx].items];
+                              items[iIdx] = { ...items[iIdx], title: e.target.value };
+                              sections[sIdx] = { ...sections[sIdx], items };
+                              handleUpdateContent({ ...activeResume.content, customSections: sections });
+                            }} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[10px]">Date</Label>
+                            <Input className="h-7 text-xs" placeholder="2024" value={item.date ?? ""} onChange={(e) => {
+                              const sections = [...(activeResume.content.customSections ?? [])];
+                              const items = [...sections[sIdx].items];
+                              items[iIdx] = { ...items[iIdx], date: e.target.value };
+                              sections[sIdx] = { ...sections[sIdx], items };
+                              handleUpdateContent({ ...activeResume.content, customSections: sections });
+                            }} />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px]">Subtitle</Label>
+                          <Input className="h-7 text-xs" value={item.subtitle ?? ""} onChange={(e) => {
+                            const sections = [...(activeResume.content.customSections ?? [])];
+                            const items = [...sections[sIdx].items];
+                            items[iIdx] = { ...items[iIdx], subtitle: e.target.value };
+                            sections[sIdx] = { ...sections[sIdx], items };
+                            handleUpdateContent({ ...activeResume.content, customSections: sections });
+                          }} />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px]">Description</Label>
+                          <Textarea className="text-xs" rows={2} value={item.description ?? ""} onChange={(e) => {
+                            const sections = [...(activeResume.content.customSections ?? [])];
+                            const items = [...sections[sIdx].items];
+                            items[iIdx] = { ...items[iIdx], description: e.target.value };
+                            sections[sIdx] = { ...sections[sIdx], items };
+                            handleUpdateContent({ ...activeResume.content, customSections: sections });
+                          }} />
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={() => {
+                      const sections = [...(activeResume.content.customSections ?? [])];
+                      const items = [...sections[sIdx].items, { id: crypto.randomUUID(), title: "", subtitle: "", date: "", description: "" }];
+                      sections[sIdx] = { ...sections[sIdx], items };
+                      handleUpdateContent({ ...activeResume.content, customSections: sections });
+                    }} className="w-full text-[11px] text-muted-foreground hover:text-foreground border border-dashed rounded-md py-1.5 transition-colors">
+                      + Add item
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
             </div>
           )}
 

@@ -58,6 +58,46 @@ export interface ResumeData {
     awarder: string;
     date: string;
   }>;
+  publications?: Array<{
+    id: string;
+    name: string;
+    publisher: string;
+    date: string;
+    url?: string;
+  }>;
+  volunteer?: Array<{
+    id: string;
+    organization: string;
+    position: string;
+    startDate: string;
+    endDate: string;
+    summary: string;
+  }>;
+  interests?: Array<{
+    id: string;
+    name: string;
+    keywords?: string;
+  }>;
+  references?: Array<{
+    id: string;
+    name: string;
+    reference: string;
+  }>;
+  /** User-defined sections — title + any number of free-form items.
+   *  Each item supports the common resume-row shape (title/subtitle/
+   *  date/description) so it can stand in for things the canonical
+   *  sections don't cover. */
+  customSections?: Array<{
+    id: string;
+    title: string;
+    items: Array<{
+      id: string;
+      title?: string;
+      subtitle?: string;
+      date?: string;
+      description?: string;
+    }>;
+  }>;
   design?: {
     template: string;
     themeColor: string;
