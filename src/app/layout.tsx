@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { DM_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -18,24 +17,6 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-// Landing-page fonts (loaded once, used only inside .landing-page).
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-dm-sans",
-});
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-  variable: "--font-instrument-serif",
-});
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-jetbrains-mono",
-});
-
 export const metadata: Metadata = {
   title: "Stax — Every job, in its place.",
   description:
@@ -51,14 +32,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(
-        "font-sans",
-        geistSans.variable,
-        geistMono.variable,
-        dmSans.variable,
-        instrumentSerif.variable,
-        jetbrainsMono.variable
-      )}
+      className={cn("font-sans", geistSans.variable, geistMono.variable)}
     >
       <body className="antialiased" suppressHydrationWarning>
         <Providers>

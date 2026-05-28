@@ -1,5 +1,6 @@
 import "./landing.css";
 
+import { DM_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { LandingNav } from "@/components/landing/Nav";
 import { Hero } from "@/components/landing/Hero";
 import { TrustedBy, Stats, ProductShowcase, HowItWorks } from "@/components/landing/Sections";
@@ -10,12 +11,40 @@ import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
 import { LandingMotion } from "@/components/landing/motion";
 import { auth } from "@/lib/auth";
+import { cn } from "@/lib/utils";
+
+// Landing-only fonts. Scoped here (not in the root layout) so app routes
+// like /board and /documents don't pay the FCP cost for woff2s they never use.
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+});
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+});
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
+});
 
 export default async function LandingPage() {
   const session = await auth();
-  
+
   return (
-    <div className="landing-page" data-glass="on">
+    <div
+      className={cn(
+        "landing-page",
+        dmSans.variable,
+        instrumentSerif.variable,
+        jetbrainsMono.variable
+      )}
+      data-glass="on"
+    >
       <LandingNav user={session?.user} />
       <Hero />
       <TrustedBy />
