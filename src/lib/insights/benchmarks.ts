@@ -181,3 +181,36 @@ export async function upsertSalaryBenchmarks(): Promise<{ upserted: number }> {
   }
   return { upserted };
 }
+
+const sameCity = (a: string | null, b: string | null) => (a ?? null) === (b ?? null);
+
+/**
+ * Looks up a curated benchmark row from the in-code dataset. Used as a fallback
+ * by the insight engine so insights work even before the SalaryBenchmark table
+ * has been seeded in the database.
+ */
+export function findSeedBenchmark(
+  jobRole: string,
+  city: string | null,
+  country: string,
+  bracket: ExperienceBracket
+): BenchmarkSeedRow | undefined {
+  return SALARY_BENCHMARKS.find(
+    (r) =>
+      r.jobRole === jobRole &&
+      sameCity(r.city, city) &&
+      r.country === country &&
+      r.experienceBracket === bracket
+  );
+}
+
+/** Curated sample size for a role × location (any bracket), for fallbacks. */
+export function seedSampleSize(
+  jobRole: string,
+  city: string | null,
+  country: string
+): number | undefined {
+  return SALARY_BENCHMARKS.find(
+    (r) => r.jobRole === jobRole && sameCity(r.city, city) && r.country === country
+  )?.sampleSize;
+}

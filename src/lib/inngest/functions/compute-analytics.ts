@@ -2,6 +2,7 @@ import prisma from "@/lib/db";
 import { inngest } from "../client";
 import { toExperienceBracket, EXPERIENCE_BRACKETS } from "@/lib/insights/experience";
 import type { ExperienceBracket } from "@/lib/insights/experience";
+import { upsertSalaryBenchmarks } from "@/lib/insights/benchmarks";
 
 /**
  * Weekly community-benchmark aggregation. Mondays at 03:00 UTC.
@@ -44,6 +45,10 @@ export const computeAnalytics = inngest.createFunction(
     triggers: [{ cron: "0 3 * * 1" }],
   },
   async ({ step }) => {
+    // Make sure the curated benchmark rows exist so a fresh database is never
+    // empty (idempotent — safe to run every week).
+    const seeded = await step.run("seed-benchmarks", () => upsertSalaryBenchmarks());
+
     // Pull every profile that has the fields needed to be aggregated.
     const profiles = await step.run("load-profiles", async () =>
       prisma.userProfile.findMany({
@@ -183,6 +188,7 @@ export const computeAnalytics = inngest.createFunction(
     });
 
     return {
+      benchmarksSeeded: seeded.upserted,
       profilesScanned: profiles.length,
       groupsConsidered: groups.size,
       bracketsTracked: EXPERIENCE_BRACKETS.length,
