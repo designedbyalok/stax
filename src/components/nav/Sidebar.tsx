@@ -3,29 +3,24 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { signOut } from "next-auth/react";
 import {
   LayoutGrid,
   Bell,
   FileText,
-  LogOut,
   Settings,
   Calendar,
   BookOpen,
   MessageSquare,
   Mail,
   PenTool,
+  TrendingUp,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { StaxMark } from "@/components/StaxMark";
 import { api } from "@/lib/api-client";
 import { useSettingsModal } from "@/lib/settings-modal-store";
+import { useProfileModal } from "@/lib/profile-modal-store";
+import { ProfileAvatarRing } from "@/components/profile/ProfileAvatarRing";
 
 type Item = {
   href: string;
@@ -50,6 +45,7 @@ const NAV_WORKSPACE: Item[] = [
   { href: "/reminders", label: "Reminders", icon: Bell, countKey: "reminders" },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/resume-builder", label: "Resume Builder", icon: PenTool },
+  { href: "/insights", label: "Insights", icon: TrendingUp },
 ];
 
 const NAV_LIBRARY: Item[] = [
@@ -65,14 +61,24 @@ export function Sidebar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const openSettings = useSettingsModal((s) => s.openModal);
-  const initial = (user.name || user.email || "U").trim().charAt(0).toUpperCase();
+  const openProfile = useProfileModal((s) => s.openModal);
 
-  // The resume builder goes full-screen once a resume is open. Hiding the
-  // sidebar (rather than just collapsing it) hands the whole viewport to the
-  // editor's three-pane layout. The landing chooser keeps the sidebar so
-  // users still have a way back into the rest of the app.
+  // The resume builder goes full-screen once a resume is open, and onboarding
+  // is its own focused full-screen flow. Hiding the sidebar hands those views
+  // the whole viewport.
   const inResumeBuilder =
     pathname === "/resume-builder" && searchParams.get("id") !== null;
+  const hideChrome = inResumeBuilder || pathname === "/onboarding";
+
+  // Drives the avatar's completion ring + first-name label.
+  const profileQuery = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => api.getProfile().then((r) => r.profile),
+  });
+  const profile = profileQuery.data;
+  const displayName = profile?.name || user.name || "";
+  const firstName = displayName.trim().split(/\s+/)[0] || "Account";
+  const completionPct = profile?.completion.percent ?? 0;
 
   const remindersQuery = useQuery({
     queryKey: ["reminders"],
@@ -97,7 +103,7 @@ export function Sidebar({
 
   const counts = { reminders: reminderCount, interviews: 0 };
 
-  if (inResumeBuilder) return null;
+  if (hideChrome) return null;
 
   return (
     <aside className="hidden md:flex w-[232px] shrink-0 flex-col border-r border-border bg-card">
@@ -158,42 +164,31 @@ export function Sidebar({
         </button>
       </div>
 
-      {/* User chip — anchored at the very bottom */}
+      {/* User chip — avatar + completion ring, opens the profile modal */}
       <div className="px-3 pb-3 pt-1 border-t border-border">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <button className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-background hover:border-border border border-transparent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/20">
-                <div className="w-[26px] h-[26px] rounded-md bg-foreground text-background grid place-items-center text-[12px] font-semibold tracking-[-0.01em] shrink-0">
-                  {initial}
-                </div>
-                <div className="min-w-0 flex-1 text-left">
-                  <div className="text-[13px] font-medium text-foreground truncate leading-[1.25]">
-                    {user.name || "Account"}
-                  </div>
-                  <div className="text-[12px] text-muted-foreground truncate leading-[1.25] mt-0.5">
-                    {user.email}
-                  </div>
-                </div>
-                <CaretSvg />
-              </button>
-            }
+        <button
+          type="button"
+          onClick={() => openProfile()}
+          className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-background hover:border-border border border-transparent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          aria-label={`Open your profile — ${completionPct}% complete`}
+        >
+          <ProfileAvatarRing
+            name={displayName || user.email}
+            photoUrl={profile?.photoUrl}
+            percent={completionPct}
+            size={32}
           />
-          <DropdownMenuContent
-            align="start"
-            side="top"
-            className="w-[208px]"
-          >
-            <DropdownMenuItem onClick={() => openSettings()}>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <div className="min-w-0 flex-1 text-left">
+            <div className="text-[13px] font-medium text-foreground truncate leading-[1.25]">
+              {firstName}
+            </div>
+            {completionPct < 100 && (
+              <div className="text-[12px] text-muted-foreground truncate leading-[1.25] mt-0.5">
+                Profile {completionPct}%
+              </div>
+            )}
+          </div>
+        </button>
       </div>
     </aside>
   );
@@ -265,19 +260,3 @@ function NavLink({
   );
 }
 
-function CaretSvg() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0"
-      aria-hidden
-    >
-      <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
-    </svg>
-  );
-}

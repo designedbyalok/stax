@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/nav/Sidebar";
 import { seedDefaultsForUser } from "@/lib/seed";
 import { WelcomeModal } from "@/components/layout/WelcomeModal";
 import { SettingsModal } from "@/components/settings/SettingsModal";
+import { ProfileModal } from "@/components/profile/ProfileModal";
 import prisma from "@/lib/db";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -34,6 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </main>
       <WelcomeModal />
       <SettingsModal />
+      <ProfileModal />
     </div>
   );
 }
