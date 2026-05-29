@@ -182,7 +182,52 @@ export async function upsertSalaryBenchmarks(): Promise<{ upserted: number }> {
   return { upserted };
 }
 
-const sameCity = (a: string | null, b: string | null) => (a ?? null) === (b ?? null);
+const sameCity = (a: string | null, b: string | null) =>
+  (a ?? "").toLowerCase() === (b ?? "").toLowerCase();
+
+// Common role aliases → our canonical dataset role, so free-typed titles still
+// resolve (e.g. "Software Developer" → "Software Engineer").
+const ROLE_SYNONYMS: Record<string, string> = {
+  "software developer": "Software Engineer",
+  "software engineer": "Software Engineer",
+  sde: "Software Engineer",
+  "full stack engineer": "Software Engineer",
+  "full-stack engineer": "Software Engineer",
+  developer: "Software Engineer",
+  "frontend engineer": "Frontend Engineer",
+  "front end engineer": "Frontend Engineer",
+  "frontend developer": "Frontend Engineer",
+  "ui engineer": "Frontend Engineer",
+  "backend engineer": "Backend Engineer",
+  "back end engineer": "Backend Engineer",
+  "backend developer": "Backend Engineer",
+  "product manager": "Product Manager",
+  pm: "Product Manager",
+  "product designer": "Product Designer",
+  designer: "Product Designer",
+  "ux designer": "UX Designer",
+  "ui/ux designer": "UX Designer",
+  "ui designer": "UX Designer",
+  "data scientist": "Data Scientist",
+  "ml engineer": "Data Scientist",
+  "data analyst": "Data Analyst",
+  analyst: "Data Analyst",
+  "marketing manager": "Marketing Manager",
+  marketing: "Marketing Manager",
+  "sales manager": "Sales Manager",
+  sales: "Sales Manager",
+};
+
+const KNOWN_ROLE_NAMES = ROLES.map((r) => r.jobRole);
+
+/** Maps a free-typed job title onto a canonical dataset role, or null. */
+export function canonicalRole(role?: string | null): string | null {
+  if (!role) return null;
+  const key = role.trim().toLowerCase();
+  if (ROLE_SYNONYMS[key]) return ROLE_SYNONYMS[key];
+  const exact = KNOWN_ROLE_NAMES.find((r) => r.toLowerCase() === key);
+  return exact ?? null;
+}
 
 /**
  * Looks up a curated benchmark row from the in-code dataset. Used as a fallback

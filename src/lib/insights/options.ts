@@ -1,8 +1,71 @@
-// Client-safe option lists for profile/onboarding pickers. Kept dependency-free
-// (no Prisma) so it can be imported from client components. These mirror the
-// curated benchmark dataset in `benchmarks.ts` (which is server-only).
+// Client-safe option lists for profile/onboarding pickers and insights.
+// Dependency-free (no Prisma) so it can be imported from client components.
 //
-// Coverage is currently focused on the top Indian metro cities.
+// Country + city are chosen from these lists (no free typing). Salary
+// benchmarks for any role × city are generated on demand by AI and cached, so
+// coverage isn't limited to a hand-curated table.
+
+export type CountryConfig = {
+  country: string;
+  currency: string;
+  /** Top metros for the country, in rough order of prominence. */
+  cities: string[];
+};
+
+export const COUNTRIES: CountryConfig[] = [
+  {
+    country: "India",
+    currency: "INR",
+    cities: ["Bengaluru", "Mumbai", "Delhi NCR", "Hyderabad", "Pune", "Chennai", "Kolkata"],
+  },
+  {
+    country: "United States",
+    currency: "USD",
+    cities: ["San Francisco", "New York", "Seattle", "Austin", "Boston", "Los Angeles", "Chicago"],
+  },
+  {
+    country: "United Kingdom",
+    currency: "GBP",
+    cities: ["London", "Manchester", "Edinburgh", "Bristol", "Cambridge"],
+  },
+  {
+    country: "Australia",
+    currency: "AUD",
+    cities: ["Sydney", "Melbourne", "Brisbane", "Perth", "Canberra"],
+  },
+  {
+    country: "New Zealand",
+    currency: "NZD",
+    cities: ["Auckland", "Wellington", "Christchurch"],
+  },
+  {
+    country: "Canada",
+    currency: "CAD",
+    cities: ["Toronto", "Vancouver", "Montreal", "Ottawa"],
+  },
+  {
+    country: "Singapore",
+    currency: "SGD",
+    cities: ["Singapore"],
+  },
+  {
+    country: "Germany",
+    currency: "EUR",
+    cities: ["Berlin", "Munich", "Hamburg", "Frankfurt"],
+  },
+  {
+    country: "Ireland",
+    currency: "EUR",
+    cities: ["Dublin", "Cork"],
+  },
+  {
+    country: "United Arab Emirates",
+    currency: "AED",
+    cities: ["Dubai", "Abu Dhabi"],
+  },
+];
+
+export const KNOWN_COUNTRIES: string[] = COUNTRIES.map((c) => c.country);
 
 export const KNOWN_ROLES: string[] = [
   "Software Engineer",
@@ -17,33 +80,62 @@ export const KNOWN_ROLES: string[] = [
   "Sales Manager",
 ];
 
-export const KNOWN_COUNTRIES: string[] = ["India"];
+const byCountry = new Map(COUNTRIES.map((c) => [c.country, c]));
 
-/** Top Indian metros we have benchmark coverage for. City → country. */
-export const CITY_OPTIONS: { city: string; country: string }[] = [
-  { city: "Bengaluru", country: "India" },
-  { city: "Mumbai", country: "India" },
-  { city: "Delhi NCR", country: "India" },
-  { city: "Hyderabad", country: "India" },
-  { city: "Pune", country: "India" },
-  { city: "Chennai", country: "India" },
-  { city: "Kolkata", country: "India" },
-];
-
-export const KNOWN_CITIES: string[] = CITY_OPTIONS.map((c) => c.city);
-
-export const COUNTRY_CURRENCY: Record<string, string> = {
-  India: "INR",
-};
-
-export const CURRENCIES: string[] = ["INR", "USD"];
-
-export function currencyForCountry(country?: string | null): string {
-  if (!country) return "INR";
-  return COUNTRY_CURRENCY[country] ?? "INR";
+/** Cities available for a country (empty array if unknown). */
+export function citiesForCountry(country?: string | null): string[] {
+  if (!country) return [];
+  return byCountry.get(country)?.cities ?? [];
 }
 
+/** The country a city belongs to, searching every country's metro list. */
 export function countryForCity(city?: string | null): string | undefined {
   if (!city) return undefined;
-  return CITY_OPTIONS.find((c) => c.city.toLowerCase() === city.toLowerCase())?.country;
+  const key = city.trim().toLowerCase();
+  for (const c of COUNTRIES) {
+    if (c.cities.some((m) => m.toLowerCase() === key)) return c.country;
+  }
+  return undefined;
+}
+
+export const COUNTRY_CURRENCY: Record<string, string> = Object.fromEntries(
+  COUNTRIES.map((c) => [c.country, c.currency])
+);
+
+export const CURRENCIES: string[] = Array.from(
+  new Set(["INR", "USD", "GBP", "EUR", "AUD", "NZD", "CAD", "SGD", "AED"])
+);
+
+export function currencyForCountry(country?: string | null): string {
+  if (!country) return "USD";
+  return COUNTRY_CURRENCY[country] ?? "USD";
+}
+
+// Aliases → canonical metro label, so any legacy/free value still resolves to a
+// known city for benchmark lookups.
+const CITY_SYNONYMS: Record<string, string> = {
+  bangalore: "Bengaluru",
+  bengaluru: "Bengaluru",
+  blr: "Bengaluru",
+  bombay: "Mumbai",
+  "new delhi": "Delhi NCR",
+  delhi: "Delhi NCR",
+  ncr: "Delhi NCR",
+  gurgaon: "Delhi NCR",
+  gurugram: "Delhi NCR",
+  noida: "Delhi NCR",
+  madras: "Chennai",
+  calcutta: "Kolkata",
+};
+
+/** Maps a free/legacy city onto a known metro, else null. */
+export function canonicalCity(city?: string | null): string | null {
+  if (!city) return null;
+  const key = city.trim().toLowerCase();
+  if (CITY_SYNONYMS[key]) return CITY_SYNONYMS[key];
+  for (const c of COUNTRIES) {
+    const hit = c.cities.find((m) => m.toLowerCase() === key);
+    if (hit) return hit;
+  }
+  return null;
 }

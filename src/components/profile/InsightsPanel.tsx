@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Globe2, Info, MapPin, Sparkles, TrendingUp } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Globe2, Info, Loader2, MapPin, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
 import { api, ApiSalaryDistribution } from "@/lib/api-client";
-import { KNOWN_CITIES } from "@/lib/insights/options";
+import { citiesForCountry } from "@/lib/insights/options";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -70,11 +70,28 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 export function InsightsPanel({ className }: { className?: string }) {
   const [cityOverride, setCityOverride] = useState<string | undefined>(undefined);
   const [scope, setScope] = useState<"city" | "country">("city");
+  const [generating, setGenerating] = useState(false);
+  const qc = useQueryClient();
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ["insights", { city: cityOverride ?? null, scope }],
     queryFn: () => api.getInsights({ city: cityOverride, scope }),
   });
+
+  // "Generate insight" forces a fresh AI estimate (refresh=1), then caches it
+  // into the query so the view updates in place.
+  const generate = async () => {
+    setGenerating(true);
+    try {
+      const fresh = await api.getInsights({ city: cityOverride, scope, refresh: true });
+      qc.setQueryData(["insights", { city: cityOverride ?? null, scope }], fresh);
+    } catch {
+      /* defensive — leave existing data in place */
+    } finally {
+      setGenerating(false);
+    }
+  };
+  const busy = isFetching || generating;
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -105,16 +122,27 @@ export function InsightsPanel({ className }: { className?: string }) {
     return (
       <div className={cn("rounded-xl border border-dashed p-6 text-center", className)}>
         <Sparkles className="mx-auto h-5 w-5 text-muted-foreground" />
-        <p className="mt-2 text-sm font-medium">Add your role &amp; city</p>
+        <p className="mt-2 text-sm font-medium">Add your role</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Tell us your job role and metro to unlock personalized salary insights.
+          Set your job role (and ideally your city) in the Profile tab, then generate your insight.
         </p>
+        <button
+          type="button"
+          onClick={generate}
+          disabled={busy}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+          Generate insight
+        </button>
       </div>
     );
   }
 
   const place = data.scope === "country" ? data.country : data.city ?? data.country;
-  const cityList = Array.from(new Set([...(data.city ? [data.city] : []), ...KNOWN_CITIES]));
+  const cityList = Array.from(
+    new Set([...(data.city ? [data.city] : []), ...citiesForCountry(data.country)])
+  );
   const showMarker =
     ownSalary != null &&
     data.distribution != null &&
@@ -158,6 +186,16 @@ export function InsightsPanel({ className }: { className?: string }) {
             ))}
           </select>
         )}
+        <button
+          type="button"
+          onClick={generate}
+          disabled={busy}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium hover:bg-muted disabled:opacity-60"
+          title="Regenerate a fresh AI estimate"
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+          Generate insight
+        </button>
       </div>
 
       {/* Hero */}
@@ -209,15 +247,20 @@ export function InsightsPanel({ className }: { className?: string }) {
         <div>
           <span className="font-medium text-foreground">Where this comes from:</span>{" "}
           {data.source === "community"
-            ? "anonymized, opted-in salaries shared by Stax members"
-            : "curated market benchmarks"}
-          {data.source === "community" ? " blended with curated market benchmarks" : ""} across the top Indian metros.
+            ? "anonymized, opted-in salaries shared by Stax members, blended with market benchmarks."
+            : data.source === "ai"
+              ? "an AI compensation estimate based on current market rates."
+              : "curated market benchmarks."}{" "}
           Figures are estimates of annual gross base pay.
-          {data.distribution ? ` Based on ~${data.distribution.sampleSize.toLocaleString("en-IN")} data points.` : ""}
+          {data.distribution ? ` Comparable pool ~${data.distribution.sampleSize.toLocaleString()}.` : ""}
           <div className="mt-0.5">
             Last updated{" "}
-            {new Date(data.refreshedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}{" "}
-            · refreshed weekly.
+            {new Date(data.refreshedAt).toLocaleDateString(undefined, {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+            {data.source === "ai" ? " · regenerate anytime with Generate insight." : " · refreshed weekly."}
           </div>
         </div>
       </div>

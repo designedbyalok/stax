@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
 import { toExperienceBracket } from "@/lib/insights/experience";
-import { countryForCity } from "@/lib/insights/options";
-import {
-  getDistribution,
-  computeSalaryPosition,
-  comparableCount,
-} from "@/lib/insights/engine";
+import { countryForCity, canonicalCity, currencyForCountry } from "@/lib/insights/options";
+import { canonicalRole } from "@/lib/insights/benchmarks";
+import { getDistribution, computeSalaryPosition } from "@/lib/insights/engine";
+
+// Below this many real comparable profiles, the headline count falls back to
+// the distribution's sample size (curated/AI estimate).
+const REAL_COMPARABLE_MIN = 5;
 
 export async function GET(req: NextRequest) {
   const auth = await requireUserId();
@@ -17,12 +18,13 @@ export async function GET(req: NextRequest) {
     where: { userId: auth.userId },
   });
 
-  // Need a role, plus a country — inferred from a known city when the user
-  // hasn't set one explicitly — to anchor any benchmark.
-  const country = profile?.country || countryForCity(profile?.city) || null;
-  if (!profile?.jobRole || !country) {
+  // A role is the only hard requirement. Country is inferred from a known city
+  // and defaults to India (our current coverage), so insights still render.
+  const jobRole = canonicalRole(profile?.jobRole) ?? profile?.jobRole ?? null;
+  if (!profile || !jobRole) {
     return NextResponse.json({ needsProfile: true });
   }
+  const country = profile.country || countryForCity(profile.city) || "India";
 
   const { searchParams } = new URL(req.url);
   const scopeParam = searchParams.get("scope");
@@ -35,22 +37,34 @@ export async function GET(req: NextRequest) {
         : "country";
 
   // City override (e.g. exploring another market); ignored at country scope.
+  // Canonicalize free-typed names ("Bangalore" → "Bengaluru"); unknown metros
+  // resolve to null so the engine falls back to the all-India aggregate.
   const cityOverride = searchParams.get("city");
-  const city =
-    requestedScope === "country"
-      ? null
-      : (cityOverride ?? profile.city ?? null);
-  // If they asked for city scope but no city is available, fall back to country.
+  const requestedCity =
+    requestedScope === "country" ? null : (cityOverride ?? profile.city ?? null);
+  const city = canonicalCity(requestedCity);
   const scope: "city" | "country" = city ? requestedScope : "country";
 
-  const jobRole = profile.jobRole;
   const years = profile.yearsExperience ?? 0;
   const bracket = toExperienceBracket(years);
 
-  const [distribution, comparable] = await Promise.all([
-    getDistribution({ jobRole, city, country, bracket }),
-    comparableCount({ jobRole, city, country }),
-  ]);
+  // `?refresh=1` (the "Generate insight" button) forces a fresh AI estimate.
+  const forceAi = searchParams.get("refresh") === "1";
+
+  const distribution = await getDistribution(
+    { jobRole, city, country, bracket },
+    { allowAi: true, forceAi }
+  );
+
+  // Headline pool: prefer real comparable profiles; otherwise use the
+  // distribution's sample size (curated or AI-estimated).
+  const realCount = await prisma.userProfile.count({
+    where: { jobRole, country, ...(city ? { city } : {}) },
+  });
+  const comparableIsReal = realCount >= REAL_COMPARABLE_MIN;
+  const comparableCount = comparableIsReal
+    ? realCount
+    : (distribution?.sampleSize ?? realCount);
 
   const position =
     profile.currentSalary != null && distribution
@@ -64,11 +78,11 @@ export async function GET(req: NextRequest) {
     country,
     scope,
     bracket,
-    comparableCount: comparable.count,
-    comparableIsReal: comparable.isReal,
+    comparableCount,
+    comparableIsReal,
     distribution,
     position,
-    currency: distribution?.currency ?? profile.salaryCurrency ?? null,
+    currency: distribution?.currency ?? currencyForCountry(country) ?? profile.salaryCurrency ?? null,
     source: distribution?.source ?? null,
     refreshedAt: new Date().toISOString(),
   });

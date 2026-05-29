@@ -19,9 +19,9 @@ import { useSettingsModal } from "@/lib/settings-modal-store";
 import { computeProfileCompletion } from "@/lib/profile-completion";
 import {
   KNOWN_ROLES,
-  KNOWN_CITIES,
   KNOWN_COUNTRIES,
   CURRENCIES,
+  citiesForCountry,
   currencyForCountry,
   countryForCity,
 } from "@/lib/insights/options";
@@ -138,16 +138,30 @@ export function ProfileModal() {
 
   const set = (patch: Partial<Form>) => setForm((f) => (f ? { ...f, ...patch } : f));
 
+  // Picking a city auto-selects the country it belongs to (+ its currency).
   const onCityChange = (city: string) =>
     setForm((f) => {
       if (!f) return f;
       const next = { ...f, city };
       const inferred = countryForCity(city);
-      if (inferred && !f.country) {
+      if (inferred) {
         next.country = inferred;
         next.salaryCurrency = currencyForCountry(inferred);
       }
       return next;
+    });
+
+  // Changing country resets a city that doesn't belong to it.
+  const onCountryChange = (country: string) =>
+    setForm((f) => {
+      if (!f) return f;
+      const cities = citiesForCountry(country);
+      return {
+        ...f,
+        country,
+        salaryCurrency: currencyForCountry(country),
+        city: f.city && cities.includes(f.city) ? f.city : "",
+      };
     });
 
   const completion = useMemo(
@@ -165,8 +179,9 @@ export function ProfileModal() {
     [form, profile?.photoUrl]
   );
 
-  // Insights need at least a role and a city to anchor a benchmark.
-  const hasEssentials = Boolean(form?.jobRole?.trim() && form?.city?.trim());
+  // Insights need at least a role to anchor a benchmark (city is optional — we
+  // fall back to the all-India aggregate when it's missing/unknown).
+  const hasEssentials = Boolean(form?.jobRole?.trim());
 
   const onPickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -275,6 +290,7 @@ export function ProfileModal() {
                 form={form}
                 set={set}
                 onCityChange={onCityChange}
+                onCountryChange={onCountryChange}
                 missing={completion.missing}
               />
             ) : hasEssentials ? (
@@ -321,13 +337,18 @@ function ProfileForm({
   form,
   set,
   onCityChange,
+  onCountryChange,
   missing,
 }: {
   form: Form;
   set: (patch: Partial<Form>) => void;
   onCityChange: (city: string) => void;
+  onCountryChange: (country: string) => void;
   missing: { key: string; label: string }[];
 }) {
+  const cityChoices = citiesForCountry(form.country);
+  const selectCls =
+    "h-9 w-full rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20";
   return (
     <div className="space-y-6">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -338,13 +359,23 @@ function ProfileForm({
           <Input list="role-options" value={form.jobRole} onChange={(e) => set({ jobRole: e.target.value })} placeholder="Product Designer" />
           <datalist id="role-options">{KNOWN_ROLES.map((r) => <option key={r} value={r} />)}</datalist>
         </Field>
-        <Field label="City">
-          <Input list="city-options" value={form.city} onChange={(e) => onCityChange(e.target.value)} placeholder="Bengaluru" />
-          <datalist id="city-options">{KNOWN_CITIES.map((c) => <option key={c} value={c} />)}</datalist>
-        </Field>
         <Field label="Country">
-          <Input list="country-options" value={form.country} onChange={(e) => set({ country: e.target.value })} placeholder="India" />
-          <datalist id="country-options">{KNOWN_COUNTRIES.map((c) => <option key={c} value={c} />)}</datalist>
+          <select className={selectCls} value={form.country} onChange={(e) => onCountryChange(e.target.value)} aria-label="Country">
+            <option value="">Select country…</option>
+            {KNOWN_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </Field>
+        <Field label="City">
+          <select
+            className={selectCls}
+            value={form.city}
+            onChange={(e) => onCityChange(e.target.value)}
+            disabled={!form.country}
+            aria-label="City"
+          >
+            <option value="">{form.country ? "Select city…" : "Choose a country first"}</option>
+            {cityChoices.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
         </Field>
         <Field label="Years of experience">
           <Input type="number" min={0} max={60} value={form.yearsExperience} onChange={(e) => set({ yearsExperience: e.target.value })} placeholder="5" />
@@ -394,9 +425,8 @@ function InsightsGate({ onComplete }: { onComplete: () => void }) {
       </div>
       <h3 className="mt-4 text-base font-semibold">Unlock your insights</h3>
       <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-        Add your <span className="font-medium text-foreground">job role</span> and{" "}
-        <span className="font-medium text-foreground">city</span> to see how your pay compares with peers in your
-        metro.
+        Add your <span className="font-medium text-foreground">job role</span> to see how your pay compares with
+        peers — add your city too for metro-level numbers.
       </p>
       <Button className="mt-5" size="sm" onClick={onComplete}>
         Complete your profile

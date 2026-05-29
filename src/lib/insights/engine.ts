@@ -1,6 +1,8 @@
 import prisma from "@/lib/db";
 import type { ExperienceBracket } from "./experience";
 import { findSeedBenchmark, seedSampleSize } from "./benchmarks";
+import { currencyForCountry } from "./options";
+import { generateSalaryEstimate } from "./ai-insights";
 
 /**
  * Core salary-insight computation. Blends curated benchmark data with
@@ -16,7 +18,7 @@ export type SalaryDistribution = {
   p90: number;
   median: number;
   sampleSize: number;
-  source: "community" | "benchmark";
+  source: "community" | "benchmark" | "ai";
   currency: string;
 };
 
@@ -47,6 +49,31 @@ const COMPARABLE_MIN = 5;
  * benchmark row. Returns null when no data exists for the slice.
  */
 export async function getDistribution(
+  query: DistributionQuery,
+  opts: { allowAi?: boolean; forceAi?: boolean } = {}
+): Promise<SalaryDistribution | null> {
+  // A forced refresh skips caches and regenerates the requested slice with AI.
+  if (opts.forceAi) {
+    return generateAndCache(query);
+  }
+
+  const direct = await lookupDistribution(query);
+  if (direct) return direct;
+  // When we don't have the exact metro, fall back to the country-level
+  // (nationwide) aggregate so the insight still renders.
+  if (query.city) {
+    const countryLevel = await lookupDistribution({ ...query, city: null });
+    if (countryLevel) return countryLevel;
+  }
+
+  // Nothing cached or curated — generate on demand with AI and cache it.
+  if (opts.allowAi) {
+    return generateAndCache(query);
+  }
+  return null;
+}
+
+async function lookupDistribution(
   query: DistributionQuery
 ): Promise<SalaryDistribution | null> {
   const { jobRole, city, country, bracket } = query;
@@ -60,12 +87,15 @@ export async function getDistribution(
     },
   });
 
-  // Prefer a healthy community row, then a stored benchmark row.
+  // Prefer healthy community data, then a curated benchmark, then a cached AI
+  // estimate.
   const community = rows.find(
     (r) => r.source === "community" && r.sampleSize >= COMMUNITY_MIN_SAMPLE
   );
-  const benchmark = rows.find((r) => r.source === "benchmark");
-  const chosen = community ?? benchmark;
+  const chosen =
+    community ??
+    rows.find((r) => r.source === "benchmark") ??
+    rows.find((r) => r.source === "ai");
 
   if (chosen) {
     return {
@@ -75,13 +105,17 @@ export async function getDistribution(
       p90: chosen.p90,
       median: chosen.p50,
       sampleSize: chosen.sampleSize,
-      source: chosen.source === "community" ? "community" : "benchmark",
+      source:
+        chosen.source === "community"
+          ? "community"
+          : chosen.source === "ai"
+            ? "ai"
+            : "benchmark",
       currency: chosen.currency,
     };
   }
 
-  // Fall back to the in-code curated dataset so insights work even before the
-  // SalaryBenchmark table has been seeded in the database.
+  // In-code curated dataset (covers India out of the box, no DB seed needed).
   const seed = findSeedBenchmark(jobRole, city ?? null, country, bracket);
   if (seed) {
     return {
@@ -97,6 +131,57 @@ export async function getDistribution(
   }
 
   return null;
+}
+
+/**
+ * Generates an AI salary estimate for the slice and caches it as a
+ * source="ai" SalaryBenchmark row (idempotent on the role×city×country×bracket
+ * key). Returns null if the AI call fails so the UI can degrade gracefully.
+ */
+async function generateAndCache(
+  query: DistributionQuery
+): Promise<SalaryDistribution | null> {
+  const { jobRole, city, country, bracket } = query;
+  const currency = currencyForCountry(country);
+  const est = await generateSalaryEstimate({ jobRole, city: city ?? null, country, bracket, currency });
+  if (!est) return null;
+
+  const data = {
+    p25: est.p25,
+    p50: est.p50,
+    p75: est.p75,
+    p90: est.p90,
+    sampleSize: est.comparableCount,
+    currency: est.currency,
+  };
+
+  // Upsert (manual, since a null city can't use the compound unique key).
+  try {
+    const existing = await prisma.salaryBenchmark.findFirst({
+      where: { jobRole, city: city ?? null, country, experienceBracket: bracket, source: "ai" },
+      select: { id: true },
+    });
+    if (existing) {
+      await prisma.salaryBenchmark.update({ where: { id: existing.id }, data });
+    } else {
+      await prisma.salaryBenchmark.create({
+        data: { jobRole, city: city ?? null, country, experienceBracket: bracket, source: "ai", ...data },
+      });
+    }
+  } catch (err) {
+    console.warn("Failed to cache AI salary estimate:", err);
+  }
+
+  return {
+    p25: est.p25,
+    p50: est.p50,
+    p75: est.p75,
+    p90: est.p90,
+    median: est.p50,
+    sampleSize: est.comparableCount,
+    source: "ai",
+    currency: est.currency,
+  };
 }
 
 function labelForPercentile(percentile: number): string {
