@@ -25,7 +25,6 @@ export function ResumeClient() {
   const resumeId = searchParams.get("id");
 
   const [activeResume, setActiveResume] = useState<ApiResume | null>(null);
-  const [activeTab, setActiveTab] = useState<"content" | "design">("content");
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -257,7 +256,7 @@ export function ResumeClient() {
 
   return (
     <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-muted/20">
-      {/* LEFT: Editor */}
+      {/* LEFT: Form / Content panel */}
       <div className="w-full md:w-[450px] border-r bg-card flex flex-col h-full z-10 shadow-sm print:hidden">
         <div className="p-4 border-b flex flex-col gap-3 shrink-0">
           <div className="flex items-center justify-between">
@@ -300,27 +299,10 @@ export function ResumeClient() {
               Print PDF
             </Button>
           </div>
-          
-          {/* Tabs */}
-          <div className="flex items-center p-1 bg-muted rounded-md mt-2">
-            <button 
-              className={`flex-1 text-xs font-medium px-3 py-1.5 rounded-sm transition-all ${activeTab === 'content' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              onClick={() => setActiveTab('content')}
-            >
-              Content
-            </button>
-            <button 
-              className={`flex-1 text-xs font-medium px-3 py-1.5 rounded-sm transition-all ${activeTab === 'design' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              onClick={() => setActiveTab('design')}
-            >
-              Design
-            </button>
-          </div>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-4">
-          {activeTab === 'content' && (
-            <div className="space-y-6">
+          <div className="space-y-6">
               <section className="space-y-4">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Personal Info</h3>
                 <div className="space-y-3">
@@ -1142,11 +1124,23 @@ export function ResumeClient() {
               ))}
             </div>
           </section>
-            </div>
-          )}
+          </div>
+        </div>
+      </div>
 
-          {activeTab === 'design' && (
-            <div className="space-y-8">
+      {/* CENTER: Preview Pane */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-muted/20 print:p-0 print:bg-white print:overflow-visible">
+        <ResumePreview resume={activeResume.content} />
+      </div>
+
+      {/* RIGHT: Design Pane */}
+      <div className="w-full md:w-[300px] border-l bg-card flex flex-col h-full z-10 shadow-sm print:hidden">
+        <div className="p-4 border-b shrink-0">
+          <h2 className="text-sm font-semibold text-foreground">Design</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Template, color &amp; typography</p>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-8">
               {/* Template Selector */}
               <section className="space-y-3">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Layout Template</h3>
@@ -1245,14 +1239,8 @@ export function ResumeClient() {
                   <span>Relaxed</span>
                 </div>
               </section>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-
-      {/* RIGHT: Preview Pane */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-muted/20 print:p-0 print:bg-white print:overflow-visible">
-        <ResumePreview resume={activeResume.content} />
       </div>
     </div>
   );

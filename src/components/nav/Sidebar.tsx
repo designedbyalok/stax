@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { signOut } from "next-auth/react";
 import {
@@ -63,8 +63,16 @@ export function Sidebar({
   user: { name?: string | null; email?: string | null; image?: string | null };
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const openSettings = useSettingsModal((s) => s.openModal);
   const initial = (user.name || user.email || "U").trim().charAt(0).toUpperCase();
+
+  // The resume builder goes full-screen once a resume is open. Hiding the
+  // sidebar (rather than just collapsing it) hands the whole viewport to the
+  // editor's three-pane layout. The landing chooser keeps the sidebar so
+  // users still have a way back into the rest of the app.
+  const inResumeBuilder =
+    pathname === "/resume-builder" && searchParams.get("id") !== null;
 
   const remindersQuery = useQuery({
     queryKey: ["reminders"],
@@ -88,6 +96,8 @@ export function Sidebar({
     : null;
 
   const counts = { reminders: reminderCount, interviews: 0 };
+
+  if (inResumeBuilder) return null;
 
   return (
     <aside className="hidden md:flex w-[232px] shrink-0 flex-col border-r border-border bg-card">
