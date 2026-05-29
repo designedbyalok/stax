@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  // Next 16 defaults to Turbopack and errors out when a `webpack` key is
+  // present with no Turbopack config. The webpack tweak above is dev-only,
+  // so an empty Turbopack config is enough to let production builds proceed
+  // without changing any behavior.
+  turbopack: {},
 };
 
 const sentryEnabled =
