@@ -270,7 +270,7 @@ export type ApiSalaryDistribution = {
   p90: number;
   median: number;
   sampleSize: number;
-  source: "community" | "benchmark";
+  source: "community" | "benchmark" | "ai";
   currency: string;
 };
 
@@ -293,7 +293,7 @@ export type ApiInsights =
       distribution: ApiSalaryDistribution | null;
       position: ApiSalaryPosition | null;
       currency: string | null;
-      source: "community" | "benchmark" | null;
+      source: "community" | "benchmark" | "ai" | null;
       refreshedAt: string;
     };
 
@@ -580,10 +580,11 @@ export const api = {
       }
     );
   },
-  getInsights: (params?: { city?: string; scope?: "city" | "country" }) => {
+  getInsights: (params?: { city?: string; scope?: "city" | "country"; refresh?: boolean }) => {
     const qs = new URLSearchParams();
     if (params?.city) qs.set("city", params.city);
     if (params?.scope) qs.set("scope", params.scope);
+    if (params?.refresh) qs.set("refresh", "1");
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return request<ApiInsights>(`/api/insights${suffix}`);
   },

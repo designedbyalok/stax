@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils";
 import { ProfileAvatarRing } from "@/components/profile/ProfileAvatarRing";
 import {
   KNOWN_ROLES,
-  KNOWN_CITIES,
   KNOWN_COUNTRIES,
   CURRENCIES,
+  citiesForCountry,
   currencyForCountry,
   countryForCity,
 } from "@/lib/insights/options";
@@ -109,11 +109,22 @@ export default function OnboardingPage() {
     setForm((f) => {
       const inferred = countryForCity(city);
       const next = { ...f, city };
-      if (inferred && !f.country) {
+      if (inferred) {
         next.country = inferred;
         next.salaryCurrency = currencyForCountry(inferred);
       }
       return next;
+    });
+
+  const onCountryChange = (country: string) =>
+    setForm((f) => {
+      const cities = citiesForCountry(country);
+      return {
+        ...f,
+        country,
+        salaryCurrency: currencyForCountry(country),
+        city: f.city && cities.includes(f.city) ? f.city : "",
+      };
     });
 
   const persist = async (extra: ProfilePatch) => {
@@ -258,14 +269,30 @@ export default function OnboardingPage() {
             <StepShell title="Where are you based?" subtitle="We compare you against your local market.">
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs">City</Label>
-                  <Input autoFocus list="ob-cities" value={form.city} onChange={(e) => onCityChange(e.target.value)} placeholder="Bengaluru" />
-                  <datalist id="ob-cities">{KNOWN_CITIES.map((c) => <option key={c} value={c} />)}</datalist>
+                  <Label className="text-xs">Country</Label>
+                  <select
+                    autoFocus
+                    className="h-9 w-full rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+                    value={form.country}
+                    onChange={(e) => onCountryChange(e.target.value)}
+                    aria-label="Country"
+                  >
+                    <option value="">Select country…</option>
+                    {KNOWN_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Country</Label>
-                  <Input list="ob-countries" value={form.country} onChange={(e) => set({ country: e.target.value })} placeholder="India" />
-                  <datalist id="ob-countries">{KNOWN_COUNTRIES.map((c) => <option key={c} value={c} />)}</datalist>
+                  <Label className="text-xs">City</Label>
+                  <select
+                    className="h-9 w-full rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+                    value={form.city}
+                    onChange={(e) => onCityChange(e.target.value)}
+                    disabled={!form.country}
+                    aria-label="City"
+                  >
+                    <option value="">{form.country ? "Select city…" : "Choose a country first"}</option>
+                    {citiesForCountry(form.country).map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
               </div>
             </StepShell>
