@@ -3,15 +3,66 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Printer, Save, Sparkles, ArrowLeft, Plus, Check } from "lucide-react";
+import { Loader2, Printer, Save, Sparkles, ArrowLeft, Plus, Check, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import { ApiResume, ResumeData } from "@/lib/types/resume";
+import { ApiResume, ResumeData, LINK_PLATFORMS, RESUME_TEMPLATES } from "@/lib/types/resume";
+import { RESUME_FONTS, ALL_FONTS_HREF, resolveFont } from "@/lib/resume-fonts";
 import { ResumePreview } from "./ResumePreview";
 import { ResumeLanding } from "./ResumeLanding";
+
+const THEME_COLORS = [
+  { name: "Slate", value: "#0f172a" },
+  { name: "Blue", value: "#2563eb" },
+  { name: "Rose", value: "#e11d48" },
+  { name: "Emerald", value: "#059669" },
+  { name: "Violet", value: "#7c3aed" },
+  { name: "Amber", value: "#d97706" },
+];
+
+const BACKGROUND_COLORS = [
+  { name: "White", value: "#ffffff" },
+  { name: "Cloud", value: "#f8fafc" },
+  { name: "Cream", value: "#fdf6ec" },
+  { name: "Mint", value: "#f0fdf4" },
+  { name: "Sky", value: "#f0f9ff" },
+  { name: "Blush", value: "#fdf2f8" },
+];
+
+const TEXT_COLORS = [
+  { name: "Ink", value: "#27272a" },
+  { name: "Black", value: "#000000" },
+  { name: "Graphite", value: "#3f3f46" },
+  { name: "Navy", value: "#1e293b" },
+  { name: "Espresso", value: "#3b2f2f" },
+];
+
+// Per-platform URL hints shown in the link's address field.
+const LINK_PLACEHOLDERS: Record<string, string> = {
+  LinkedIn: "linkedin.com/in/you",
+  GitHub: "github.com/you",
+  "X (Twitter)": "x.com/you",
+  Portfolio: "yoursite.com",
+  Website: "yoursite.com",
+  Dribbble: "dribbble.com/you",
+  Behance: "behance.net/you",
+  "Stack Overflow": "stackoverflow.com/users/...",
+  Medium: "medium.com/@you",
+  "Dev.to": "dev.to/you",
+  YouTube: "youtube.com/@you",
+  Instagram: "instagram.com/you",
+};
 
 // Snapshot used to detect unsaved edits for autosave.
 function serializeResume(r: ApiResume): string {
@@ -381,75 +432,82 @@ export function ResumeClient() {
                 />
               </div>
 
-              {/* Links (LinkedIn, GitHub, etc.) */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs">Links</Label>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6"
-                    onClick={() => {
-                      const links = [
-                        ...(activeResume.content.basics.links ?? []),
-                        { id: crypto.randomUUID(), label: "", url: "" },
-                      ];
-                      handleUpdateContent({
-                        ...activeResume.content,
-                        basics: { ...activeResume.content.basics, links },
-                      });
-                    }}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {(activeResume.content.basics.links ?? []).map((link, idx) => (
-                    <div key={link.id} className="flex items-center gap-2 group">
+            </div>
+          </section>
+
+          {/* Links & Profiles */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Links &amp; Profiles</h3>
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                const links = [...(activeResume.content.basics.links ?? []), { id: crypto.randomUUID(), label: "LinkedIn", url: "" }];
+                handleUpdateContent({ ...activeResume.content, basics: { ...activeResume.content.basics, links } });
+              }}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {(activeResume.content.basics.links ?? []).map((link, idx) => {
+                const known =
+                  (LINK_PLATFORMS as readonly string[]).includes(link.label) && link.label !== "Custom";
+                const selectValue = known ? link.label : "Custom";
+                const updateLink = (patch: { label?: string; url?: string }) => {
+                  const links = [...(activeResume.content.basics.links ?? [])];
+                  links[idx] = { ...links[idx], ...patch };
+                  handleUpdateContent({ ...activeResume.content, basics: { ...activeResume.content.basics, links } });
+                };
+                return (
+                  <div key={link.id} className="flex items-start gap-2 group">
+                    <Select
+                      value={selectValue}
+                      onValueChange={(v) =>
+                        updateLink({ label: v === "Custom" ? (known ? "" : link.label) : (v ?? "") })
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-xs w-[132px] shrink-0">
+                        <span className="truncate">{selectValue}</span>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LINK_PLATFORMS.map((p) => (
+                          <SelectItem key={p} value={p}>{p}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      {!known && (
+                        <Input
+                          className="h-8 text-xs"
+                          placeholder="Label (e.g. Personal Site)"
+                          value={link.label}
+                          onChange={(e) => updateLink({ label: e.target.value })}
+                        />
+                      )}
                       <Input
-                        className="h-7 text-xs w-[34%] shrink-0"
-                        placeholder="LinkedIn"
-                        value={link.label}
-                        onChange={(e) => {
-                          const links = [...(activeResume.content.basics.links ?? [])];
-                          links[idx] = { ...links[idx], label: e.target.value };
-                          handleUpdateContent({
-                            ...activeResume.content,
-                            basics: { ...activeResume.content.basics, links },
-                          });
-                        }}
-                      />
-                      <Input
-                        className="h-7 text-xs flex-1 min-w-0"
-                        placeholder="linkedin.com/in/you"
+                        className="h-8 text-xs"
+                        placeholder={LINK_PLACEHOLDERS[selectValue] ?? "https://…"}
                         value={link.url}
-                        onChange={(e) => {
-                          const links = [...(activeResume.content.basics.links ?? [])];
-                          links[idx] = { ...links[idx], url: e.target.value };
-                          handleUpdateContent({
-                            ...activeResume.content,
-                            basics: { ...activeResume.content.basics, links },
-                          });
-                        }}
+                        onChange={(e) => updateLink({ url: e.target.value })}
                       />
-                      <button
-                        onClick={() => {
-                          const links = [...(activeResume.content.basics.links ?? [])];
-                          links.splice(idx, 1);
-                          handleUpdateContent({
-                            ...activeResume.content,
-                            basics: { ...activeResume.content.basics, links },
-                          });
-                        }}
-                        className="text-muted-foreground hover:text-destructive text-xs shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        aria-label="Remove link"
-                      >
-                        Remove
-                      </button>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <button
+                      onClick={() => {
+                        const links = [...(activeResume.content.basics.links ?? [])];
+                        links.splice(idx, 1);
+                        handleUpdateContent({ ...activeResume.content, basics: { ...activeResume.content.basics, links } });
+                      }}
+                      className="text-muted-foreground hover:text-destructive text-xs shrink-0 mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label="Remove link"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                );
+              })}
+              {(activeResume.content.basics.links ?? []).length === 0 && (
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Add LinkedIn, GitHub, a portfolio, or any profile relevant to the role.
+                </p>
+              )}
             </div>
           </section>
 
@@ -1140,12 +1198,14 @@ export function ResumeClient() {
           <p className="text-xs text-muted-foreground mt-0.5">Template, color &amp; typography</p>
         </div>
         <div className="flex-1 overflow-y-auto p-4">
+          {/* Loaded so each option in the font picker previews in its own face */}
+          <link rel="stylesheet" href={ALL_FONTS_HREF} precedence="resume-fonts-all" />
           <div className="space-y-8">
               {/* Template Selector */}
               <section className="space-y-3">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Layout Template</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {['classic', 'modern', 'minimal'].map((tpl) => (
+                <div className="grid grid-cols-2 gap-2">
+                  {RESUME_TEMPLATES.map((tpl) => (
                     <button
                       key={tpl}
                       onClick={() => handleUpdateContent({
@@ -1153,8 +1213,8 @@ export function ResumeClient() {
                         design: { ...activeResume.content.design, template: tpl } as any
                       })}
                       className={`py-2 px-1 border rounded-md text-xs font-medium capitalize transition-all ${
-                        (activeResume.content.design?.template || 'classic') === tpl 
-                          ? 'border-primary bg-primary/5 text-primary' 
+                        (activeResume.content.design?.template || 'classic') === tpl
+                          ? 'border-primary bg-primary/5 text-primary'
                           : 'border-border text-muted-foreground hover:bg-muted'
                       }`}
                     >
@@ -1164,56 +1224,80 @@ export function ResumeClient() {
                 </div>
               </section>
 
+              {/* Typography */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Font</h3>
+                {(() => {
+                  const currentFont = resolveFont(activeResume.content.design?.fontFamily).font.name;
+                  return (
+                    <Select
+                      value={currentFont}
+                      onValueChange={(v) =>
+                        handleUpdateContent({
+                          ...activeResume.content,
+                          design: { ...activeResume.content.design, fontFamily: v ?? "Inter" } as any,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-9 text-sm">
+                        <span className="truncate" style={{ fontFamily: `"${currentFont}"` }}>
+                          {currentFont}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[320px]">
+                        {(["Sans Serif", "Serif", "Monospace"] as const).map((cat) => (
+                          <SelectGroup key={cat}>
+                            <SelectLabel>{cat}</SelectLabel>
+                            {RESUME_FONTS.filter((f) => f.category === cat).map((f) => (
+                              <SelectItem key={f.name} value={f.name}>
+                                <span style={{ fontFamily: `"${f.name}", ${f.stack}` }}>{f.name}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  );
+                })()}
+              </section>
+
               {/* Theme Color */}
               <section className="space-y-3">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Theme Color</h3>
-                <div className="flex flex-wrap gap-3">
-                  {[
-                    { name: 'Slate', value: '#0f172a' },
-                    { name: 'Blue', value: '#2563eb' },
-                    { name: 'Rose', value: '#e11d48' },
-                    { name: 'Emerald', value: '#059669' },
-                    { name: 'Violet', value: '#7c3aed' },
-                  ].map((color) => (
-                    <button
-                      key={color.value}
-                      onClick={() => handleUpdateContent({
-                        ...activeResume.content,
-                        design: { ...activeResume.content.design, themeColor: color.value } as any
-                      })}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${(activeResume.content.design?.themeColor || '#0f172a') === color.value ? 'border-foreground scale-110' : 'border-transparent hover:scale-105 shadow-sm'}`}
-                      style={{ backgroundColor: color.value }}
-                      title={color.name}
-                    />
-                  ))}
-                </div>
+                <ColorSwatches
+                  options={THEME_COLORS}
+                  current={activeResume.content.design?.themeColor || "#0f172a"}
+                  onSelect={(value) => handleUpdateContent({
+                    ...activeResume.content,
+                    design: { ...activeResume.content.design, themeColor: value } as any,
+                  })}
+                />
               </section>
 
-              {/* Typography */}
+              {/* Background Color */}
               <section className="space-y-3">
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Typography</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { label: 'Sans', value: 'sans', style: 'font-sans' },
-                    { label: 'Serif', value: 'serif', style: 'font-serif' },
-                    { label: 'Mono', value: 'mono', style: 'font-mono' },
-                  ].map((font) => (
-                    <button
-                      key={font.value}
-                      onClick={() => handleUpdateContent({
-                        ...activeResume.content,
-                        design: { ...activeResume.content.design, fontFamily: font.value } as any
-                      })}
-                      className={`py-2 px-1 border rounded-md text-xs font-medium transition-all ${font.style} ${
-                        (activeResume.content.design?.fontFamily || 'sans') === font.value 
-                          ? 'border-primary bg-primary/5 text-primary' 
-                          : 'border-border text-muted-foreground hover:bg-muted'
-                      }`}
-                    >
-                      {font.label}
-                    </button>
-                  ))}
-                </div>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Background</h3>
+                <ColorSwatches
+                  options={BACKGROUND_COLORS}
+                  current={activeResume.content.design?.backgroundColor || "#ffffff"}
+                  onSelect={(value) => handleUpdateContent({
+                    ...activeResume.content,
+                    design: { ...activeResume.content.design, backgroundColor: value } as any,
+                  })}
+                />
+              </section>
+
+              {/* Text Color */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Text Color</h3>
+                <ColorSwatches
+                  options={TEXT_COLORS}
+                  current={activeResume.content.design?.textColor || "#27272a"}
+                  onSelect={(value) => handleUpdateContent({
+                    ...activeResume.content,
+                    design: { ...activeResume.content.design, textColor: value } as any,
+                  })}
+                />
               </section>
 
               {/* Spacing */}
@@ -1242,6 +1326,56 @@ export function ResumeClient() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// A row of preset color swatches plus a native picker for any custom color.
+function ColorSwatches({
+  options,
+  current,
+  onSelect,
+}: {
+  options: { name: string; value: string }[];
+  current: string;
+  onSelect: (value: string) => void;
+}) {
+  const isPreset = options.some((o) => o.value.toLowerCase() === current.toLowerCase());
+  return (
+    <div className="flex flex-wrap items-center gap-2.5">
+      {options.map((c) => (
+        <button
+          key={c.value}
+          type="button"
+          onClick={() => onSelect(c.value)}
+          className={`w-7 h-7 rounded-full border transition-all ${
+            current.toLowerCase() === c.value.toLowerCase()
+              ? "ring-2 ring-foreground ring-offset-1 ring-offset-background scale-110"
+              : "border-border hover:scale-105 shadow-sm"
+          }`}
+          style={{ backgroundColor: c.value }}
+          title={c.name}
+          aria-label={c.name}
+        />
+      ))}
+      <label
+        className={`relative w-7 h-7 rounded-full overflow-hidden cursor-pointer grid place-items-center border ${
+          isPreset
+            ? "border-border"
+            : "ring-2 ring-foreground ring-offset-1 ring-offset-background border-transparent"
+        }`}
+        title="Custom color"
+        style={isPreset ? undefined : { backgroundColor: current }}
+      >
+        {isPreset && <Palette className="w-3.5 h-3.5 text-muted-foreground" />}
+        <input
+          type="color"
+          value={current}
+          onChange={(e) => onSelect(e.target.value)}
+          className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+          aria-label="Custom color"
+        />
+      </label>
     </div>
   );
 }

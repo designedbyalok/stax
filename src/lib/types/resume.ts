@@ -103,8 +103,40 @@ export interface ResumeData {
     themeColor: string;
     fontFamily: string;
     spacing: number;
+    /** Resume page background color. Defaults to white. */
+    backgroundColor?: string;
+    /** Primary body/heading ("ink") text color. Defaults to near-black. */
+    textColor?: string;
   };
 }
+
+/** Available resume layout templates, in display order. */
+export const RESUME_TEMPLATES = [
+  "classic",
+  "modern",
+  "minimal",
+  "professional",
+  "elegant",
+  "compact",
+] as const;
+
+/** Recognized link platforms offered in the builder. `label` is what shows
+ *  on the resume; "Custom" lets the user type their own label. */
+export const LINK_PLATFORMS = [
+  "LinkedIn",
+  "GitHub",
+  "X (Twitter)",
+  "Portfolio",
+  "Website",
+  "Dribbble",
+  "Behance",
+  "Stack Overflow",
+  "Medium",
+  "Dev.to",
+  "YouTube",
+  "Instagram",
+  "Custom",
+] as const;
 
 export interface ApiResume {
   id: string;

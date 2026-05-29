@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ApiResume, ResumeData } from "@/lib/types/resume";
+import { ApiResume, ResumeData, RESUME_TEMPLATES } from "@/lib/types/resume";
 import { ResumePreview } from "./ResumePreview";
 
 const MOCK_RESUME_DATA: ResumeData = {
@@ -68,7 +68,7 @@ const MOCK_RESUME_DATA: ResumeData = {
   }
 };
 
-const TEMPLATES = ["classic", "modern", "minimal"] as const;
+const TEMPLATES = RESUME_TEMPLATES;
 
 export function ResumeLanding() {
   const router = useRouter();
