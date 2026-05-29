@@ -35,6 +35,7 @@ model User {
   questions     InterviewQuestion[]
   starStories   StarStory[]
   resumes       Resume[]
+  profile       UserProfile?
 }
 
 model Account {
@@ -94,6 +95,50 @@ model UserSettings {
   staleDaysInterview  Int     @default(5)
   skipApplyCheckpoint Boolean @default(false)
   user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- V3: User Profile + Career Insights ---
+model UserProfile {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  jobRole               String?
+  jobFamily             String?
+  city                  String?
+  country               String?
+  yearsExperience       Int?
+  currentSalary         Int?      // OPTIONAL / PRIVATE — never exposed to other users
+  salaryCurrency        String?   @default("USD")
+  photoUrl              String?
+  bio                   String?   @db.Text
+  onboardingStep        Int       @default(0)
+  onboardingCompletedAt DateTime?
+  onboardingSkippedAt   DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jobRole, city])
+  @@index([country])
+}
+
+model SalaryBenchmark {
+  id                String   @id @default(cuid())
+  jobRole           String
+  city              String?  // null = country-level aggregate
+  country           String
+  experienceBracket String   // "0-2" | "3-5" | "6-9" | "10+"
+  p25               Int
+  p50               Int
+  p75               Int
+  p90               Int
+  sampleSize        Int
+  source            String   @default("benchmark") // "benchmark" | "community"
+  currency          String   @default("USD")
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+
+  @@unique([jobRole, city, country, experienceBracket, source])
+  @@index([jobRole, city, country, experienceBracket])
 }
 
 model Column {

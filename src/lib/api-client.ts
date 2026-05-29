@@ -223,6 +223,95 @@ export type ApiUserSettings = {
   timezone?: string;
 };
 
+// --- V3: User Profile + Career Insights ---
+
+export type ProfileCompletionField =
+  | "name"
+  | "photo"
+  | "jobRole"
+  | "city"
+  | "country"
+  | "yearsExperience"
+  | "currentSalary"
+  | "bio";
+
+export type ApiProfileCompletion = {
+  percent: number;
+  completed: ProfileCompletionField[];
+  missing: { key: ProfileCompletionField; label: string }[];
+  weights: Record<ProfileCompletionField, number>;
+};
+
+export type ApiProfile = {
+  id: string;
+  userId: string;
+  name: string | null;
+  jobRole: string | null;
+  jobFamily: string | null;
+  city: string | null;
+  country: string | null;
+  yearsExperience: number | null;
+  currentSalary: number | null;
+  salaryCurrency: string | null;
+  photoUrl: string | null;
+  bio: string | null;
+  onboardingStep: number;
+  onboardingCompletedAt: string | null;
+  onboardingSkippedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  completion: ApiProfileCompletion;
+};
+
+export type ApiSalaryDistribution = {
+  p25: number;
+  p50: number;
+  p75: number;
+  p90: number;
+  median: number;
+  sampleSize: number;
+  source: "community" | "benchmark";
+  currency: string;
+};
+
+export type ApiSalaryPosition = {
+  percentile: number;
+  label: string;
+};
+
+export type ApiInsights =
+  | { needsProfile: true }
+  | {
+      needsProfile?: false;
+      role: string;
+      city: string | null;
+      country: string;
+      scope: "city" | "country";
+      bracket: "0-2" | "3-5" | "6-9" | "10+";
+      comparableCount: number;
+      comparableIsReal: boolean;
+      distribution: ApiSalaryDistribution | null;
+      position: ApiSalaryPosition | null;
+      currency: string | null;
+      source: "community" | "benchmark" | null;
+      refreshedAt: string;
+    };
+
+export type ProfilePatch = Partial<{
+  name: string | null;
+  jobRole: string | null;
+  jobFamily: string | null;
+  city: string | null;
+  country: string | null;
+  yearsExperience: number | null;
+  currentSalary: number | null;
+  salaryCurrency: string | null;
+  bio: string | null;
+  onboardingStep: number;
+  onboardingCompleted: boolean;
+  onboardingSkipped: boolean;
+}>;
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
@@ -470,4 +559,32 @@ export const api = {
     }),
   deleteStory: (id: string) =>
     request<{ ok: true }>(`/api/library/stories/${id}`, { method: "DELETE" }),
+
+  // Profile + Career Insights
+  getProfile: () => request<{ profile: ApiProfile }>("/api/profile"),
+  updateProfile: (patch: ProfilePatch) =>
+    request<{ profile: ApiProfile }>("/api/profile", {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    }),
+  uploadProfilePhoto: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return fetch("/api/profile/photo", { method: "POST", body: formData }).then(
+      async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || `Upload failed (${res.status})`);
+        }
+        return res.json() as Promise<{ photoUrl: string }>;
+      }
+    );
+  },
+  getInsights: (params?: { city?: string; scope?: "city" | "country" }) => {
+    const qs = new URLSearchParams();
+    if (params?.city) qs.set("city", params.city);
+    if (params?.scope) qs.set("scope", params.scope);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return request<ApiInsights>(`/api/insights${suffix}`);
+  },
 };
