@@ -118,6 +118,7 @@ export const RESUME_TEMPLATES = [
   "professional",
   "elegant",
   "compact",
+  "split",
 ] as const;
 
 /** Recognized link platforms offered in the builder. `label` is what shows

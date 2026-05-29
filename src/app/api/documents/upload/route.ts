@@ -46,9 +46,20 @@ export async function POST(req: NextRequest) {
 
     const isPrimary = isPrimaryStr === "true";
     const ext = file.name.split(".").pop();
-    const storageKey = `${auth.userId}/${nanoid()}.${ext}`;
+    
+    // If notes are provided (e.g., from Resume Builder), check if we already have this document
+    let existingDoc = null;
+    if (notes) {
+      existingDoc = await prisma.document.findFirst({
+        where: { userId: auth.userId, notes },
+      });
+    }
 
-    const { error: uploadError } = await uploadToStorage(storageKey, file);
+    const storageKey = existingDoc?.storageKey || `${auth.userId}/${nanoid()}.${ext}`;
+
+    const { error: uploadError } = await uploadToStorage(storageKey, file, {
+      upsert: !!existingDoc,
+    });
 
     if (uploadError) {
       return NextResponse.json({ error: "Failed to upload file: " + uploadError.message }, { status: 500 });
@@ -63,19 +74,32 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      document = await tx.document.create({
-        data: {
-          userId: auth.userId,
-          type,
-          name,
-          filename: file.name,
-          mimeType: file.type,
-          sizeBytes: file.size,
-          storageKey,
-          notes,
-          isPrimary,
-        },
-      });
+      if (existingDoc) {
+        document = await tx.document.update({
+          where: { id: existingDoc.id },
+          data: {
+            name,
+            filename: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+            isPrimary,
+          },
+        });
+      } else {
+        document = await tx.document.create({
+          data: {
+            userId: auth.userId,
+            type,
+            name,
+            filename: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+            storageKey,
+            notes,
+            isPrimary,
+          },
+        });
+      }
     });
 
     return NextResponse.json({ document }, { status: 201 });

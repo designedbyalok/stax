@@ -25,7 +25,6 @@ import { useProfileModal } from "@/lib/profile-modal-store";
 import { useSettingsModal } from "@/lib/settings-modal-store";
 import { computeProfileCompletion } from "@/lib/profile-completion";
 import {
-  KNOWN_ROLES,
   KNOWN_COUNTRIES,
   CURRENCIES,
   citiesForCountry,
@@ -354,6 +353,10 @@ function ProfileForm({
   missing: { key: string; label: string }[];
 }) {
   const cityChoices = citiesForCountry(form.country);
+  const { data: rolesData } = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => api.getRoles().then((r) => r.roles),
+  });
   return (
     <div className="space-y-6">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -362,7 +365,7 @@ function ProfileForm({
         </Field>
         <Field label="Job role">
           <Input list="role-options" value={form.jobRole} onChange={(e) => set({ jobRole: e.target.value })} placeholder="Product Designer" />
-          <datalist id="role-options">{KNOWN_ROLES.map((r) => <option key={r} value={r} />)}</datalist>
+          <datalist id="role-options">{(rolesData ?? []).map((r) => <option key={r} value={r} />)}</datalist>
         </Field>
         <Field label="Country">
           <Select value={form.country || undefined} onValueChange={(v) => onCountryChange(v ?? "")}>

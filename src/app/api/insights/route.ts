@@ -18,15 +18,18 @@ export async function GET(req: NextRequest) {
     where: { userId: auth.userId },
   });
 
+  const { searchParams } = new URL(req.url);
+
   // A role is the only hard requirement. Country is inferred from a known city
   // and defaults to India (our current coverage), so insights still render.
-  const jobRole = canonicalRole(profile?.jobRole) ?? profile?.jobRole ?? null;
+  const roleOverride = searchParams.get("role");
+  const baseRole = roleOverride || profile?.jobRole;
+  const jobRole = canonicalRole(baseRole) ?? baseRole ?? null;
   if (!profile || !jobRole) {
     return NextResponse.json({ needsProfile: true });
   }
   const country = profile.country || countryForCity(profile.city) || "India";
 
-  const { searchParams } = new URL(req.url);
   const scopeParam = searchParams.get("scope");
   // Default scope: city if the user has one, else country.
   const requestedScope: "city" | "country" =

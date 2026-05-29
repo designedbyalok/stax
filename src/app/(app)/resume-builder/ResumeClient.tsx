@@ -16,8 +16,25 @@ import {
   SelectLabel,
   SelectTrigger,
 } from "@/components/ui/select";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 import { toast } from "sonner";
 import { ApiResume, ResumeData, LINK_PLATFORMS, RESUME_TEMPLATES } from "@/lib/types/resume";
+
+const LINK_PREFIXES: Record<string, string> = {
+  "LinkedIn": "linkedin.com/in/",
+  "GitHub": "github.com/",
+  "X (Twitter)": "x.com/",
+  "Dribbble": "dribbble.com/",
+  "Behance": "behance.net/",
+  "Medium": "medium.com/@",
+  "Dev.to": "dev.to/",
+  "Instagram": "instagram.com/",
+};
+
 import { RESUME_FONTS, ALL_FONTS_HREF, resolveFont } from "@/lib/resume-fonts";
 import { ResumePreview } from "./ResumePreview";
 import { ResumeLanding } from "./ResumeLanding";
@@ -286,6 +303,7 @@ export function ResumeClient() {
       formData.append("name", activeResume.title || "My Builder Resume");
       formData.append("type", "RESUME");
       formData.append("isPrimary", "false");
+      formData.append("notes", `builder-resume-${activeResume.id}`);
 
       const res = await fetch("/api/documents/upload", {
         method: "POST",
@@ -306,11 +324,16 @@ export function ResumeClient() {
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-muted/20">
+    <ResizablePanelGroup direction="horizontal" className="flex-1 h-full overflow-hidden bg-muted/20 print:block responsive-panels">
       {/* LEFT: Form / Content panel */}
-      <div className="w-full md:w-[450px] border-r bg-card flex flex-col h-full z-10 shadow-sm print:hidden">
+      <ResizablePanel defaultSize={35} minSize={20} className="bg-card flex flex-col h-full z-10 shadow-sm print:hidden responsive-panel" style={{ maxWidth: 300 }}>
         <div className="p-4 border-b flex flex-col gap-3 shrink-0">
-          <div className="flex items-center justify-between">
+          <div className="text-xs text-muted-foreground flex items-center justify-between">
+            <span>Last saved {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar">
+          <section className="space-y-6">
             <div className="flex items-center gap-1.5 min-w-0">
               <Button size="icon" variant="ghost" className="h-8 w-8 -ml-2 shrink-0 text-muted-foreground hover:text-foreground" onClick={() => router.push("/resume-builder")}>
                 <ArrowLeft className="h-4 w-4" />
@@ -325,36 +348,19 @@ export function ResumeClient() {
                 className="font-semibold text-sm bg-transparent border border-transparent rounded px-1.5 py-0.5 -ml-1.5 min-w-0 flex-1 outline-none hover:bg-muted/50 focus:bg-muted/50 focus:border-border transition-colors"
               />
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <SaveStatus status={saveStatus} />
-              <input
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={handleImportFile}
-              />
-              <Button size="sm" variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary" onClick={() => fileInputRef.current?.click()} disabled={isImporting}>
-                {isImporting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
-                Import with AI
+            <div className="flex items-center gap-2">
+              <Button size="sm" className="flex-1" variant="secondary" onClick={handleExportToDocuments} disabled={isExporting}>
+                {isExporting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                Save
+              </Button>
+              <Button size="sm" className="flex-1" onClick={handlePrint}>
+                <Printer className="w-3.5 h-3.5 mr-1.5" />
+                Print
               </Button>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" className="flex-1" variant="secondary" onClick={handleExportToDocuments} disabled={isExporting}>
-              {isExporting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
-              Save to Documents
-            </Button>
-            <Button size="sm" className="flex-1" onClick={handlePrint}>
-              <Printer className="w-3.5 h-3.5 mr-1.5" />
-              Print PDF
-            </Button>
-          </div>
-        </div>
+          </section>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-6">
-              <section className="space-y-4">
+          <section className="space-y-4 mt-6">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Personal Info</h3>
                 <div className="space-y-3">
                   <div className="space-y-1.5">
@@ -456,6 +462,26 @@ export function ResumeClient() {
                   links[idx] = { ...links[idx], ...patch };
                   handleUpdateContent({ ...activeResume.content, basics: { ...activeResume.content.basics, links } });
                 };
+
+                const prefix = LINK_PREFIXES[selectValue];
+                const urlLower = (link.url || "").toLowerCase();
+                let displayValue = link.url || "";
+                
+                if (prefix) {
+                  if (urlLower.startsWith(`https://${prefix}`)) displayValue = link.url.slice(`https://${prefix}`.length);
+                  else if (urlLower.startsWith(`http://${prefix}`)) displayValue = link.url.slice(`http://${prefix}`.length);
+                  else if (urlLower.startsWith(`https://www.${prefix}`)) displayValue = link.url.slice(`https://www.${prefix}`.length);
+                  else if (urlLower.startsWith(prefix)) displayValue = link.url.slice(prefix.length);
+                }
+
+                const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                  let val = e.target.value;
+                  if (prefix && val && !val.includes(prefix)) {
+                    val = `https://${prefix}${val}`;
+                  }
+                  updateLink({ url: val });
+                };
+
                 return (
                   <div key={link.id} className="flex items-start gap-2 group">
                     <Select
@@ -482,12 +508,19 @@ export function ResumeClient() {
                           onChange={(e) => updateLink({ label: e.target.value })}
                         />
                       )}
-                      <Input
-                        className="h-8 text-xs"
-                        placeholder={LINK_PLACEHOLDERS[selectValue] ?? "https://…"}
-                        value={link.url}
-                        onChange={(e) => updateLink({ url: e.target.value })}
-                      />
+                      <div className="flex items-center h-8 text-xs border border-input rounded-md shadow-sm overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                        {prefix && (
+                          <span className="px-2.5 text-muted-foreground bg-muted border-r h-full flex items-center shrink-0">
+                            {prefix}
+                          </span>
+                        )}
+                        <input
+                          className="flex-1 bg-transparent px-2.5 outline-none min-w-0"
+                          placeholder={prefix ? "username" : (LINK_PLACEHOLDERS[selectValue] ?? "https://…")}
+                          value={displayValue}
+                          onChange={handleUrlChange}
+                        />
+                      </div>
                     </div>
                     <button
                       onClick={() => {
@@ -1178,22 +1211,25 @@ export function ResumeClient() {
               ))}
             </div>
           </section>
-          </div>
         </div>
-      </div>
+      </ResizablePanel>
+
+      <ResizableHandle className="print:hidden responsive-handle" />
 
       {/* CENTER: Preview Pane */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-muted/20 print:p-0 print:bg-white print:overflow-visible">
-        <ResumePreview resume={activeResume.content} />
-      </div>
+      <ResizablePanel defaultSize={45} className="flex flex-col h-full print:block responsive-panel min-h-[50vh] overflow-hidden bg-muted/20 print:p-0 print:bg-white print:overflow-visible relative">
+        <ScaledBuilderPreview resume={activeResume.content} />
+      </ResizablePanel>
+
+      <ResizableHandle className="print:hidden responsive-handle" />
 
       {/* RIGHT: Design Pane */}
-      <div className="w-full md:w-[300px] border-l bg-card flex flex-col h-full z-10 shadow-sm print:hidden">
+      <ResizablePanel defaultSize={20} minSize={15} className="border-l bg-card flex flex-col h-full z-10 shadow-sm print:hidden responsive-panel" style={{ maxWidth: 300 }}>
         <div className="p-4 border-b shrink-0">
           <h2 className="text-sm font-semibold text-foreground">Design</h2>
           <p className="text-xs text-muted-foreground mt-0.5">Template, color &amp; typography</p>
         </div>
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 no-scrollbar">
           {/* Loaded so each option in the font picker previews in its own face */}
           <link rel="stylesheet" href={ALL_FONTS_HREF} precedence="resume-fonts-all" />
           <div className="space-y-8">
@@ -1321,8 +1357,8 @@ export function ResumeClient() {
               </section>
           </div>
         </div>
-      </div>
-    </div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
 
@@ -1399,5 +1435,122 @@ function SaveStatus({ status }: { status: "saved" | "saving" | "unsaved" }) {
       <Check className="h-3 w-3 text-emerald-600" />
       Saved
     </span>
+  );
+}
+
+// Fit-to-height preview component for the builder
+function ScaledBuilderPreview({ resume }: { resume: ResumeData }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [actualHeight, setActualHeight] = useState(1123);
+
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        if (entry.target === containerRef.current) {
+          const { width, height } = entry.contentRect;
+          // Available space with some padding
+          const availableW = Math.max(width - 64, 0);
+          const availableH = Math.max(height - 64, 0);
+          
+          const scaleW = availableW / 794;
+          // When paginated, actual height might be larger, but we scale based on 1 page fitting, or we can let it scroll.
+          // Wait, if we scale it so 1 page fits height, then multiple pages will scroll!
+          const scaleH = availableH / 1123;
+          
+          setScale(Math.min(scaleW, scaleH, 1.5));
+        }
+      }
+    });
+
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Pagination Engine
+  useEffect(() => {
+    const container = containerRef.current?.querySelector('#resume-preview-content') as HTMLElement;
+    if (!container) return;
+    
+    // Clear previous margins
+    const elements = container.querySelectorAll('*');
+    elements.forEach(el => {
+       if ((el as HTMLElement).dataset.pageSpacer) {
+           (el as HTMLElement).style.marginTop = '';
+           delete (el as HTMLElement).dataset.pageSpacer;
+       }
+    });
+
+    const PAGE_HEIGHT = 1123;
+    const BOTTOM_MARGIN = 40;
+    const TOP_MARGIN = 40;
+    const GAP = 16;
+    
+    // Find breakable blocks (mostly text, lists, and headers)
+    const blocks = Array.from(container.querySelectorAll('p, h1, h2, h3, h4, li, .section-block, .contact-link'));
+    
+    let containerRect = container.getBoundingClientRect();
+    
+    for (let i = 0; i < blocks.length; i++) {
+        const el = blocks[i] as HTMLElement;
+        const rect = el.getBoundingClientRect();
+        
+        // Coordinates relative to the unscaled container
+        const top = (rect.top - containerRect.top) / scale;
+        const bottom = (rect.bottom - containerRect.top) / scale;
+        
+        // Find which page the bottom of the element is on
+        const pageIndex = Math.floor(bottom / PAGE_HEIGHT);
+        if (pageIndex === 0) continue; // First page is fine unless it crosses
+        
+        const pageBoundary = pageIndex * PAGE_HEIGHT;
+        const dangerStart = pageBoundary - BOTTOM_MARGIN;
+        
+        // If element crosses the danger zone at the bottom of ANY page
+        if (bottom > dangerStart && top < pageBoundary + GAP) {
+            const targetTop = pageBoundary + GAP + TOP_MARGIN;
+            const pushAmount = targetTop - top;
+            el.style.marginTop = `${pushAmount}px`;
+            el.dataset.pageSpacer = "true";
+            
+            // Re-measure container for next iterations
+            containerRect = container.getBoundingClientRect();
+        }
+    }
+    
+    // Update the wrapper height to show all pages
+    setActualHeight(container.scrollHeight);
+  }, [resume, scale]);
+
+  const pages = Math.max(1, Math.ceil(actualHeight / 1123));
+
+  return (
+    <div ref={containerRef} className="w-full h-full flex items-start justify-center overflow-auto no-scrollbar py-8">
+      <div 
+        style={{
+          width: "794px",
+          height: `${actualHeight}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: "top center",
+          transition: "transform 0.1s ease-out"
+        }}
+        className="shrink-0 relative"
+      >
+        <ResumePreview resume={resume} />
+        
+        {/* Visual Page Break Gaps */}
+        {Array.from({ length: pages - 1 }).map((_, i) => (
+          <div 
+            key={i}
+            className="absolute left-0 w-full bg-[#f1f5f9] print:hidden z-50 pointer-events-none"
+            style={{ 
+              top: (i + 1) * 1123, 
+              height: 16,
+              // #f1f5f9 is roughly Tailwind bg-slate-100 which matches the muted/20 wrapper
+            }} 
+          />
+        ))}
+      </div>
+    </div>
   );
 }

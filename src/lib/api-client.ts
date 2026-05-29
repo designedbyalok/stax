@@ -580,8 +580,10 @@ export const api = {
       }
     );
   },
-  getInsights: (params?: { city?: string; scope?: "city" | "country"; refresh?: boolean }) => {
+  getRoles: () => request<{ roles: string[] }>("/api/options/roles"),
+  getInsights: (params?: { role?: string; city?: string; scope?: "city" | "country"; refresh?: boolean }) => {
     const qs = new URLSearchParams();
+    if (params?.role) qs.set("role", params.role);
     if (params?.city) qs.set("city", params.city);
     if (params?.scope) qs.set("scope", params.scope);
     if (params?.refresh) {

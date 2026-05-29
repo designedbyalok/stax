@@ -16,53 +16,71 @@ import { ResumePreview } from "./ResumePreview";
 
 const MOCK_RESUME_DATA: ResumeData = {
   basics: {
-    name: "Alex Designer",
+    name: "Ariel Norling",
     label: "Product Designer",
-    email: "alex@example.com",
-    phone: "(555) 123-4567",
-    url: "alexdesigner.com",
-    summary: "Creative Product Designer with 5+ years of experience in building user-centric interfaces. Passionate about design systems, accessibility, and micro-interactions.",
-    location: "San Francisco, CA",
+    email: "arielnorling@gmail.com",
+    phone: "(210) 326-5459",
+    url: "arielnorling.com",
+    location: "",
+    headline: "",
+    summary: "",
+    links: [],
   },
   work: [
     {
       id: "w1",
-      company: "Acme Corp",
-      position: "Senior Designer",
-      startDate: "2020",
-      endDate: "Present",
-      summary: "Led the redesign of the core web application, increasing user engagement by 45%. Established a comprehensive design system.",
+      company: "Casetext",
+      position: "Product Designer",
+      startDate: "August 2016",
+      endDate: "September 2017",
+      summary: "I led the design vision and helped to set product direction and manage two designers. I designed new features and overhauled the visual design for product and marketing. I created the hiring criteria and interview process for the design team and hired two designers. I also advised on HR and hiring processes company-wide.",
     },
     {
       id: "w2",
-      company: "Startup Inc",
-      position: "UI/UX Designer",
-      startDate: "2018",
-      endDate: "2020",
-      summary: "Designed end-to-end mobile experiences for iOS and Android. Collaborated closely with engineering teams.",
-    }
+      company: "EdSurge",
+      position: "UX Designer",
+      startDate: "June 2016",
+      endDate: "August 2016",
+      summary: "I worked on a contract project with the Summits team to redesign their website. The project involved working with stakeholders across EdSurge to conduct needfinding, creating a new information architecture schema and content strategy, and designing sketches, flow diagrams, wireframes, and mockups.",
+    },
+    {
+      id: "w3",
+      company: "Whil",
+      position: "Senior Designer",
+      startDate: "August 2015",
+      endDate: "February 2016",
+      summary: "I was the only product designer at Whil. I designed the home page, dashboard, favorites page, pricing page, onboarding experience, training reminders experience, and the leadership course experience. I also collaborated with other designers on the design of the office space, and was a member of the Culture Team.",
+    },
   ],
   education: [
     {
       id: "e1",
-      institution: "State University",
-      area: "Design",
-      studyType: "BFA",
-      startDate: "2014",
-      endDate: "2018",
+      institution: "Carnegie Mellon University",
+      area: "Educational Technology and Applied Learning Science",
+      studyType: "Master's in",
+      startDate: "August 2014",
+      endDate: "August 2015",
+    },
+    {
+      id: "e2",
+      institution: "Syracuse University",
+      area: "Information Management",
+      studyType: "Master's of Science in",
+      startDate: "August 2012",
+      endDate: "",
     }
   ],
   skills: [
-    { id: "s1", name: "Figma", level: "Expert" },
-    { id: "s2", name: "UI/UX Design", level: "Expert" },
-    { id: "s3", name: "Prototyping", level: "Advanced" },
-    { id: "s4", name: "Design Systems", level: "Advanced" },
-    { id: "s5", name: "HTML/CSS", level: "Intermediate" },
-    { id: "s6", name: "React", level: "Intermediate" }
+    { id: "s1", name: "Adobe XD", level: "" },
+    { id: "s2", name: "Sketch", level: "" },
+    { id: "s3", name: "Figma", level: "" },
+    { id: "s4", name: "Atomic", level: "" },
+    { id: "s5", name: "InVision", level: "" },
+    { id: "s6", name: "After Effects", level: "" },
   ],
   design: {
-    template: "classic",
-    themeColor: "#0f172a",
+    template: "split",
+    themeColor: "#000000",
     fontFamily: "sans",
     spacing: 1,
   }
@@ -330,13 +348,13 @@ function ScaledTemplatePreview({ template }: { template: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const [actualHeight, setActualHeight] = useState(1056);
+  const [actualHeight, setActualHeight] = useState(1123);
 
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         if (entry.target === containerRef.current) {
-          setScale(entry.contentRect.width / 816);
+          setScale(entry.contentRect.width / 794);
         }
       }
     });
@@ -355,11 +373,11 @@ function ScaledTemplatePreview({ template }: { template: string }) {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-hidden" style={{ height: 1056 * scale }}>
+    <div ref={containerRef} className="relative w-full overflow-hidden" style={{ height: 1123 * scale }}>
       <div 
         className="absolute top-0 left-0"
         style={{
-          width: "816px",
+          width: "794px",
           transform: `scale(${scale})`,
           transformOrigin: "top left"
         }}

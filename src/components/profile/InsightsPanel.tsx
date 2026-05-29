@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 function fmtMoney(value: number, currency: string): string {
@@ -32,34 +33,63 @@ function fmtMoney(value: number, currency: string): string {
 // p25→p90 range bar with the p25–p75 band emphasized, the median tick, and an
 // optional marker for the user's own salary.
 function DistributionBar({ dist, salary }: { dist: ApiSalaryDistribution; salary?: number | null }) {
-  const lo = dist.p25;
-  const hi = dist.p90;
+  // Extend track 15% on each side so the highlighted band floats in the middle
+  const padding = (dist.p90 - dist.p25) * 0.15;
+  const lo = Math.max(0, dist.p25 - padding);
+  const hi = dist.p90 + padding;
   const span = Math.max(1, hi - lo);
   const pos = (v: number) => `${Math.max(0, Math.min(100, ((v - lo) / span) * 100))}%`;
   return (
     <div className="pt-8 pb-1">
       <div className="relative h-2.5 rounded-full bg-muted">
-        <div
-          className="absolute h-2.5 rounded-full bg-primary/30"
-          style={{ left: pos(dist.p25), right: `calc(100% - ${pos(dist.p75)})` }}
-        />
+        {/* Typical Range Band */}
+        <TooltipProvider delay={100}>
+          <Tooltip>
+            <TooltipTrigger
+              className="absolute h-2.5 rounded-full bg-primary/30 cursor-help"
+              style={{ left: pos(dist.p25), right: `calc(100% - ${pos(dist.p75)})` }}
+            />
+            <TooltipContent side="top">
+              Typical Range (25th - 75th Percentile)
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Small ticks for bounds to anchor the labels */}
+        <div className="absolute top-1/2 h-2.5 w-[1px] -translate-y-1/2 bg-foreground/20" style={{ left: pos(dist.p25) }} />
+        <div className="absolute top-1/2 h-2.5 w-[1px] -translate-y-1/2 bg-foreground/20" style={{ left: pos(dist.p90) }} />
+
+        {/* Median Tick */}
         <div className="absolute top-1/2 h-4 w-0.5 -translate-y-1/2 rounded bg-primary" style={{ left: pos(dist.p50) }} />
         {salary != null && (
-          <div
-            className="absolute -top-7 flex flex-col items-center"
-            style={{ left: pos(salary), transform: "translateX(-50%)" }}
-          >
-            <span className="whitespace-nowrap rounded bg-foreground px-1.5 py-0.5 text-[10px] font-medium text-background">
-              You
-            </span>
-            <span className="mt-0.5 h-3 w-3 rounded-full border-2 border-background bg-foreground shadow" />
-          </div>
+          <TooltipProvider delay={100}>
+            <Tooltip>
+              <TooltipTrigger
+                className="absolute -top-7 flex cursor-help flex-col items-center"
+                style={{ left: pos(salary), transform: "translateX(-50%)" }}
+              >
+                <span className="whitespace-nowrap rounded bg-foreground px-1.5 py-0.5 text-[10px] font-medium text-background">
+                  You
+                </span>
+                <span className="mt-0.5 h-3 w-3 rounded-full border-2 border-background bg-foreground shadow" />
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                Your salary: {fmtMoney(salary, dist.currency)}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
-      <div className="mt-2 flex justify-between text-[11px] tabular-nums text-muted-foreground">
-        <span>{fmtMoney(dist.p25, dist.currency)}</span>
-        <span className="font-medium text-foreground">{fmtMoney(dist.p50, dist.currency)}</span>
-        <span>{fmtMoney(dist.p90, dist.currency)}</span>
+      <div className="relative mt-2 h-4 text-[11px] tabular-nums text-muted-foreground">
+        <span className="absolute -translate-x-1/2" style={{ left: pos(dist.p25) }}>
+          {fmtMoney(dist.p25, dist.currency)}
+        </span>
+        <span className="absolute -translate-x-1/2 font-medium text-foreground" style={{ left: pos(dist.p50) }}>
+          {fmtMoney(dist.p50, dist.currency)}
+        </span>
+        <span className="absolute -translate-x-1/2" style={{ left: pos(dist.p90) }}>
+          {fmtMoney(dist.p90, dist.currency)}
+        </span>
       </div>
     </div>
   );
@@ -77,13 +107,19 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 export function InsightsPanel({ className }: { className?: string }) {
   const [cityOverride, setCityOverride] = useState<string | undefined>(undefined);
+  const [roleOverride, setRoleOverride] = useState<string | undefined>(undefined);
   const [scope, setScope] = useState<"city" | "country">("city");
   const [generating, setGenerating] = useState(false);
   const qc = useQueryClient();
 
   const { data, isLoading, isError, isFetching } = useQuery({
-    queryKey: ["insights", { city: cityOverride ?? null, scope }],
-    queryFn: () => api.getInsights({ city: cityOverride, scope }),
+    queryKey: ["insights", { role: roleOverride ?? null, city: cityOverride ?? null, scope }],
+    queryFn: () => api.getInsights({ role: roleOverride, city: cityOverride, scope }),
+  });
+
+  const { data: rolesData } = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => api.getRoles().then((r) => r.roles),
   });
 
   // "Generate insight" forces a fresh AI estimate (refresh=1), then caches it
@@ -91,8 +127,8 @@ export function InsightsPanel({ className }: { className?: string }) {
   const generate = async () => {
     setGenerating(true);
     try {
-      const fresh = await api.getInsights({ city: cityOverride, scope, refresh: true });
-      qc.setQueryData(["insights", { city: cityOverride ?? null, scope }], fresh);
+      const fresh = await api.getInsights({ role: roleOverride, city: cityOverride, scope, refresh: true });
+      qc.setQueryData(["insights", { role: roleOverride ?? null, city: cityOverride ?? null, scope }], fresh);
     } catch (err: any) {
       console.error("Failed to generate insight:", err);
       toast.error(err.message || "Failed to generate new insight. Please try again.");
@@ -157,6 +193,10 @@ export function InsightsPanel({ className }: { className?: string }) {
     data.distribution != null &&
     (ownCurrency == null || ownCurrency === data.distribution.currency);
 
+  const isOwnRole = Boolean(
+    profile?.jobRole && data.role.toLowerCase() === profile.jobRole.toLowerCase()
+  );
+
   return (
     <div className={cn("space-y-5", className)}>
       {/* Scope controls */}
@@ -183,6 +223,19 @@ export function InsightsPanel({ className }: { className?: string }) {
             <Globe2 className="h-3.5 w-3.5" /> All India
           </button>
         </div>
+        <Select
+          value={roleOverride ?? data.role ?? undefined}
+          onValueChange={(v) => setRoleOverride(v ?? undefined)}
+        >
+          <SelectTrigger className="h-8 w-[160px] text-xs">
+            <SelectValue placeholder="Choose role" />
+          </SelectTrigger>
+          <SelectContent>
+            {rolesData?.map((r) => (
+              <SelectItem key={r} value={r}>{r}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {scope === "city" && (
           <Select
             value={cityOverride ?? data.city ?? undefined}
@@ -216,8 +269,17 @@ export function InsightsPanel({ className }: { className?: string }) {
           <TrendingUp className="h-4 w-4" /> {data.role} · {data.bracket} yrs
         </div>
         <p className="mt-2 text-lg font-semibold tracking-tight">
-          You’re 1 of {data.comparableCount.toLocaleString("en-IN")} {data.role}
-          {data.comparableCount === 1 ? "" : "s"} in <span className="text-primary">{place}</span>
+          {isOwnRole ? (
+            <>
+              You’re 1 of {data.comparableCount.toLocaleString("en-IN")} {data.role}
+              {data.comparableCount === 1 ? "" : "s"} in <span className="text-primary">{place}</span>
+            </>
+          ) : (
+            <>
+              There are ~{data.comparableCount.toLocaleString("en-IN")} {data.role}
+              {data.comparableCount === 1 ? "" : "s"} in <span className="text-primary">{place}</span>
+            </>
+          )}
         </p>
 
         {data.distribution ? (

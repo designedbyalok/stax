@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Camera, Loader2, Sparkles } from "lucide-react";
 import { api, ApiProfile, ProfilePatch } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ProfileAvatarRing } from "@/components/profile/ProfileAvatarRing";
 import {
-  KNOWN_ROLES,
   KNOWN_COUNTRIES,
   CURRENCIES,
   citiesForCountry,
@@ -92,6 +91,11 @@ export default function OnboardingPage() {
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const { data: rolesData } = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => api.getRoles().then((r) => r.roles),
+  });
 
   // Resume from wherever the user left off.
   useEffect(() => {
@@ -268,7 +272,7 @@ export default function OnboardingPage() {
           {id === "role" && (
             <StepShell title="What do you do?" subtitle="Your current or target job role.">
               <Input autoFocus list="ob-roles" value={form.jobRole} onChange={(e) => set({ jobRole: e.target.value })} placeholder="Product Designer" />
-              <datalist id="ob-roles">{KNOWN_ROLES.map((r) => <option key={r} value={r} />)}</datalist>
+              <datalist id="ob-roles">{(rolesData ?? []).map((r: string) => <option key={r} value={r} />)}</datalist>
             </StepShell>
           )}
 

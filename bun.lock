@@ -43,6 +43,7 @@
         "react-dom": "^19.2.6",
         "react-hook-form": "^7.76.1",
         "react-pdf": "^10.4.1",
+        "react-resizable-panels": "^4.11.2",
         "resend": "^6.12.3",
         "sanitize-html": "^2.17.4",
         "server-only": "^0.0.1",
@@ -1874,6 +1875,8 @@
     "react-is": ["react-is@16.13.1", "", {}, "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="],
 
     "react-pdf": ["react-pdf@10.4.1", "", { "dependencies": { "clsx": "^2.0.0", "dequal": "^2.0.3", "make-cancellable-promise": "^2.0.0", "make-event-props": "^2.0.0", "merge-refs": "^2.0.0", "pdfjs-dist": "5.4.296", "tiny-invariant": "^1.0.0", "warning": "^4.0.0" }, "peerDependencies": { "@types/react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" }, "optionalPeers": ["@types/react"] }, "sha512-kS/35staVCBqS29verTQJQZXw7RfsRCPO3fdJoW1KXylcv7A9dw6DZ3vJXC2w+bIBgLw5FN4pOFvKSQtkQhPfA=="],
+
+    "react-resizable-panels": ["react-resizable-panels@4.11.2", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-+kfFbDZ8mygc7g0vxOcDzCVGuwiIUOnILqPoUHo6/uP+Mmyx6HzZU+kj1aOPDlktXuobYbr6BtQekvJwHRX4Eg=="],
 
     "read-cache": ["read-cache@1.0.0", "", { "dependencies": { "pify": "^2.3.0" } }, "sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA=="],
 

@@ -1,6 +1,58 @@
 import React from "react";
 import { ResumeData } from "@/lib/types/resume";
 import { resolveFont, googleFontsHref } from "@/lib/resume-fonts";
+import { Globe, MonitorSmartphone, PenTool } from "lucide-react";
+
+function SocialIcon({ label, className }: { label: string; className?: string }) {
+  const l = label.toLowerCase();
+  
+  if (l.includes("github")) return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.02c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+    </svg>
+  );
+  
+  if (l.includes("linkedin")) return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+      <rect x="2" y="9" width="4" height="12"></rect>
+      <circle cx="4" cy="4" r="2"></circle>
+    </svg>
+  );
+  
+  if (l.includes("twitter") || l === "x" || l.includes("x (twitter)")) return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M4 4l11.733 16h4.267l-11.733 -16z"></path>
+      <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path>
+    </svg>
+  );
+
+  if (l.includes("dribbble")) return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.83-16.74 5.85m14.94 10.39c-3.26-6.1-5.75-8.62-11.96-10.87"></path>
+    </svg>
+  );
+
+  if (l.includes("instagram")) return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+    </svg>
+  );
+
+  if (l.includes("youtube")) return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+    </svg>
+  );
+  
+  if (l.includes("behance") || l.includes("portfolio")) return <MonitorSmartphone className={className} />;
+  if (l.includes("medium") || l.includes("dev.to")) return <PenTool className={className} />;
+  return <Globe className={className} />;
+}
 
 interface ResumePreviewProps {
   resume: ResumeData;
@@ -366,7 +418,7 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
     return (
       <div
         id="resume-preview-content"
-        className="shadow-2xl print:shadow-none min-h-[1056px] w-[816px] max-w-[816px] shrink-0 border print:border-none flex flex-row"
+        className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] shrink-0 border print:border-none flex flex-row a4-page-breaks"
         style={rootStyle}
       >
         {fontLink}
@@ -381,13 +433,13 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
             {resume.basics.email && <div>{resume.basics.email}</div>}
             {resume.basics.phone && <div>{resume.basics.phone}</div>}
             {resume.basics.location && <div>{resume.basics.location}</div>}
-            {contactLinks(resume.basics).map((l) => (
-              <div key={l.id}>
-                <a href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline break-all">
-                  {l.label}
+            <div className="flex flex-wrap gap-3 mt-4">
+              {contactLinks(resume.basics).map((l) => (
+                <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" title={l.label} className="hover:opacity-75 transition-opacity">
+                  <SocialIcon label={l.label} className="w-4 h-4" />
                 </a>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {resume.skills && resume.skills.length > 0 && (
@@ -464,7 +516,7 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
     return (
       <div
         id="resume-preview-content"
-        className="shadow-2xl print:shadow-none min-h-[1056px] w-[816px] max-w-[816px] shrink-0 border print:border-none p-12"
+        className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] shrink-0 border print:border-none p-12 a4-page-breaks"
         style={rootStyle}
       >
         {fontLink}
@@ -477,11 +529,13 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
             {resume.basics.email && <span>{resume.basics.email}</span>}
             {resume.basics.phone && <span>{resume.basics.phone}</span>}
             {resume.basics.location && <span>{resume.basics.location}</span>}
-            {contactLinks(resume.basics).map((l) => (
-              <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline hover:text-zinc-600">
-                {l.label}
-              </a>
-            ))}
+            <div className="flex gap-3 items-center ml-2">
+              {contactLinks(resume.basics).map((l) => (
+                <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" title={l.label} className="hover:text-zinc-600 transition-colors">
+                  <SocialIcon label={l.label} className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
           </div>
 
           {resume.basics.summary && (
@@ -552,7 +606,7 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
     return (
       <div
         id="resume-preview-content"
-        className="shadow-2xl print:shadow-none min-h-[1056px] w-[816px] max-w-[816px] shrink-0 border print:border-none flex flex-row"
+        className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] shrink-0 border print:border-none flex flex-row a4-page-breaks"
         style={rootStyle}
       >
         {fontLink}
@@ -565,13 +619,13 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
                 {resume.basics.email && <div>{resume.basics.email}</div>}
                 {resume.basics.phone && <div>{resume.basics.phone}</div>}
                 {resume.basics.location && <div>{resume.basics.location}</div>}
-                {contactLinks(resume.basics).map((l) => (
-                  <div key={l.id}>
-                    <a href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline" style={{ color: themeColor }}>
-                      {l.label}
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {contactLinks(resume.basics).map((l) => (
+                    <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" title={l.label} className="hover:opacity-75 transition-opacity" style={{ color: themeColor }}>
+                      <SocialIcon label={l.label} className="w-4 h-4" />
                     </a>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
             {resume.skills && resume.skills.length > 0 && (
@@ -660,7 +714,7 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
     return (
       <div
         id="resume-preview-content"
-        className="shadow-2xl print:shadow-none min-h-[1056px] w-[816px] max-w-[816px] shrink-0 border print:border-none px-14 py-12"
+        className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] shrink-0 border print:border-none px-14 py-12 a4-page-breaks"
         style={rootStyle}
       >
         {fontLink}
@@ -674,9 +728,13 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
             {resume.basics.email && <span>{resume.basics.email}</span>}
             {resume.basics.phone && <span>· {resume.basics.phone}</span>}
             {resume.basics.location && <span>· {resume.basics.location}</span>}
-            {contactLinks(resume.basics).map((l) => (
-              <span key={l.id}>· <a href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline" style={{ color: themeColor }}>{l.label}</a></span>
-            ))}
+            <div className="flex items-center gap-3 ml-2 border-l pl-3 border-zinc-300">
+              {contactLinks(resume.basics).map((l) => (
+                <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" title={l.label} className="hover:opacity-75 transition-opacity" style={{ color: themeColor }}>
+                  <SocialIcon label={l.label} className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
           </div>
           <div className="mx-auto mt-5 h-px w-24" style={{ backgroundColor: themeColor }} />
         </div>
@@ -747,7 +805,7 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
     return (
       <div
         id="resume-preview-content"
-        className="shadow-2xl print:shadow-none min-h-[1056px] w-[816px] max-w-[816px] shrink-0 border print:border-none p-8 text-[13px]"
+        className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] shrink-0 border print:border-none p-8 text-[13px] a4-page-breaks"
         style={rootStyle}
       >
         {fontLink}
@@ -760,11 +818,13 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
             {resume.basics.email && <div>{resume.basics.email}</div>}
             {resume.basics.phone && <div>{resume.basics.phone}</div>}
             {resume.basics.location && <div>{resume.basics.location}</div>}
-            {contactLinks(resume.basics).map((l) => (
-              <div key={l.id}>
-                <a href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline" style={{ color: themeColor }}>{l.label}</a>
-              </div>
-            ))}
+            <div className="flex items-center justify-center gap-4 mt-2">
+              {contactLinks(resume.basics).map((l) => (
+                <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" title={l.label} className="hover:opacity-75 transition-opacity" style={{ color: themeColor }}>
+                  <SocialIcon label={l.label} className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -832,11 +892,120 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
     );
   }
 
+  if (design.template === "split") {
+    return (
+      <div
+        id="resume-preview-content"
+        className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] shrink-0 border print:border-none px-12 py-16 text-[12px] leading-relaxed a4-page-breaks"
+        style={rootStyle}
+      >
+        {fontLink}
+        
+        {/* Header */}
+        <div className="flex gap-10 mb-10">
+          <div className="w-[160px] shrink-0 font-medium">
+            <h1 className="text-2xl font-bold tracking-tight text-[color:var(--text-color)] leading-tight">{resume.basics.name || "Your Name"}</h1>
+            {resume.basics.headline && <div className="text-[14px] mt-1 text-[color:var(--text-color)]">{resume.basics.headline}</div>}
+          </div>
+          <div className="flex-1 text-[11px] text-[color:var(--text-color)] space-y-0.5 mt-1">
+            {resume.basics.url && <div><a href={ensureHttp(resume.basics.url)} target="_blank" rel="noreferrer" className="hover:underline">{displayUrl(resume.basics.url)}</a></div>}
+            {resume.basics.email && <div>{resume.basics.email}</div>}
+            {resume.basics.phone && <div>{resume.basics.phone}</div>}
+            {resume.basics.location && <div>{resume.basics.location}</div>}
+            {resume.basics.links?.map((l) => (
+              <div key={l.id}>
+                <a href={ensureHttp(l.url)} target="_blank" rel="noreferrer" className="hover:underline">{l.label || displayUrl(l.url)}</a>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Summary */}
+        {resume.basics.summary && (
+          <div className="flex gap-10 mb-8">
+            <div className="w-[160px] shrink-0">
+              <h2 className="font-bold text-[14px] text-[color:var(--text-color)]">Profile</h2>
+            </div>
+            <div className="flex-1">
+              <p className="whitespace-pre-wrap">{resume.basics.summary}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Experience */}
+        {resume.work.length > 0 && (
+          <div className="flex gap-10 mb-8">
+            <div className="w-[160px] shrink-0">
+              <h2 className="font-bold text-[14px] text-[color:var(--text-color)]">Experience</h2>
+            </div>
+            <div className="flex-1 space-y-7">
+              {resume.work.map((work) => (
+                <div key={work.id} className="flex gap-6">
+                  <div className="w-[160px] shrink-0">
+                    <div className="font-bold text-[13px] text-[color:var(--text-color)]">{work.position || "Position"}</div>
+                    <div className="font-bold text-[13px] text-[color:var(--text-color)] mb-1">{work.company || "Company"}</div>
+                    <div className="text-[10.5px] text-zinc-500 mb-0.5">{/* location if we had it */}</div>
+                    <div className="text-[10.5px] text-zinc-500 tabular-nums">
+                      {work.startDate} {work.startDate || work.endDate ? "—" : ""} {work.endDate}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="whitespace-pre-wrap">{work.summary}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Education */}
+        {resume.education.length > 0 && (
+          <div className="flex gap-10 mb-8">
+            <div className="w-[160px] shrink-0">
+              <h2 className="font-bold text-[14px] text-[color:var(--text-color)]">Education</h2>
+            </div>
+            <div className="flex-1 space-y-5">
+              {resume.education.map((ed) => (
+                <div key={ed.id}>
+                  <div className="font-bold text-[13px] text-[color:var(--text-color)]">{ed.institution || "Institution"}</div>
+                  <div className="text-[12px] text-[color:var(--text-color)] mt-1">{ed.studyType} {ed.studyType && ed.area ? "in" : ""} {ed.area}</div>
+                  <div className="text-[10.5px] text-zinc-500 tabular-nums mt-1">
+                    {ed.startDate} {ed.startDate || ed.endDate ? "—" : ""} {ed.endDate}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Skills */}
+        {resume.skills && resume.skills.length > 0 && (
+          <div className="flex gap-10 mb-8">
+            <div className="w-[160px] shrink-0">
+              <h2 className="font-bold text-[14px] text-[color:var(--text-color)]">Skills</h2>
+            </div>
+            <div className="flex-1 grid grid-cols-4 gap-y-1.5 gap-x-4 text-[11.5px] text-[color:var(--text-color)]">
+              {resume.skills.map((sk) => <div key={sk.id}>{sk.name}</div>)}
+            </div>
+          </div>
+        )}
+
+        {/* Fallback Extra Sections (if any) using a simple layout so it doesn't break */}
+        <div className="flex gap-10">
+          <div className="w-[160px] shrink-0"></div>
+          <div className="flex-1">
+            <ExtraSections resume={resume} template="compact" color={themeColor} sectionMb={s(1)} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Classic template
   return (
     <div
       id="resume-preview-content"
-      className="shadow-2xl print:shadow-none min-h-[1056px] w-[816px] max-w-[816px] p-10 shrink-0 border print:border-none"
+      className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] p-10 shrink-0 border print:border-none a4-page-breaks"
       style={rootStyle}
     >
       {fontLink}

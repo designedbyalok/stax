@@ -32,18 +32,16 @@ export default function AccountSettings() {
     queryFn: api.getUserSettings,
   });
 
-  const [name, setName] = useState("");
   const [timezone, setTimezone] = useState("UTC");
 
   useEffect(() => {
     if (settingsQuery.data) {
-      setName(settingsQuery.data.name ?? "");
       setTimezone(settingsQuery.data.timezone ?? "UTC");
     }
   }, [settingsQuery.data]);
 
   const saveMutation = useMutation({
-    mutationFn: () => api.updateUserSettings({ name, timezone }),
+    mutationFn: () => api.updateUserSettings({ timezone }),
     onSuccess: () => {
       toast.success("Saved.");
       queryClient.invalidateQueries({ queryKey: ["userSettings"] });
@@ -57,7 +55,7 @@ export default function AccountSettings() {
   if (settingsQuery.isLoading) {
     return (
       <div className="space-y-6">
-        <Section title="Profile">
+        <Section title="Account Details">
           <div className="space-y-4">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
@@ -70,16 +68,8 @@ export default function AccountSettings() {
 
   return (
     <div className="space-y-6">
-      <Section title="Profile">
+      <Section title="Account Details">
         <div className="space-y-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
             <Input id="email" value={email ?? ""} disabled readOnly />
