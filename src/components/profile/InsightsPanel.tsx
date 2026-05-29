@@ -127,7 +127,7 @@ export function InsightsPanel({ className }: { className?: string }) {
     return <p className="text-sm text-muted-foreground">Couldn’t load insights. Try again shortly.</p>;
   }
 
-  if ("needsProfile" in data) {
+  if (data.needsProfile) {
     return (
       <div className={cn("rounded-xl border border-dashed p-6 text-center", className)}>
         <Sparkles className="mx-auto h-5 w-5 text-muted-foreground" />
