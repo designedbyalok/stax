@@ -6,6 +6,8 @@ import {
   isSupabaseConfigured,
   uploadToStorage,
   getPublicUrl,
+  getAvatarsBucket,
+  ensurePublicBucket,
 } from "@/lib/storage";
 
 const ALLOWED_MIME: Record<string, string> = {
@@ -46,9 +48,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const bucket = getAvatarsBucket();
+    const { error: bucketError } = await ensurePublicBucket(bucket, {
+      fileSizeLimit: 5 * 1024 * 1024,
+      allowedMimeTypes: Object.keys(ALLOWED_MIME),
+    });
+    if (bucketError) {
+      return NextResponse.json(
+        { error: "Could not prepare photo storage: " + bucketError.message },
+        { status: 500 }
+      );
+    }
+
     const storageKey = `${auth.userId}/avatar-${nanoid()}.${ext}`;
 
-    const { error: uploadError } = await uploadToStorage(storageKey, file);
+    const { error: uploadError } = await uploadToStorage(storageKey, file, {
+      bucket,
+      upsert: true,
+    });
     if (uploadError) {
       return NextResponse.json(
         { error: "Failed to upload image: " + uploadError.message },
@@ -56,7 +73,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const photoUrl = getPublicUrl(storageKey);
+    const photoUrl = getPublicUrl(storageKey, bucket);
 
     await prisma.$transaction([
       prisma.userProfile.upsert({

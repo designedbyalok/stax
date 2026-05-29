@@ -1,6 +1,8 @@
 // Client-safe option lists for profile/onboarding pickers. Kept dependency-free
 // (no Prisma) so it can be imported from client components. These mirror the
 // curated benchmark dataset in `benchmarks.ts` (which is server-only).
+//
+// Coverage is currently focused on the top Indian metro cities.
 
 export const KNOWN_ROLES: string[] = [
   "Software Engineer",
@@ -15,31 +17,30 @@ export const KNOWN_ROLES: string[] = [
   "Sales Manager",
 ];
 
-export const KNOWN_COUNTRIES: string[] = ["United States", "United Kingdom", "India"];
+export const KNOWN_COUNTRIES: string[] = ["India"];
 
-/** City → country, so picking a city can pre-fill the country. */
+/** Top Indian metros we have benchmark coverage for. City → country. */
 export const CITY_OPTIONS: { city: string; country: string }[] = [
-  { city: "San Francisco", country: "United States" },
-  { city: "New York", country: "United States" },
-  { city: "Austin", country: "United States" },
-  { city: "London", country: "United Kingdom" },
-  { city: "Bangalore", country: "India" },
+  { city: "Bengaluru", country: "India" },
   { city: "Mumbai", country: "India" },
+  { city: "Delhi NCR", country: "India" },
+  { city: "Hyderabad", country: "India" },
+  { city: "Pune", country: "India" },
+  { city: "Chennai", country: "India" },
+  { city: "Kolkata", country: "India" },
 ];
 
 export const KNOWN_CITIES: string[] = CITY_OPTIONS.map((c) => c.city);
 
 export const COUNTRY_CURRENCY: Record<string, string> = {
-  "United States": "USD",
-  "United Kingdom": "GBP",
   India: "INR",
 };
 
-export const CURRENCIES: string[] = ["USD", "GBP", "EUR", "INR", "CAD", "AUD", "SGD"];
+export const CURRENCIES: string[] = ["INR", "USD"];
 
 export function currencyForCountry(country?: string | null): string {
-  if (!country) return "USD";
-  return COUNTRY_CURRENCY[country] ?? "USD";
+  if (!country) return "INR";
+  return COUNTRY_CURRENCY[country] ?? "INR";
 }
 
 export function countryForCity(city?: string | null): string | undefined {

@@ -31,63 +31,49 @@ export type BenchmarkSeedRow = {
 
 type RoleBase = {
   jobRole: string;
-  // p50 base salary at the 3-5 bracket for the "anchor" location of each country
+  // p50 annual base salary (INR) at the 3-5 bracket for the anchor metro.
   anchorP50: number;
 };
 
-/** Anchor median (3-5 yrs) by role, expressed in USD for US anchor city (SF). */
+/** Anchor median (3-5 yrs) by role, in INR for the anchor metro (Bengaluru). */
 const ROLES: RoleBase[] = [
-  { jobRole: "Software Engineer", anchorP50: 165000 },
-  { jobRole: "Frontend Engineer", anchorP50: 158000 },
-  { jobRole: "Backend Engineer", anchorP50: 162000 },
-  { jobRole: "Product Manager", anchorP50: 170000 },
-  { jobRole: "Product Designer", anchorP50: 145000 },
-  { jobRole: "UX Designer", anchorP50: 135000 },
-  { jobRole: "Data Scientist", anchorP50: 160000 },
-  { jobRole: "Data Analyst", anchorP50: 115000 },
-  { jobRole: "Marketing Manager", anchorP50: 125000 },
-  { jobRole: "Sales Manager", anchorP50: 130000 },
+  { jobRole: "Software Engineer", anchorP50: 2000000 },
+  { jobRole: "Frontend Engineer", anchorP50: 1800000 },
+  { jobRole: "Backend Engineer", anchorP50: 1900000 },
+  { jobRole: "Product Manager", anchorP50: 2800000 },
+  { jobRole: "Product Designer", anchorP50: 1700000 },
+  { jobRole: "UX Designer", anchorP50: 1500000 },
+  { jobRole: "Data Scientist", anchorP50: 2200000 },
+  { jobRole: "Data Analyst", anchorP50: 1200000 },
+  { jobRole: "Marketing Manager", anchorP50: 1600000 },
+  { jobRole: "Sales Manager", anchorP50: 1600000 },
 ];
 
 type LocationConfig = {
   country: string;
   currency: string;
-  // Cities with a cost-of-living multiplier applied to the USD anchor, plus a
-  // currency conversion factor to express numbers in local currency.
+  // Metros with a cost-of-living multiplier applied to the INR anchor.
   cities: { name: string | null; col: number }[];
-  // Multiplier converting USD anchor into local currency.
+  // Multiplier converting the anchor into local currency (1 = already local).
   fx: number;
 };
 
+// Coverage is focused on the top Indian metros (anchor: Bengaluru). Numbers are
+// rough estimates of annual gross base salary in INR.
 const LOCATIONS: LocationConfig[] = [
-  {
-    country: "United States",
-    currency: "USD",
-    fx: 1,
-    cities: [
-      { name: "San Francisco", col: 1.0 },
-      { name: "New York", col: 0.95 },
-      { name: "Austin", col: 0.8 },
-      { name: null, col: 0.82 }, // country-level
-    ],
-  },
-  {
-    country: "United Kingdom",
-    currency: "GBP",
-    fx: 0.5, // rough: UK tech base sits well below US even before FX
-    cities: [
-      { name: "London", col: 1.0 },
-      { name: null, col: 0.85 },
-    ],
-  },
   {
     country: "India",
     currency: "INR",
-    fx: 22, // USD anchor * 0.18 (local level) * ~120 INR/USD ≈ 22x in absolute INR
+    fx: 1,
     cities: [
-      { name: "Bangalore", col: 1.0 },
-      { name: "Mumbai", col: 0.92 },
-      { name: null, col: 0.85 },
+      { name: "Bengaluru", col: 1.0 },
+      { name: "Mumbai", col: 1.0 },
+      { name: "Delhi NCR", col: 0.97 },
+      { name: "Hyderabad", col: 0.92 },
+      { name: "Pune", col: 0.9 },
+      { name: "Chennai", col: 0.88 },
+      { name: "Kolkata", col: 0.8 },
+      { name: null, col: 0.9 }, // country-level
     ],
   },
 ];
