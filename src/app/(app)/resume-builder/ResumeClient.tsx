@@ -503,11 +503,7 @@ export function ResumeClient() {
                   </div>
                 );
               })}
-              {(activeResume.content.basics.links ?? []).length === 0 && (
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Add LinkedIn, GitHub, a portfolio, or any profile relevant to the role.
-                </p>
-              )}
+
             </div>
           </section>
 
