@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { isSupabaseConfigured, uploadToStorage } from "@/lib/storage";
 import { nanoid } from "nanoid";
 
 export async function POST(req: NextRequest) {
@@ -48,17 +48,7 @@ export async function POST(req: NextRequest) {
     const ext = file.name.split(".").pop();
     const storageKey = `${auth.userId}/${nanoid()}.${ext}`;
 
-    const bucket = process.env.SUPABASE_STORAGE_BUCKET || "documents";
-    
-    // In Next 15 / Node 20+, passing a File object directly to Supabase upload 
-    // can cause a fetch failed error due to Undici. We pass an ArrayBuffer instead.
-    const fileBuffer = await file.arrayBuffer();
-    const { error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(storageKey, fileBuffer, {
-        contentType: file.type,
-        upsert: false,
-      });
+    const { error: uploadError } = await uploadToStorage(storageKey, file);
 
     if (uploadError) {
       return NextResponse.json({ error: "Failed to upload file: " + uploadError.message }, { status: 500 });

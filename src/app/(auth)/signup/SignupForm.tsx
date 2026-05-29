@@ -52,7 +52,7 @@ export function SignupForm({ googleEnabled }: { googleEnabled: boolean }) {
         return;
       }
 
-      router.push("/board");
+      router.push("/onboarding");
       router.refresh();
     } catch {
       toast.error("Something went wrong. Please try again.");
