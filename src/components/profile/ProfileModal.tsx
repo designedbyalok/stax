@@ -11,6 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { api, ApiProfile, ProfilePatch } from "@/lib/api-client";
@@ -347,8 +354,6 @@ function ProfileForm({
   missing: { key: string; label: string }[];
 }) {
   const cityChoices = citiesForCountry(form.country);
-  const selectCls =
-    "h-9 w-full rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20";
   return (
     <div className="space-y-6">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -360,36 +365,38 @@ function ProfileForm({
           <datalist id="role-options">{KNOWN_ROLES.map((r) => <option key={r} value={r} />)}</datalist>
         </Field>
         <Field label="Country">
-          <select className={selectCls} value={form.country} onChange={(e) => onCountryChange(e.target.value)} aria-label="Country">
-            <option value="">Select country…</option>
-            {KNOWN_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <Select value={form.country || undefined} onValueChange={(v) => onCountryChange(v ?? "")}>
+            <SelectTrigger className="h-9 w-full">
+              <SelectValue placeholder="Select country…" />
+            </SelectTrigger>
+            <SelectContent>
+              {KNOWN_COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </Field>
         <Field label="City">
-          <select
-            className={selectCls}
-            value={form.city}
-            onChange={(e) => onCityChange(e.target.value)}
-            disabled={!form.country}
-            aria-label="City"
-          >
-            <option value="">{form.country ? "Select city…" : "Choose a country first"}</option>
-            {cityChoices.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <Select value={form.city || undefined} onValueChange={(v) => onCityChange(v ?? "")} disabled={!form.country}>
+            <SelectTrigger className="h-9 w-full">
+              <SelectValue placeholder={form.country ? "Select city…" : "Choose a country first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {cityChoices.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </Field>
         <Field label="Years of experience">
           <Input type="number" min={0} max={60} value={form.yearsExperience} onChange={(e) => set({ yearsExperience: e.target.value })} placeholder="5" />
         </Field>
         <Field label="Current salary (annual)" className="sm:col-span-2">
           <div className="flex gap-2">
-            <select
-              value={form.salaryCurrency}
-              onChange={(e) => set({ salaryCurrency: e.target.value })}
-              className="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
-              aria-label="Currency"
-            >
-              {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <Select value={form.salaryCurrency || undefined} onValueChange={(v) => set({ salaryCurrency: v ?? "USD" })}>
+              <SelectTrigger className="h-9 w-[92px] shrink-0">
+                <SelectValue placeholder="Cur" />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
             <Input type="number" min={0} value={form.currentSalary} onChange={(e) => set({ currentSalary: e.target.value })} placeholder="2000000" className="flex-1" />
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground">

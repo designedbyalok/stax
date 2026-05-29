@@ -6,6 +6,13 @@ import { Globe2, Info, Loader2, MapPin, RefreshCw, Sparkles, TrendingUp } from "
 import { api, ApiSalaryDistribution } from "@/lib/api-client";
 import { citiesForCountry } from "@/lib/insights/options";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 function fmtMoney(value: number, currency: string): string {
@@ -175,16 +182,19 @@ export function InsightsPanel({ className }: { className?: string }) {
           </button>
         </div>
         {scope === "city" && (
-          <select
-            value={cityOverride ?? data.city ?? ""}
-            onChange={(e) => setCityOverride(e.target.value || undefined)}
-            className="h-8 rounded-md border bg-background px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
-            aria-label="Choose metro"
+          <Select
+            value={cityOverride ?? data.city ?? undefined}
+            onValueChange={(v) => setCityOverride(v ?? undefined)}
           >
-            {cityList.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+            <SelectTrigger className="h-8 w-[150px] text-xs">
+              <SelectValue placeholder="Choose metro" />
+            </SelectTrigger>
+            <SelectContent>
+              {cityList.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
         <button
           type="button"

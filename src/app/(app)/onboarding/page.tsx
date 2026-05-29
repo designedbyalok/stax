@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ProfileAvatarRing } from "@/components/profile/ProfileAvatarRing";
@@ -270,29 +277,25 @@ export default function OnboardingPage() {
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Country</Label>
-                  <select
-                    autoFocus
-                    className="h-9 w-full rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
-                    value={form.country}
-                    onChange={(e) => onCountryChange(e.target.value)}
-                    aria-label="Country"
-                  >
-                    <option value="">Select country…</option>
-                    {KNOWN_COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <Select value={form.country || undefined} onValueChange={(v) => onCountryChange(v ?? "")}>
+                    <SelectTrigger className="h-9 w-full">
+                      <SelectValue placeholder="Select country…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {KNOWN_COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">City</Label>
-                  <select
-                    className="h-9 w-full rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
-                    value={form.city}
-                    onChange={(e) => onCityChange(e.target.value)}
-                    disabled={!form.country}
-                    aria-label="City"
-                  >
-                    <option value="">{form.country ? "Select city…" : "Choose a country first"}</option>
-                    {citiesForCountry(form.country).map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <Select value={form.city || undefined} onValueChange={(v) => onCityChange(v ?? "")} disabled={!form.country}>
+                    <SelectTrigger className="h-9 w-full">
+                      <SelectValue placeholder={form.country ? "Select city…" : "Choose a country first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {citiesForCountry(form.country).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </StepShell>
@@ -315,14 +318,14 @@ export default function OnboardingPage() {
           {id === "salary" && (
             <StepShell title="Current salary" subtitle="Optional — and completely private.">
               <div className="flex gap-2">
-                <select
-                  value={form.salaryCurrency}
-                  onChange={(e) => set({ salaryCurrency: e.target.value })}
-                  className="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
-                  aria-label="Currency"
-                >
-                  {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <Select value={form.salaryCurrency || undefined} onValueChange={(v) => set({ salaryCurrency: v ?? "USD" })}>
+                  <SelectTrigger className="h-9 w-[92px] shrink-0">
+                    <SelectValue placeholder="Cur" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
                 <Input autoFocus type="number" min={0} value={form.currentSalary} onChange={(e) => set({ currentSalary: e.target.value })} placeholder="2000000" className="flex-1" />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">

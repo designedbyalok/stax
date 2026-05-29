@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import type { ExperienceBracket } from "./experience";
+import { COUNTRIES } from "./options";
 
 /**
  * ============================================================================
@@ -29,54 +30,63 @@ export type BenchmarkSeedRow = {
   currency: string;
 };
 
-type RoleBase = {
-  jobRole: string;
-  // p50 annual base salary (INR) at the 3-5 bracket for the anchor metro.
-  anchorP50: number;
+/** Anchor median (3-5 yrs) by role, in USD at a top US metro. */
+const ROLE_ANCHOR_USD: Record<string, number> = {
+  "Software Engineer": 165000,
+  "Frontend Engineer": 150000,
+  "Backend Engineer": 158000,
+  "Product Manager": 170000,
+  "Product Designer": 140000,
+  "UX Designer": 130000,
+  "Data Scientist": 160000,
+  "Data Analyst": 110000,
+  "Marketing Manager": 120000,
+  "Sales Manager": 125000,
 };
 
-/** Anchor median (3-5 yrs) by role, in INR for the anchor metro (Bengaluru). */
-const ROLES: RoleBase[] = [
-  { jobRole: "Software Engineer", anchorP50: 2000000 },
-  { jobRole: "Frontend Engineer", anchorP50: 1800000 },
-  { jobRole: "Backend Engineer", anchorP50: 1900000 },
-  { jobRole: "Product Manager", anchorP50: 2800000 },
-  { jobRole: "Product Designer", anchorP50: 1700000 },
-  { jobRole: "UX Designer", anchorP50: 1500000 },
-  { jobRole: "Data Scientist", anchorP50: 2200000 },
-  { jobRole: "Data Analyst", anchorP50: 1200000 },
-  { jobRole: "Marketing Manager", anchorP50: 1600000 },
-  { jobRole: "Sales Manager", anchorP50: 1600000 },
-];
-
-type LocationConfig = {
-  country: string;
-  currency: string;
-  // Metros with a cost-of-living multiplier applied to the INR anchor.
-  cities: { name: string | null; col: number }[];
-  // Multiplier converting the anchor into local currency (1 = already local).
-  fx: number;
+/**
+ * Per-country economics: `level` is the local market level relative to the US
+ * anchor (in USD terms); `fx` converts USD into the local currency. Together
+ * `level * fx` scales the USD anchor into a realistic local-currency figure.
+ */
+const COUNTRY_ECON: Record<string, { level: number; fx: number }> = {
+  "United States": { level: 1.0, fx: 1 },
+  India: { level: 0.18, fx: 83 },
+  "United Kingdom": { level: 0.62, fx: 0.79 },
+  Australia: { level: 0.72, fx: 1.5 },
+  "New Zealand": { level: 0.6, fx: 1.65 },
+  Canada: { level: 0.72, fx: 1.36 },
+  Singapore: { level: 0.85, fx: 1.35 },
+  Germany: { level: 0.7, fx: 0.92 },
+  Ireland: { level: 0.78, fx: 0.92 },
+  "United Arab Emirates": { level: 0.8, fx: 3.67 },
 };
 
-// Coverage is focused on the top Indian metros (anchor: Bengaluru). Numbers are
-// rough estimates of annual gross base salary in INR.
-const LOCATIONS: LocationConfig[] = [
-  {
-    country: "India",
-    currency: "INR",
-    fx: 1,
-    cities: [
-      { name: "Bengaluru", col: 1.0 },
-      { name: "Mumbai", col: 1.0 },
-      { name: "Delhi NCR", col: 0.97 },
-      { name: "Hyderabad", col: 0.92 },
-      { name: "Pune", col: 0.9 },
-      { name: "Chennai", col: 0.88 },
-      { name: "Kolkata", col: 0.8 },
-      { name: null, col: 0.9 }, // country-level
-    ],
-  },
-];
+/** Cost-of-living multiplier per metro (relative to its country anchor city). */
+const CITY_COL: Record<string, number> = {
+  // US
+  "San Francisco": 1.0, "New York": 0.98, Seattle: 0.95, Boston: 0.92,
+  "Los Angeles": 0.9, Austin: 0.85, Chicago: 0.85,
+  // India
+  Bengaluru: 1.0, Mumbai: 1.0, "Delhi NCR": 0.97, Hyderabad: 0.92,
+  Pune: 0.9, Chennai: 0.88, Kolkata: 0.8,
+  // UK
+  London: 1.0, Cambridge: 0.9, Edinburgh: 0.85, Bristol: 0.83, Manchester: 0.82,
+  // Australia
+  Sydney: 1.0, Melbourne: 0.95, Canberra: 0.92, Brisbane: 0.88, Perth: 0.88,
+  // New Zealand
+  Auckland: 1.0, Wellington: 0.95, Christchurch: 0.88,
+  // Canada
+  Toronto: 1.0, Vancouver: 0.98, Ottawa: 0.9, Montreal: 0.88,
+  // Singapore
+  Singapore: 1.0,
+  // Germany
+  Munich: 1.05, Frankfurt: 1.02, Berlin: 1.0, Hamburg: 0.98,
+  // Ireland
+  Dublin: 1.0, Cork: 0.9,
+  // UAE
+  Dubai: 1.0, "Abu Dhabi": 0.98,
+};
 
 /** Multiplier applied to the 3-5 median to derive each bracket's median. */
 const BRACKET_FACTOR: Record<ExperienceBracket, number> = {
@@ -91,29 +101,38 @@ function round(n: number): number {
   return Math.round(n / 1000) * 1000;
 }
 
+// Covers every country/metro offered in the pickers. Numbers are rough
+// estimates of annual gross base salary in local currency — a sane fallback
+// when AI / community data isn't available for a slice.
 function buildSeed(): BenchmarkSeedRow[] {
   const rows: BenchmarkSeedRow[] = [];
   const brackets = Object.keys(BRACKET_FACTOR) as ExperienceBracket[];
+  const roles = Object.keys(ROLE_ANCHOR_USD);
 
-  for (const role of ROLES) {
-    for (const loc of LOCATIONS) {
-      for (const city of loc.cities) {
+  for (const country of COUNTRIES) {
+    const econ = COUNTRY_ECON[country.country] ?? { level: 0.5, fx: 1 };
+    // Each metro, plus a country-level (city = null) aggregate.
+    const places: { name: string | null; col: number }[] = [
+      ...country.cities.map((name) => ({ name, col: CITY_COL[name] ?? 0.9 })),
+      { name: null, col: 0.88 },
+    ];
+
+    for (const role of roles) {
+      const anchorLocal = ROLE_ANCHOR_USD[role] * econ.level * econ.fx;
+      for (const place of places) {
         for (const bracket of brackets) {
-          const p50 = round(
-            role.anchorP50 * loc.fx * city.col * BRACKET_FACTOR[bracket]
-          );
+          const p50 = round(anchorLocal * place.col * BRACKET_FACTOR[bracket]);
           rows.push({
-            jobRole: role.jobRole,
-            city: city.name,
-            country: loc.country,
+            jobRole: role,
+            city: place.name,
+            country: country.country,
             experienceBracket: bracket,
             p25: round(p50 * 0.82),
             p50,
             p75: round(p50 * 1.22),
             p90: round(p50 * 1.5),
-            // Country-level rows aggregate more samples than single cities.
-            sampleSize: city.name === null ? 600 : 180,
-            currency: loc.currency,
+            sampleSize: place.name === null ? 600 : 180,
+            currency: country.currency,
           });
         }
       }
@@ -218,7 +237,7 @@ const ROLE_SYNONYMS: Record<string, string> = {
   sales: "Sales Manager",
 };
 
-const KNOWN_ROLE_NAMES = ROLES.map((r) => r.jobRole);
+const KNOWN_ROLE_NAMES = Object.keys(ROLE_ANCHOR_USD);
 
 /** Maps a free-typed job title onto a canonical dataset role, or null. */
 export function canonicalRole(role?: string | null): string | null {
