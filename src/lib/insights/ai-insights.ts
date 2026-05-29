@@ -52,11 +52,13 @@ function isEstimate(v: unknown): v is AiSalaryEstimate {
 }
 
 export async function generateSalaryEstimate(
-  q: AiInsightQuery
+  q: AiInsightQuery,
+  opts?: { throwOnError?: boolean }
 ): Promise<AiSalaryEstimate | null> {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
     console.warn("GOOGLE_AI_API_KEY missing — skipping AI salary estimate");
+    if (opts?.throwOnError) throw new Error("GOOGLE_AI_API_KEY is missing from environment variables.");
     return null;
   }
 
@@ -107,6 +109,7 @@ Base figures on typical market rates. Be realistic, not aspirational.`;
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       console.warn(`Gemini salary HTTP ${res.status}: ${text.slice(0, 200)}`);
+      if (opts?.throwOnError) throw new Error(`Gemini API Error ${res.status}: ${text.slice(0, 100)}`);
       return null;
     }
 
@@ -114,20 +117,30 @@ Base figures on typical market rates. Be realistic, not aspirational.`;
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
     };
     const raw = payload.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!raw) return null;
+    if (!raw) {
+      if (opts?.throwOnError) throw new Error("Gemini returned empty response.");
+      return null;
+    }
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw);
     } catch {
+      if (opts?.throwOnError) throw new Error("Gemini returned invalid JSON.");
       return null;
     }
-    if (!isEstimate(parsed)) return null;
+    if (!isEstimate(parsed)) {
+      if (opts?.throwOnError) throw new Error("Gemini JSON does not match expected schema.");
+      return null;
+    }
 
     // Sanity: enforce ordering + non-negative, clamp comparableCount.
     const nums = [parsed.p25, parsed.p50, parsed.p75, parsed.p90].map((n) => Math.max(0, Math.round(n)));
     nums.sort((a, b) => a - b);
-    if (nums[0] === 0 && nums[3] === 0) return null;
+    if (nums[0] === 0 && nums[3] === 0) {
+      if (opts?.throwOnError) throw new Error("Gemini generated zero salaries.");
+      return null;
+    }
 
     return {
       p25: nums[0],
@@ -140,8 +153,10 @@ Base figures on typical market rates. Be realistic, not aspirational.`;
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       console.warn("Gemini salary estimate timed out");
+      if (opts?.throwOnError) throw new Error("Gemini API timed out after 12 seconds.");
     } else {
       console.warn("Gemini salary estimate error:", err);
+      if (opts?.throwOnError) throw err;
     }
     return null;
   } finally {

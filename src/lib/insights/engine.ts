@@ -54,7 +54,7 @@ export async function getDistribution(
 ): Promise<SalaryDistribution | null> {
   // A forced refresh skips caches and regenerates the requested slice with AI.
   if (opts.forceAi) {
-    return generateAndCache(query);
+    return generateAndCache(query, true);
   }
 
   const direct = await lookupDistribution(query);
@@ -68,7 +68,7 @@ export async function getDistribution(
 
   // Nothing cached or curated — generate on demand with AI and cache it.
   if (opts.allowAi) {
-    return generateAndCache(query);
+    return generateAndCache(query, false);
   }
   return null;
 }
@@ -139,11 +139,12 @@ async function lookupDistribution(
  * key). Returns null if the AI call fails so the UI can degrade gracefully.
  */
 async function generateAndCache(
-  query: DistributionQuery
+  query: DistributionQuery,
+  throwOnError?: boolean
 ): Promise<SalaryDistribution | null> {
   const { jobRole, city, country, bracket } = query;
   const currency = currencyForCountry(country);
-  const est = await generateSalaryEstimate({ jobRole, city: city ?? null, country, bracket, currency });
+  const est = await generateSalaryEstimate({ jobRole, city: city ?? null, country, bracket, currency }, { throwOnError });
   if (!est) return null;
 
   const data = {

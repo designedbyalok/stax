@@ -51,10 +51,15 @@ export async function GET(req: NextRequest) {
   // `?refresh=1` (the "Generate insight" button) forces a fresh AI estimate.
   const forceAi = searchParams.get("refresh") === "1";
 
-  const distribution = await getDistribution(
-    { jobRole, city, country, bracket },
-    { allowAi: true, forceAi }
-  );
+  let distribution;
+  try {
+    distribution = await getDistribution(
+      { jobRole, city, country, bracket },
+      { allowAi: true, forceAi }
+    );
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || "Failed to generate AI estimate" }, { status: 400 });
+  }
 
   // Headline pool: prefer real comparable profiles; otherwise use the
   // distribution's sample size (curated or AI-estimated).

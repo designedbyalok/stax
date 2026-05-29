@@ -93,9 +93,9 @@ export function InsightsPanel({ className }: { className?: string }) {
     try {
       const fresh = await api.getInsights({ city: cityOverride, scope, refresh: true });
       qc.setQueryData(["insights", { city: cityOverride ?? null, scope }], fresh);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to generate insight:", err);
-      toast.error("Failed to generate new insight. Please try again.");
+      toast.error(err.message || "Failed to generate new insight. Please try again.");
     } finally {
       setGenerating(false);
     }
