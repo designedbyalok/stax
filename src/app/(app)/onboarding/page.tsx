@@ -42,7 +42,7 @@ const EMPTY: Form = {
   country: "",
   yearsExperience: "",
   currentSalary: "",
-  salaryCurrency: "USD",
+  salaryCurrency: "INR",
   bio: "",
   photoUrl: null,
 };
@@ -55,7 +55,7 @@ function fromProfile(p: ApiProfile): Form {
     country: p.country ?? "",
     yearsExperience: p.yearsExperience != null ? String(p.yearsExperience) : "",
     currentSalary: p.currentSalary != null ? String(p.currentSalary) : "",
-    salaryCurrency: p.salaryCurrency ?? "USD",
+    salaryCurrency: p.salaryCurrency ?? "INR",
     bio: p.bio ?? "",
     photoUrl: p.photoUrl,
   };
@@ -259,12 +259,12 @@ export default function OnboardingPage() {
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">City</Label>
-                  <Input autoFocus list="ob-cities" value={form.city} onChange={(e) => onCityChange(e.target.value)} placeholder="San Francisco" />
+                  <Input autoFocus list="ob-cities" value={form.city} onChange={(e) => onCityChange(e.target.value)} placeholder="Bengaluru" />
                   <datalist id="ob-cities">{KNOWN_CITIES.map((c) => <option key={c} value={c} />)}</datalist>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Country</Label>
-                  <Input list="ob-countries" value={form.country} onChange={(e) => set({ country: e.target.value })} placeholder="United States" />
+                  <Input list="ob-countries" value={form.country} onChange={(e) => set({ country: e.target.value })} placeholder="India" />
                   <datalist id="ob-countries">{KNOWN_COUNTRIES.map((c) => <option key={c} value={c} />)}</datalist>
                 </div>
               </div>
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
                 >
                   {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
-                <Input autoFocus type="number" min={0} value={form.currentSalary} onChange={(e) => set({ currentSalary: e.target.value })} placeholder="120000" className="flex-1" />
+                <Input autoFocus type="number" min={0} value={form.currentSalary} onChange={(e) => set({ currentSalary: e.target.value })} placeholder="2000000" className="flex-1" />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 Your salary is never shown to anyone. It’s only ever used anonymously, blended into aggregate ranges —
