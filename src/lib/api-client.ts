@@ -584,7 +584,10 @@ export const api = {
     const qs = new URLSearchParams();
     if (params?.city) qs.set("city", params.city);
     if (params?.scope) qs.set("scope", params.scope);
-    if (params?.refresh) qs.set("refresh", "1");
+    if (params?.refresh) {
+      qs.set("refresh", "1");
+      qs.set("t", Date.now().toString()); // Cache buster
+    }
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return request<ApiInsights>(`/api/insights${suffix}`);
   },

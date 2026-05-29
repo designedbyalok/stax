@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Globe2, Info, Loader2, MapPin, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
 import { api, ApiSalaryDistribution } from "@/lib/api-client";
 import { citiesForCountry } from "@/lib/insights/options";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,8 +93,9 @@ export function InsightsPanel({ className }: { className?: string }) {
     try {
       const fresh = await api.getInsights({ city: cityOverride, scope, refresh: true });
       qc.setQueryData(["insights", { city: cityOverride ?? null, scope }], fresh);
-    } catch {
-      /* defensive — leave existing data in place */
+    } catch (err) {
+      console.error("Failed to generate insight:", err);
+      toast.error("Failed to generate new insight. Please try again.");
     } finally {
       setGenerating(false);
     }
