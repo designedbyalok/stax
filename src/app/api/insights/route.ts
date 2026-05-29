@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireUserId } from "@/lib/api";
 import { toExperienceBracket } from "@/lib/insights/experience";
+import { countryForCity } from "@/lib/insights/options";
 import {
   getDistribution,
   computeSalaryPosition,
@@ -16,8 +17,10 @@ export async function GET(req: NextRequest) {
     where: { userId: auth.userId },
   });
 
-  // Need at least role + country to anchor any benchmark.
-  if (!profile?.jobRole || !profile.country) {
+  // Need a role, plus a country — inferred from a known city when the user
+  // hasn't set one explicitly — to anchor any benchmark.
+  const country = profile?.country || countryForCity(profile?.city) || null;
+  if (!profile?.jobRole || !country) {
     return NextResponse.json({ needsProfile: true });
   }
 
@@ -40,7 +43,6 @@ export async function GET(req: NextRequest) {
   // If they asked for city scope but no city is available, fall back to country.
   const scope: "city" | "country" = city ? requestedScope : "country";
 
-  const country = profile.country;
   const jobRole = profile.jobRole;
   const years = profile.yearsExperience ?? 0;
   const bracket = toExperienceBracket(years);

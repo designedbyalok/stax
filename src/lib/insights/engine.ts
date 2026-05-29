@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import type { ExperienceBracket } from "./experience";
+import { findSeedBenchmark, seedSampleSize } from "./benchmarks";
 
 /**
  * Core salary-insight computation. Blends curated benchmark data with
@@ -59,25 +60,43 @@ export async function getDistribution(
     },
   });
 
-  if (rows.length === 0) return null;
-
+  // Prefer a healthy community row, then a stored benchmark row.
   const community = rows.find(
     (r) => r.source === "community" && r.sampleSize >= COMMUNITY_MIN_SAMPLE
   );
   const benchmark = rows.find((r) => r.source === "benchmark");
+  const chosen = community ?? benchmark;
 
-  const chosen = community ?? benchmark ?? rows[0];
+  if (chosen) {
+    return {
+      p25: chosen.p25,
+      p50: chosen.p50,
+      p75: chosen.p75,
+      p90: chosen.p90,
+      median: chosen.p50,
+      sampleSize: chosen.sampleSize,
+      source: chosen.source === "community" ? "community" : "benchmark",
+      currency: chosen.currency,
+    };
+  }
 
-  return {
-    p25: chosen.p25,
-    p50: chosen.p50,
-    p75: chosen.p75,
-    p90: chosen.p90,
-    median: chosen.p50,
-    sampleSize: chosen.sampleSize,
-    source: chosen.source === "community" ? "community" : "benchmark",
-    currency: chosen.currency,
-  };
+  // Fall back to the in-code curated dataset so insights work even before the
+  // SalaryBenchmark table has been seeded in the database.
+  const seed = findSeedBenchmark(jobRole, city ?? null, country, bracket);
+  if (seed) {
+    return {
+      p25: seed.p25,
+      p50: seed.p50,
+      p75: seed.p75,
+      p90: seed.p90,
+      median: seed.p50,
+      sampleSize: seed.sampleSize,
+      source: "benchmark",
+      currency: seed.currency,
+    };
+  }
+
+  return null;
 }
 
 function labelForPercentile(percentile: number): string {
@@ -178,5 +197,6 @@ export async function comparableCount(
     select: { sampleSize: true },
   });
 
-  return { count: benchmark?.sampleSize ?? real, isReal: false };
+  const size = benchmark?.sampleSize ?? seedSampleSize(jobRole, city ?? null, country);
+  return { count: size ?? real, isReal: false };
 }
