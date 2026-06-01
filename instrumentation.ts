@@ -7,7 +7,9 @@ import * as Sentry from "@sentry/nextjs";
  * Next 15 calls register() once per runtime startup.
  */
 export async function register() {
+  // Production-only — see the rationale in instrumentation-client.ts.
   if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return;
+  if (process.env.NODE_ENV !== "production") return;
 
   if (process.env.NEXT_RUNTIME === "nodejs") {
     Sentry.init({

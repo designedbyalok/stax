@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import posthog from "posthog-js";
+import * as Sentry from "@sentry/nextjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 
@@ -55,6 +56,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <PosthogIdentifier />
+            <SentryIdentifier />
             {children}
           </TooltipProvider>
         </QueryClientProvider>
@@ -74,6 +76,25 @@ function PosthogIdentifier() {
       });
     } else if (status === "unauthenticated") {
       posthog.reset();
+    }
+  }, [session, status]);
+  return null;
+}
+
+// Attach the signed-in user to every Sentry event so prod issues attribute
+// to a real account instead of showing userCount: 0. Safe to call in dev
+// too — Sentry.setUser is a no-op when the SDK wasn't initialized.
+function SentryIdentifier() {
+  const { data: session, status } = useSession();
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.id) {
+      Sentry.setUser({
+        id: session.user.id,
+        email: session.user.email ?? undefined,
+        username: session.user.name ?? undefined,
+      });
+    } else if (status === "unauthenticated") {
+      Sentry.setUser(null);
     }
   }, [session, status]);
   return null;
