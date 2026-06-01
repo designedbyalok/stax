@@ -5,6 +5,7 @@ import { Search, X, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
@@ -92,17 +93,21 @@ export function SearchFilters() {
             }
           />
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {visibleColumns.map((c) => (
-              <DropdownMenuCheckboxItem
-                key={c.id}
-                checked={columnIds.has(c.id)}
-                onCheckedChange={() => toggleColumn(c.id)}
-              >
-                {c.name}
-              </DropdownMenuCheckboxItem>
-            ))}
+            {/* DropdownMenuLabel is Base UI's Menu.GroupLabel under the hood
+                — it requires a Menu.Group ancestor or it throws #31 in prod. */}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {visibleColumns.map((c) => (
+                <DropdownMenuCheckboxItem
+                  key={c.id}
+                  checked={columnIds.has(c.id)}
+                  onCheckedChange={() => toggleColumn(c.id)}
+                >
+                  {c.name}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuGroup>
             {columnIds.size > 0 && (
               <>
                 <DropdownMenuSeparator />
@@ -124,19 +129,21 @@ export function SearchFilters() {
             }
           />
           <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuLabel>Applied</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {(Object.keys(DATE_LABEL) as DateRange[]).map((d) => (
-              <DropdownMenuItem
-                key={d}
-                onClick={() => setDateRange(d)}
-              >
-                {DATE_LABEL[d]}
-                {dateRange === d && (
-                  <span className="ml-auto text-muted-foreground">✓</span>
-                )}
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Applied</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {(Object.keys(DATE_LABEL) as DateRange[]).map((d) => (
+                <DropdownMenuItem
+                  key={d}
+                  onClick={() => setDateRange(d)}
+                >
+                  {DATE_LABEL[d]}
+                  {dateRange === d && (
+                    <span className="ml-auto text-muted-foreground">✓</span>
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -150,16 +157,18 @@ export function SearchFilters() {
             }
           />
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuLabel>Source</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {SOURCE_OPTIONS.map((o) => (
-              <DropdownMenuItem key={o.value} onClick={() => setSource(o.value)}>
-                {o.label}
-                {source === o.value && (
-                  <span className="ml-auto text-muted-foreground">✓</span>
-                )}
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Source</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {SOURCE_OPTIONS.map((o) => (
+                <DropdownMenuItem key={o.value} onClick={() => setSource(o.value)}>
+                  {o.label}
+                  {source === o.value && (
+                    <span className="ml-auto text-muted-foreground">✓</span>
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

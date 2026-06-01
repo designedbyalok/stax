@@ -12,6 +12,7 @@ import { UnmatchedInbox } from "@/components/email/UnmatchedInbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuTrigger,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -155,16 +156,18 @@ export default function RemindersPage() {
                         }
                       />
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Snooze for</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {SNOOZE_DAYS.map((days) => (
-                          <DropdownMenuItem
-                            key={days}
-                            onClick={() => snoozeMutation.mutate({ id: r.id, days })}
-                          >
-                            {days} day{days > 1 ? "s" : ""}
-                          </DropdownMenuItem>
-                        ))}
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel>Snooze for</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {SNOOZE_DAYS.map((days) => (
+                            <DropdownMenuItem
+                              key={days}
+                              onClick={() => snoozeMutation.mutate({ id: r.id, days })}
+                            >
+                              {days} day{days > 1 ? "s" : ""}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuGroup>
                       </DropdownMenuContent>
                     </DropdownMenu>
                     <Button
