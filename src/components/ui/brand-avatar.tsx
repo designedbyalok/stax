@@ -39,6 +39,8 @@ export function BrandAvatar({
           src={src}
           alt={name}
           className="w-full h-full object-contain bg-white"
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         letter

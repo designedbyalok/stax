@@ -111,7 +111,7 @@ export function Sidebar({
       <div className="px-3 pt-4 pb-3">
         <Link
           href="/board"
-          className="flex items-center gap-2 px-2 font-semibold tracking-[-0.01em] text-foreground text-[14px]"
+          className="flex items-center gap-2 px-2 font-serif font-semibold tracking-[-0.01em] text-foreground text-[16px]"
         >
           <StaxMark size={16} strokeWidth={2.5} gap={2} />
           Stax

@@ -16,6 +16,14 @@ export async function GET(req: NextRequest) {
     },
     orderBy: { createdAt: "desc" },
     include: {
+      resumeApplications: {
+        select: { id: true, companyName: true, roleTitle: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+      },
+      coverLetterApplications: {
+        select: { id: true, companyName: true, roleTitle: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+      },
       _count: {
         select: {
           resumeApplications: true,

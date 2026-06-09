@@ -50,7 +50,8 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-playfair-display)", "Times New Roman", "serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
       },
       fontSize: {

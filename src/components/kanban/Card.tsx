@@ -118,7 +118,7 @@ function KanbanCardImpl({ card, isOverlay, onSelect }: CardProps) {
             size={28}
           />
           <div className="min-w-0 flex-1">
-            <h3 className="text-[14px] font-semibold text-foreground leading-[1.35] tracking-[-0.005em] line-clamp-2">
+            <h3 className="text-[15px] font-serif font-medium text-foreground leading-[1.35] tracking-[-0.005em] line-clamp-2">
               {card.roleTitle}
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5 flex items-center gap-1.5">

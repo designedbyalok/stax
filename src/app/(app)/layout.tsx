@@ -1,5 +1,8 @@
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { makeServerQueryClient } from "@/lib/server-query";
+import { loadProfile, loadReminders, loadUser } from "@/lib/loaders";
 import { Sidebar } from "@/components/nav/Sidebar";
 import { seedDefaultsForUser } from "@/lib/seed";
 import { WelcomeModal } from "@/components/layout/WelcomeModal";
@@ -27,15 +30,33 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   await seedDefaultsForUser(session.user.id);
 
+  const queryClient = makeServerQueryClient();
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: ["profile"],
+      queryFn: () => loadProfile(session.user.id),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["reminders"],
+      queryFn: () => loadReminders(session.user.id),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["user"],
+      queryFn: () => loadUser(session.user.id),
+    }),
+  ]);
+
   return (
-    <div className="flex h-[100dvh] flex-col md:flex-row bg-background overflow-hidden">
-      <Sidebar user={session.user} />
-      <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        {children}
-      </main>
-      <WelcomeModal />
-      <SettingsModal />
-      <ProfileModal />
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <div className="flex h-[100dvh] flex-col md:flex-row bg-background overflow-hidden">
+        <Sidebar user={session.user} />
+        <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {children}
+        </main>
+        <WelcomeModal />
+        <SettingsModal />
+        <ProfileModal />
+      </div>
+    </HydrationBoundary>
   );
 }

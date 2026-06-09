@@ -63,7 +63,7 @@ function ColumnImpl({
     >
       <div className="flex items-center gap-2 px-1 pb-1 pt-0.5 group/colhead">
         <Pip color={pipColor} />
-        <span className="text-[14px] font-semibold text-foreground tracking-[-0.005em]">
+        <span className="text-[15px] font-serif font-medium text-foreground tracking-[-0.005em]">
           {column.name}
         </span>
         <span className="text-[12px] text-muted-foreground/80 font-medium tabular-nums">

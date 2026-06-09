@@ -94,6 +94,8 @@ export type ApiDocument = {
   createdAt: string;
   updatedAt: string;
   _count?: { resumeApplications: number; coverLetterApplications: number };
+  resumeApplications?: Array<{ id: string; companyName: string; roleTitle: string; createdAt: string }>;
+  coverLetterApplications?: Array<{ id: string; companyName: string; roleTitle: string; createdAt: string }>;
 };
 
 export type ApiEmailEvent = {

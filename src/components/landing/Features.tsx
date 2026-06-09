@@ -107,7 +107,7 @@ function CaptureMini() {
               placeItems: "center",
               color: "white",
               fontSize: 12,
-              fontFamily: "var(--font-instrument-serif), serif",
+              fontFamily: "var(--font-playfair-display), serif",
               flexShrink: 0,
             }}
           >
@@ -155,7 +155,7 @@ function CardMini() {
             display: "grid",
             placeItems: "center",
             color: "white",
-            fontFamily: "var(--font-instrument-serif), serif",
+            fontFamily: "var(--font-playfair-display), serif",
             fontSize: 13,
             flexShrink: 0,
           }}
@@ -239,7 +239,7 @@ function DigestMini() {
           marginBottom: 4,
         }}
       >
-        <div style={{ fontFamily: "var(--font-instrument-serif), serif", fontSize: 18 }}>
+        <div style={{ fontFamily: "var(--font-playfair-display), serif", fontSize: 18 }}>
           Monday, 9:00am
         </div>
         <div
@@ -285,7 +285,7 @@ function DigestMini() {
                 display: "grid",
                 placeItems: "center",
                 fontSize: 10,
-                fontFamily: "var(--font-instrument-serif), serif",
+                fontFamily: "var(--font-playfair-display), serif",
                 flexShrink: 0,
               }}
             >

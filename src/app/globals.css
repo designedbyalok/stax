@@ -5,36 +5,35 @@
 @layer base {
   :root {
     /* ─────────────────────────────────────────────────────────
-       Warm canvas — Airbnb-inspired. Replaces the cold neutral
-       palette. Shadcn primitives inherit through these tokens.
+       Clean Minimal Green Palette
        ───────────────────────────────────────────────────────── */
-    --background: 39 23% 95%;        /* #f5f3ef warm cream */
-    --foreground: 40 12% 9%;         /* #1a1916 warm ink */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
-    --card: 0 0% 100%;               /* #ffffff paper */
-    --card-foreground: 40 12% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 40 12% 9%;
+    --popover-foreground: 240 10% 3.9%;
 
-    --primary: 40 12% 9%;            /* near-black ink */
-    --primary-foreground: 0 0% 100%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 144 100% 98%;
 
-    --secondary: 39 23% 92%;
-    --secondary-foreground: 40 12% 9%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 39 20% 94%;             /* slightly cooler than bg */
-    --muted-foreground: 36 6% 47%;   /* warm gray */
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 39 23% 92%;
-    --accent-foreground: 40 12% 9%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 36 12% 88%;
-    --input: 36 12% 88%;
-    --ring: 40 12% 9%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142 71% 45%;
 
     /* Coral accent (Airbnb-inspired). Use sparingly — primary
        CTAs and a few brand moments. */
@@ -56,7 +55,7 @@
     --pip-waiting: 32 95% 44%;       /* amber */
     --pip-upcoming: 262 83% 58%;     /* violet */
 
-    --radius: 0.5rem;
+    --radius: 6px;
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);

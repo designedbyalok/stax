@@ -91,3 +91,74 @@ export async function loadReminders(userId: string) {
     },
   }));
 }
+
+import { computeProfileCompletion } from "@/lib/profile-completion";
+
+export async function loadProfile(userId: string) {
+  const [profile, user] = await Promise.all([
+    prisma.userProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    }),
+    prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
+  ]);
+
+  const completion = computeProfileCompletion({
+    name: user?.name ?? null,
+    photoUrl: profile.photoUrl,
+    jobRole: profile.jobRole,
+    city: profile.city,
+    country: profile.country,
+    yearsExperience: profile.yearsExperience,
+    currentSalary: profile.currentSalary,
+    bio: profile.bio,
+  });
+
+  return {
+    id: profile.id,
+    userId: profile.userId,
+    name: user?.name ?? null,
+    jobRole: profile.jobRole,
+    jobFamily: profile.jobFamily,
+    city: profile.city,
+    country: profile.country,
+    yearsExperience: profile.yearsExperience,
+    currentSalary: profile.currentSalary,
+    salaryCurrency: profile.salaryCurrency,
+    photoUrl: profile.photoUrl,
+    bio: profile.bio,
+    onboardingStep: profile.onboardingStep,
+    onboardingCompletedAt: profile.onboardingCompletedAt?.toISOString() ?? null,
+    onboardingSkippedAt: profile.onboardingSkippedAt?.toISOString() ?? null,
+    createdAt: profile.createdAt.toISOString(),
+    updatedAt: profile.updatedAt.toISOString(),
+    completion,
+  };
+}
+
+export async function loadUser(userId: string) {
+  const [user, googleIntegration] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        timezone: true,
+        inboundEmailToken: true,
+      },
+    }),
+    prisma.googleIntegration.findUnique({
+      where: { userId },
+      select: { id: true, email: true, createdAt: true },
+    }),
+  ]);
+
+  return { ...user, googleIntegration: googleIntegration ? {
+    id: googleIntegration.id,
+    email: googleIntegration.email,
+    createdAt: googleIntegration.createdAt.toISOString()
+  } : null };
+}
