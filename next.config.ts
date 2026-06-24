@@ -20,6 +20,17 @@ const nextConfig: NextConfig = {
   // as if you wrote per-icon imports, which shrinks bundles + speeds up
   // RSC module-graph analysis during build.
   experimental: {
+    // Client-side Router Cache lifetimes. Next 15/16 default `dynamic` to 0,
+    // so auth-gated (dynamic) routes re-fetch + re-run their server segment on
+    // every tab switch — even one you just viewed. Caching dynamic segments
+    // for a few minutes makes returning to a recent tab instant (no server
+    // round-trip). Safe here because the visible UI is driven by React Query
+    // (its own cache + mutation invalidation), so a slightly-stale RSC payload
+    // never shows stale content — the client reconciles on hydration.
+    staleTimes: {
+      dynamic: 180,
+      static: 300,
+    },
     optimizePackageImports: [
       "@hugeicons/react",
       "@hugeicons/core-free-icons",
