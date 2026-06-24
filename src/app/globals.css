@@ -5,41 +5,49 @@
 @layer base {
   :root {
     /* ─────────────────────────────────────────────────────────
-       Clean Minimal Green Palette
+       Linear design language — light theme.
+       Neutral, near-grayscale surfaces (Linear's restrained
+       palette) with a single vivid violet accent (#7C5CFF) used
+       for primary actions, focus, and selection.
        ───────────────────────────────────────────────────────── */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 240 10% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 10% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 240 10% 9%;
 
-    --primary: 142 71% 45%;
-    --primary-foreground: 144 100% 98%;
+    --primary: 252 90% 64%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 240 5% 96.5%;
+    --muted-foreground: 240 4% 46%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 240 5% 95%;
+    --accent-foreground: 240 6% 10%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 142 71% 45%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 252 90% 64%;
 
-    /* Coral accent (Airbnb-inspired). Use sparingly — primary
-       CTAs and a few brand moments. */
-    --coral: 350 100% 60%;           /* #ff385c */
-    --coral-soft: 350 100% 95%;
-    --coral-ink: 348 80% 42%;
+    /* Brand accent ramp (violet). Soft = tinted surfaces/badges,
+       ink = accent text on light. */
+    --accent-brand: 252 90% 64%;     /* #7C5CFF family */
+    --accent-soft: 252 100% 97%;
+    --accent-ink: 252 72% 52%;
+
+    /* Legacy aliases kept so any lingering references resolve. */
+    --coral: 252 90% 64%;
+    --coral-soft: 252 100% 97%;
+    --coral-ink: 252 72% 52%;
 
     /* Stage tint variables (OKLCH). Used per-column for kanban. */
     --stage-saved-h: 38;     --stage-saved-c: 0.06;
@@ -55,47 +63,57 @@
     --pip-waiting: 32 95% 44%;       /* amber */
     --pip-upcoming: 262 83% 58%;     /* violet */
 
-    --radius: 6px;
+    --radius: 8px;
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
 
-    --shadow-card: 0 1px 0 hsl(40 12% 9% / 0.03),
-                   0 1px 2px hsl(40 12% 9% / 0.03);
-    --shadow-pop: 0 1px 0 hsl(40 12% 9% / 0.03),
-                  0 12px 24px -14px hsl(40 12% 9% / 0.10),
-                  0 4px 10px -6px hsl(40 12% 9% / 0.06);
+    /* Linear leans on borders, not shadows. Keep these whisper-soft
+       and cool-toned so elevation reads as a subtle lift, never a drop. */
+    --shadow-card: 0 1px 2px hsl(240 10% 4% / 0.04);
+    --shadow-pop: 0 4px 16px -4px hsl(240 10% 4% / 0.16),
+                  0 2px 6px -2px hsl(240 10% 4% / 0.10);
   }
 
   .dark {
-    --background: 30 5% 8%;
-    --foreground: 36 12% 95%;
+    /* Linear dark — near-black cool canvas, low-contrast elevated
+       panels, whisper-thin borders, vivid violet accent. */
+    --background: 240 6% 7%;
+    --foreground: 240 12% 95%;
 
-    --card: 30 5% 11%;
-    --card-foreground: 36 12% 95%;
+    --card: 240 6% 9%;
+    --card-foreground: 240 12% 95%;
 
-    --popover: 30 5% 11%;
-    --popover-foreground: 36 12% 95%;
+    --popover: 240 7% 11%;
+    --popover-foreground: 240 12% 95%;
 
-    --primary: 36 12% 95%;
-    --primary-foreground: 30 5% 8%;
+    --primary: 252 100% 69%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 5% 16%;
-    --secondary-foreground: 36 12% 95%;
+    --secondary: 240 5% 14%;
+    --secondary-foreground: 240 12% 95%;
 
-    --muted: 30 5% 14%;
-    --muted-foreground: 36 6% 60%;
+    --muted: 240 5% 13%;
+    --muted-foreground: 240 5% 60%;
 
-    --accent: 30 5% 16%;
-    --accent-foreground: 36 12% 95%;
+    --accent: 240 5% 15%;
+    --accent-foreground: 240 12% 96%;
 
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 0 0% 96%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 30 5% 20%;
-    --input: 30 5% 20%;
-    --ring: 36 12% 70%;
+    --border: 240 5% 17%;
+    --input: 240 5% 17%;
+    --ring: 252 100% 69%;
+
+    --accent-brand: 252 100% 69%;
+    --accent-soft: 252 40% 18%;
+    --accent-ink: 252 100% 80%;
+
+    --coral: 252 100% 69%;
+    --coral-soft: 252 40% 18%;
+    --coral-ink: 252 100% 80%;
   }
 
   * {
@@ -113,7 +131,7 @@
   }
 
   ::selection {
-    background: hsl(40 12% 9% / 0.08);
+    background: hsl(var(--primary) / 0.22);
   }
 }
 

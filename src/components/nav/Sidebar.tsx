@@ -4,18 +4,19 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
-  LayoutGrid,
-  Bell,
-  FileText,
-  Settings,
-  Calendar,
-  BookOpen,
-  MessageSquare,
-  Mail,
-  PenTool,
-  TrendingUp,
-} from "lucide-react";
+  DashboardSquare01Icon,
+  Calendar03Icon,
+  Notification03Icon,
+  File01Icon,
+  PenTool03Icon,
+  Analytics01Icon,
+  Message01Icon,
+  BookOpen01Icon,
+  Settings02Icon,
+  Mail01Icon,
+} from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
+import { Icon, type IconSvgElement } from "@/components/ui/icon";
 import { StaxMark } from "@/components/StaxMark";
 import { api } from "@/lib/api-client";
 import { useSettingsModal } from "@/lib/settings-modal-store";
@@ -25,7 +26,7 @@ import { ProfileAvatarRing } from "@/components/profile/ProfileAvatarRing";
 type Item = {
   href: string;
   label: string;
-  icon: typeof LayoutGrid;
+  icon: IconSvgElement;
   kbd?: string;
   countKey?: "reminders" | "interviews";
   /** Additional path prefixes that should mark this item active.
@@ -37,20 +38,20 @@ const NAV_WORKSPACE: Item[] = [
   {
     href: "/board",
     label: "Pipeline",
-    icon: LayoutGrid,
+    icon: DashboardSquare01Icon,
     kbd: "⌘1",
     matches: ["/board", "/list"],
   },
-  { href: "/interviews", label: "Interviews", icon: Calendar, countKey: "interviews" },
-  { href: "/reminders", label: "Reminders", icon: Bell, countKey: "reminders" },
-  { href: "/documents", label: "Documents", icon: FileText },
-  { href: "/resume-builder", label: "Resume Builder", icon: PenTool },
-  { href: "/insights", label: "Insights", icon: TrendingUp },
+  { href: "/interviews", label: "Interviews", icon: Calendar03Icon, countKey: "interviews" },
+  { href: "/reminders", label: "Reminders", icon: Notification03Icon, countKey: "reminders" },
+  { href: "/documents", label: "Documents", icon: File01Icon },
+  { href: "/resume-builder", label: "Resume Builder", icon: PenTool03Icon },
+  { href: "/insights", label: "Insights", icon: Analytics01Icon },
 ];
 
 const NAV_LIBRARY: Item[] = [
-  { href: "/library/questions", label: "Questions", icon: MessageSquare },
-  { href: "/library/stories", label: "STAR Stories", icon: BookOpen },
+  { href: "/library/questions", label: "Questions", icon: Message01Icon },
+  { href: "/library/stories", label: "STAR Stories", icon: BookOpen01Icon },
 ];
 
 export function Sidebar({
@@ -106,20 +107,22 @@ export function Sidebar({
   if (hideChrome) return null;
 
   return (
-    <aside className="hidden md:flex w-[232px] shrink-0 flex-col border-r border-border bg-card">
+    <aside className="hidden md:flex w-[228px] shrink-0 flex-col bg-background">
       {/* Brand */}
       <div className="px-3 pt-4 pb-3">
         <Link
           href="/board"
-          className="flex items-center gap-2 px-2 font-serif font-semibold tracking-[-0.01em] text-foreground text-[16px]"
+          className="group flex items-center gap-2 px-2 font-semibold tracking-[-0.02em] text-foreground text-[15px] outline-none"
         >
-          <StaxMark size={16} strokeWidth={2.5} gap={2} />
+          <span className="grid h-[22px] w-[22px] place-items-center rounded-md bg-primary text-primary-foreground shadow-sm shadow-primary/30 transition-transform group-hover:scale-105">
+            <StaxMark size={13} strokeWidth={2.75} gap={2} />
+          </span>
           Stax
         </Link>
       </div>
 
       {/* Sections */}
-      <nav className="flex-1 overflow-y-auto scroll-soft px-3 space-y-4">
+      <nav className="flex-1 overflow-y-auto scroll-soft px-3 space-y-5">
         <Section label="Workspace">
           {NAV_WORKSPACE.map((item) => (
             <NavLink
@@ -141,13 +144,13 @@ export function Sidebar({
       {/* Inbound email tip */}
       {inboundEmail && (
         <div className="px-3 pb-2">
-          <div className="bg-background border border-border rounded-lg px-3 py-2.5 text-[12px] text-muted-foreground leading-[1.5]">
-            <div className="flex items-center gap-1.5 text-foreground font-semibold mb-0.5">
-              <Mail className="h-3 w-3" strokeWidth={2} />
+          <div className="rounded-lg border border-border bg-background px-3 py-2.5 text-[12px] leading-[1.5] text-muted-foreground">
+            <div className="mb-0.5 flex items-center gap-1.5 font-semibold text-foreground">
+              <Icon icon={Mail01Icon} size={13} strokeWidth={2} />
               Forward emails →
             </div>
             <span className="break-all">{inboundEmail}</span>
-            <span className="block mt-0.5">to auto-update cards.</span>
+            <span className="mt-0.5 block">to auto-update cards.</span>
           </div>
         </div>
       )}
@@ -157,19 +160,23 @@ export function Sidebar({
         <button
           type="button"
           onClick={() => openSettings()}
-          className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[14px] font-medium text-foreground/80 hover:bg-background hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          className="group flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13.5px] font-medium text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40"
         >
-          <Settings className="h-4 w-4 shrink-0" strokeWidth={1.7} />
+          <Icon
+            icon={Settings02Icon}
+            size={17}
+            className="text-muted-foreground transition-transform duration-500 group-hover:rotate-90 group-hover:text-foreground"
+          />
           Settings
         </button>
       </div>
 
       {/* User chip — avatar + completion ring, opens the profile modal */}
-      <div className="px-3 pb-3 pt-1 border-t border-border">
+      <div className="border-t border-border px-3 pb-3 pt-1">
         <button
           type="button"
           onClick={() => openProfile()}
-          className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-background hover:border-border border border-transparent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          className="flex w-full items-center gap-2.5 rounded-lg border border-transparent p-2 outline-none transition-colors hover:border-border hover:bg-background focus-visible:ring-2 focus-visible:ring-ring/40"
           aria-label={`Open your profile — ${completionPct}% complete`}
         >
           <ProfileAvatarRing
@@ -179,11 +186,11 @@ export function Sidebar({
             size={32}
           />
           <div className="min-w-0 flex-1 text-left">
-            <div className="text-[13px] font-medium text-foreground truncate leading-[1.25]">
+            <div className="truncate text-[13px] font-medium leading-[1.25] text-foreground">
               {firstName}
             </div>
             {completionPct < 100 && (
-              <div className="text-[12px] text-muted-foreground truncate leading-[1.25] mt-0.5">
+              <div className="mt-0.5 truncate text-[12px] leading-[1.25] text-muted-foreground">
                 Profile {completionPct}%
               </div>
             )}
@@ -207,7 +214,7 @@ function Section({
 }) {
   return (
     <div>
-      <div className="px-2.5 pt-1.5 pb-1 text-[12px] font-medium text-muted-foreground/70">
+      <div className="px-2.5 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground/60">
         {label}
       </div>
       <div className="flex flex-col gap-px">{children}</div>
@@ -228,35 +235,39 @@ function NavLink({
   const active = patterns.some(
     (p) => pathname === p || pathname.startsWith(p + "/")
   );
-  const Icon = item.icon;
   return (
     <Link
       href={item.href}
+      aria-current={active ? "page" : undefined}
       className={cn(
-        "group/nav relative flex items-center gap-2.5 px-2.5 py-[7px] rounded-md text-[14px] font-medium transition-colors",
+        "group/nav relative flex items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[13.5px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/40",
         active
-          ? "bg-background text-foreground"
-          : "text-foreground/80 hover:bg-background hover:text-foreground"
+          ? "bg-secondary text-foreground"
+          : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
       )}
     >
+      {/* Filled glyph when active, linear otherwise — the deliberate mix,
+          kept neutral so the nav reads with Linear's restraint. */}
       <Icon
+        icon={item.icon}
+        size={18}
+        solid={active}
+        strokeWidth={1.8}
         className={cn(
-          "h-4 w-4 shrink-0 transition-colors",
+          "transition-colors",
           active ? "text-foreground" : "text-muted-foreground group-hover/nav:text-foreground"
         )}
-        strokeWidth={1.7}
       />
       <span className="truncate">{item.label}</span>
       {count !== undefined && count > 0 ? (
-        <span className="ml-auto text-[12px] text-muted-foreground/80 tabular-nums">
+        <span className="ml-auto text-[12px] font-medium tabular-nums text-muted-foreground">
           {count}
         </span>
       ) : item.kbd ? (
-        <span className="ml-auto text-[12px] text-muted-foreground/60 font-medium tracking-wider">
+        <span className="ml-auto font-mono text-[11px] tracking-wider text-muted-foreground/50">
           {item.kbd}
         </span>
       ) : null}
     </Link>
   );
 }
-

@@ -50,9 +50,12 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
+        // Linear is an all-sans system (Inter). `serif` is intentionally
+        // mapped to the same sans stack so any lingering `font-serif`
+        // utility renders without a serif face — no serif anywhere.
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        serif: ["var(--font-playfair-display)", "Times New Roman", "serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        serif: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       fontSize: {
         // Linear-ish tighter scale

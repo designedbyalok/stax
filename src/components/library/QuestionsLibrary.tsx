@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Star, Link as LinkIcon, Trash2, Edit2 } from "lucide-react";
+import { Search, Plus, Star, Link as LinkIcon, Trash2, Edit2 } from "@/components/icons";
 import { api, ApiInterviewQuestion } from "@/lib/api-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Trash2, Edit2, ThumbsUp } from "lucide-react";
+import { Search, Plus, Trash2, Edit2, ThumbsUp } from "@/components/icons";
 import { api, ApiStarStory } from "@/lib/api-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

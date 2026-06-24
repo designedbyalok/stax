@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Camera, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Camera, Loader2, Sparkles } from "@/components/icons";
 import { api, ApiProfile, ProfilePatch } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

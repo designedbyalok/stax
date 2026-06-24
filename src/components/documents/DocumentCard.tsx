@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import { Download, Eye, MoreHorizontal, Trash2 } from "@/components/icons";
 import { toast } from "sonner";
 import {
   DropdownMenu,

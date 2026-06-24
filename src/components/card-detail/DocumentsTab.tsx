@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Eye, Trash2, Plus, Calendar, Star, Upload, Loader2 } from "lucide-react";
+import { FileText, Eye, Trash2, Plus, Calendar, Star, Upload, Loader2 } from "@/components/icons";
 import { api, ApiApplication, ApiApplicationDetail } from "@/lib/api-client";
 import { toast } from "sonner";
 import { DocumentPicker } from "@/components/documents/DocumentPicker";

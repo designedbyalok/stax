@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, ChevronsUpDown, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsUpDown, Sparkles } from "@/components/icons";
 import { format } from "date-fns";
 import { api, ApiColumn } from "@/lib/api-client";
 import { CardDrawer } from "@/components/card-detail/CardDrawer";

@@ -1,11 +1,10 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { makeServerQueryClient } from "@/lib/server-query";
 import {
   loadApplications,
   loadColumns,
-  loadReminders,
   loadUserSettings,
 } from "@/lib/loaders";
 import BoardPageClient from "./BoardPageClient";
@@ -16,14 +15,16 @@ import BoardPageClient from "./BoardPageClient";
 // reads them via useQuery with the same keys (Board.tsx, StatsStrip,
 // RemindersBell, etc.) and never sees a loading state on cold reload.
 export default async function BoardPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login");
   const userId = session.user.id;
 
   const queryClient = makeServerQueryClient();
 
-  // Fire all four in parallel — same set of round trips a fresh client
-  // would have made, but on the server where they overlap with rendering.
+  // Fire these in parallel — same round trips a fresh client would make, but
+  // on the server where they overlap with rendering. `reminders` is omitted
+  // on purpose: the (app) layout already prefetches it, and nested hydration
+  // boundaries merge, so the RemindersBell reads it from the warmed cache.
   await Promise.all([
     queryClient.prefetchQuery({
       queryKey: ["columns"],
@@ -36,10 +37,6 @@ export default async function BoardPage() {
     queryClient.prefetchQuery({
       queryKey: ["userSettings"],
       queryFn: () => loadUserSettings(userId),
-    }),
-    queryClient.prefetchQuery({
-      queryKey: ["reminders"],
-      queryFn: () => loadReminders(userId),
     }),
   ]);
 

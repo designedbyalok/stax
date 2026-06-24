@@ -1,7 +1,7 @@
 import React from "react";
 import { ResumeData } from "@/lib/types/resume";
 import { resolveFont, googleFontsHref } from "@/lib/resume-fonts";
-import { Globe, MonitorSmartphone, PenTool } from "lucide-react";
+import { Globe, MonitorSmartphone, PenTool } from "@/components/icons";
 
 function SocialIcon({ label, className }: { label: string; className?: string }) {
   const l = label.toLowerCase();
@@ -381,7 +381,7 @@ function ExtraSections({
   );
 }
 
-export function ResumePreview({ resume }: ResumePreviewProps) {
+function ResumePreviewImpl({ resume }: ResumePreviewProps) {
   const design = resume.design || {
     template: "classic",
     themeColor: "#0f172a",
@@ -1099,3 +1099,8 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
     </div>
   );
 }
+
+// Memoized so editing the resume title (or any sibling state in the builder)
+// doesn't re-render the whole preview tree — it only re-renders when the
+// resume content object itself changes.
+export const ResumePreview = React.memo(ResumePreviewImpl);

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar as CalendarIcon, Loader2, Video } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Video } from "@/components/icons";
 import { toast } from "sonner";
 import { format, addMinutes } from "date-fns";
 import { api } from "@/lib/api-client";

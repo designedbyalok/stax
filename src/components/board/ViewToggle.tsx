@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, List } from "lucide-react";
+import { GridViewIcon, ListViewIcon } from "@hugeicons/core-free-icons";
+import { Icon, type IconSvgElement } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 // Inline segmented control to switch between the board and list
@@ -15,12 +16,12 @@ export function ViewToggle() {
 
   return (
     <div
-      className="inline-flex items-center p-0.5 rounded-md bg-card border border-border"
+      className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-background p-0.5"
       role="tablist"
       aria-label="Pipeline view"
     >
-      <Segment href="/board" active={isBoard} icon={LayoutGrid} label="Board" />
-      <Segment href="/list" active={isList} icon={List} label="List" />
+      <Segment href="/board" active={isBoard} icon={GridViewIcon} label="Board" />
+      <Segment href="/list" active={isList} icon={ListViewIcon} label="List" />
     </div>
   );
 }
@@ -28,12 +29,12 @@ export function ViewToggle() {
 function Segment({
   href,
   active,
-  icon: Icon,
+  icon,
   label,
 }: {
   href: string;
   active: boolean;
-  icon: typeof LayoutGrid;
+  icon: IconSvgElement;
   label: string;
 }) {
   return (
@@ -42,13 +43,13 @@ function Segment({
       aria-label={`${label} view`}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "inline-flex items-center justify-center w-7 h-6 rounded-[5px] transition-colors",
+        "inline-flex h-6 w-7 items-center justify-center rounded-[6px] transition-colors",
         active
-          ? "bg-background text-foreground"
+          ? "bg-secondary text-foreground shadow-sm"
           : "text-muted-foreground hover:text-foreground"
       )}
     >
-      <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+      <Icon icon={icon} size={15} strokeWidth={1.9} solid={active} />
     </Link>
   );
 }

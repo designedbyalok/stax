@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Mail, Check, X, Inbox, Loader2 } from "lucide-react";
+import { Mail, Check, X, Inbox, Loader2 } from "@/components/icons";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";

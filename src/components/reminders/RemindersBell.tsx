@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, Clock, X, ChevronDown } from "lucide-react";
+import { Bell, Clock, X, ChevronDown } from "@/components/icons";
 import { toast } from "sonner";
 import {
   Popover,

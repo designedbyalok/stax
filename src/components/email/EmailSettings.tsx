@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Mail, ExternalLink } from "lucide-react";
+import { Copy, Mail, ExternalLink } from "@/components/icons";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";

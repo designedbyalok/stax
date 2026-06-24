@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Download, FileText, ListFilter } from "lucide-react";
+import { Loader2, Plus, Download, FileText, ListFilter } from "@/components/icons";
 import { toast } from "sonner";
 import { ApiResume } from "@/lib/types/resume";
 import { ResumeCard } from "@/app/(app)/resume-builder/ResumeCard";

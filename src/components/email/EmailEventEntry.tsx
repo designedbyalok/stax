@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Mail, ChevronDown, ChevronRight, CornerUpLeft } from "lucide-react";
+import { Mail, ChevronDown, ChevronRight, CornerUpLeft } from "@/components/icons";
 import { ApiEmailEvent } from "@/lib/api-client";
 import { Badge } from "@/components/ui/badge";
 

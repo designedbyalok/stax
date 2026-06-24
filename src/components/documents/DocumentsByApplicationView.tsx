@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, FileText, Eye } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Eye } from "@/components/icons";
 import { useState } from "react";
 import { ApiDocument } from "@/lib/api-client";
 import { cn } from "@/lib/utils";

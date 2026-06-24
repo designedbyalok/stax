@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/icons";
 
 // Dynamically import the client implementation with SSR disabled.
 // This prevents Next.js SSR Webpack from crashing when importing pdfjs-dist.

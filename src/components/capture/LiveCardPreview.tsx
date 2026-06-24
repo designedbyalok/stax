@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, MapPin } from "lucide-react";
+import { Globe, MapPin } from "@/components/icons";
 import { format } from "date-fns";
 import { BrandAvatar } from "@/components/ui/brand-avatar";
 import { Pill } from "@/components/ui/pill";

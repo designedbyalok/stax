@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Search, X, ChevronDown } from "lucide-react";
+import { Search, X, ChevronDown } from "@/components/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,

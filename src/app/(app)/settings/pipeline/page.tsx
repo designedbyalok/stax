@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, GripVertical, Trash2, Check, X } from "lucide-react";
+import { Plus, GripVertical, Trash2, Check, X } from "@/components/icons";
 import { toast } from "sonner";
 import {
   DndContext,

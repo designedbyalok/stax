@@ -21,7 +21,8 @@ const nextConfig: NextConfig = {
   // RSC module-graph analysis during build.
   experimental: {
     optimizePackageImports: [
-      "lucide-react",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons",
       "date-fns",
       "@dnd-kit/core",
       "@dnd-kit/sortable",

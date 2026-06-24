@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
+import { cache } from "react";
 import { z } from "zod";
 import prisma from "./db";
 
@@ -79,6 +80,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: { signIn: "/login" },
 });
+
+// Request-scoped session read. React's cache() dedupes the JWT decode across
+// every server component in a single render pass — so a route's layout and
+// page (which both need the session) only verify the cookie once instead of
+// each paying for it. Prefer this over calling `auth()` directly in RSCs.
+export const getSession = cache(auth);
 
 declare module "next-auth" {
   interface Session {

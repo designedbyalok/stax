@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { signOut } from "next-auth/react";
-import { Camera, Check, Loader2, LogOut, Settings, Sparkles, TrendingUp, User, X } from "lucide-react";
+import { Camera, Check, Loader2, LogOut, Settings, Sparkles, TrendingUp, User, X } from "@/components/icons";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

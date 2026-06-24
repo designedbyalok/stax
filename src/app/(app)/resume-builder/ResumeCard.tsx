@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "@/components/icons";
 import { ApiResume } from "@/lib/types/resume";
 import { ResumePreview } from "./ResumePreview";
 import {

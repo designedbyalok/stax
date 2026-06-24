@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { User, Palette, Columns3, Bell, Puzzle, Trash2, X } from "lucide-react";
+import { User, Palette, Columns3, Bell, Puzzle, Trash2, X } from "@/components/icons";
 
 const SECTIONS = [
   { href: "/settings/account", label: "Account", icon: User },

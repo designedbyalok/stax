@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
+import { AlertCircle, CheckCircle2, Sparkles } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 // One-line AI nudge attached to a card or row. Three tones:

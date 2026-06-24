@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, FileText, CheckCircle2 } from "lucide-react";
+import { ExternalLink, FileText, CheckCircle2 } from "@/components/icons";
 import { api, ApiApplication } from "@/lib/api-client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";

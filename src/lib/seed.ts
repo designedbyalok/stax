@@ -10,15 +10,22 @@ const DEFAULT_COLUMNS = [
   { name: "Archived", color: "#64748B", isArchive: true, isInterviewStage: false },
 ];
 
-export async function seedDefaultsForUser(userId: string) {
+export async function seedDefaultsForUser(
+  userId: string,
+  opts?: { skipUserCheck?: boolean }
+) {
   // Belt-and-suspenders: confirm the user actually exists before we try to
-  // create rows that reference it. The caller (app layout) already checks
-  // this, but we want this helper safe to call from anywhere.
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true },
-  });
-  if (!user) return;
+  // create rows that reference it, so this helper is safe to call from
+  // anywhere. Callers that have *already* verified the user (e.g. the app
+  // layout, which checks + redirects) pass skipUserCheck to avoid paying for
+  // a second identical round-trip on the hot path.
+  if (!opts?.skipUserCheck) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!user) return;
+  }
 
   const existing = await prisma.column.count({ where: { userId } });
   if (existing > 0) return;

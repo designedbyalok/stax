@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "@/components/icons";
 import { api } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 

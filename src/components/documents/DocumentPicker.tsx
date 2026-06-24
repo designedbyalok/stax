@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus } from "@/components/icons";
 import { api } from "@/lib/api-client";
 import {
   Select,

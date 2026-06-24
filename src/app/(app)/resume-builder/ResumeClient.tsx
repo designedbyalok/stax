@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Printer, Save, Sparkles, ArrowLeft, Plus, Check, Palette } from "lucide-react";
+import { Loader2, Printer, Save, Sparkles, ArrowLeft, Plus, Check, Palette } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,6 +95,10 @@ export function ResumeClient() {
   const [activeResume, setActiveResume] = useState<ApiResume | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  // The full font catalog (~24 families) is only needed so each option in
+  // the font picker previews in its own face. Loading it eagerly blocks
+  // first paint, so we latch it on the first time the picker opens.
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Autosave bookkeeping. savedSnapshotRef holds the last-persisted
@@ -329,7 +333,7 @@ export function ResumeClient() {
       <ResizablePanel defaultSize={35} minSize={20} className="bg-card flex flex-col h-full z-10 shadow-sm print:hidden responsive-panel" style={{ maxWidth: 300 }}>
         <div className="p-4 border-b flex flex-col gap-3 shrink-0">
           <div className="text-xs text-muted-foreground flex items-center justify-between">
-            <span>Last saved {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <SaveStatus status={saveStatus} />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar">
@@ -528,7 +532,7 @@ export function ResumeClient() {
                         links.splice(idx, 1);
                         handleUpdateContent({ ...activeResume.content, basics: { ...activeResume.content.basics, links } });
                       }}
-                      className="text-muted-foreground hover:text-destructive text-xs shrink-0 mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="text-muted-foreground hover:text-destructive text-xs shrink-0 mt-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                       aria-label="Remove link"
                     >
                       Remove
@@ -557,7 +561,7 @@ export function ResumeClient() {
                     const newWork = [...activeResume.content.work];
                     newWork.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, work: newWork });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="grid grid-cols-2 gap-3 pt-2">
@@ -636,7 +640,7 @@ export function ResumeClient() {
                     const newSkills = [...activeResume.content.skills];
                     newSkills.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, skills: newSkills });
-                  }} className="text-muted-foreground hover:text-destructive text-xs px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  }} className="text-muted-foreground hover:text-destructive text-xs px-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity">
                     Remove
                   </button>
                 </div>
@@ -661,7 +665,7 @@ export function ResumeClient() {
                     const newEd = [...activeResume.content.education];
                     newEd.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, education: newEd });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="grid grid-cols-2 gap-3 pt-2">
@@ -731,7 +735,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.projects ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, projects: items });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="grid grid-cols-2 gap-3 pt-2">
@@ -783,7 +787,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.certifications ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, certifications: items });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="space-y-1.5 pt-2">
@@ -835,7 +839,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.awards ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, awards: items });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="space-y-1.5 pt-2">
@@ -897,7 +901,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.languages ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, languages: items });
-                  }} className="text-muted-foreground hover:text-destructive text-xs px-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  }} className="text-muted-foreground hover:text-destructive text-xs px-1 shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity">
                     Remove
                   </button>
                 </div>
@@ -923,7 +927,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.publications ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, publications: items });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="space-y-1.5 pt-2">
@@ -983,7 +987,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.volunteer ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, volunteer: items });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="grid grid-cols-2 gap-3 pt-2">
@@ -1063,7 +1067,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.interests ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, interests: items });
-                  }} className="text-muted-foreground hover:text-destructive text-xs px-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  }} className="text-muted-foreground hover:text-destructive text-xs px-1 shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity">
                     Remove
                   </button>
                 </div>
@@ -1089,7 +1093,7 @@ export function ResumeClient() {
                     const items = [...(activeResume.content.references ?? [])];
                     items.splice(idx, 1);
                     handleUpdateContent({ ...activeResume.content, references: items });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove
                   </button>
                   <div className="space-y-1.5 pt-2">
@@ -1131,7 +1135,7 @@ export function ResumeClient() {
                     const sections = [...(activeResume.content.customSections ?? [])];
                     sections.splice(sIdx, 1);
                     handleUpdateContent({ ...activeResume.content, customSections: sections });
-                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-xs">
+                  }} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-xs">
                     Remove section
                   </button>
                   <div className="space-y-1.5 pt-2">
@@ -1151,7 +1155,7 @@ export function ResumeClient() {
                           items.splice(iIdx, 1);
                           sections[sIdx] = { ...sections[sIdx], items };
                           handleUpdateContent({ ...activeResume.content, customSections: sections });
-                        }} className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover/item:opacity-100 text-[11px]">
+                        }} className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover/item:opacity-100 focus-visible:opacity-100 text-[11px]">
                           Remove
                         </button>
                         <div className="grid grid-cols-2 gap-2">
@@ -1230,8 +1234,11 @@ export function ResumeClient() {
           <p className="text-xs text-muted-foreground mt-0.5">Template, color &amp; typography</p>
         </div>
         <div className="flex-1 overflow-y-auto p-4 no-scrollbar">
-          {/* Loaded so each option in the font picker previews in its own face */}
-          <link rel="stylesheet" href={ALL_FONTS_HREF} precedence="resume-fonts-all" />
+          {/* Loaded lazily (on first font-picker open) so each option can
+              preview in its own face without blocking the editor's paint. */}
+          {fontsLoaded && (
+            <link rel="stylesheet" href={ALL_FONTS_HREF} precedence="resume-fonts-all" />
+          )}
           <div className="space-y-8">
               {/* Template Selector */}
               <section className="space-y-3">
@@ -1264,6 +1271,9 @@ export function ResumeClient() {
                   return (
                     <Select
                       value={currentFont}
+                      onOpenChange={(open) => {
+                        if (open) setFontsLoaded(true);
+                      }}
                       onValueChange={(v) =>
                         handleUpdateContent({
                           ...activeResume.content,
@@ -1467,11 +1477,14 @@ function ScaledBuilderPreview({ resume }: { resume: ResumeData }) {
     return () => observer.disconnect();
   }, []);
 
-  // Pagination Engine
+  // Pagination Engine. Walks the rendered preview reading layout
+  // (getBoundingClientRect) in a loop — a forced reflow that's costly to run
+  // on every keystroke. Debounce so it runs ~150ms after edits/resize settle.
   useEffect(() => {
+    const timer = setTimeout(() => {
     const container = containerRef.current?.querySelector('#resume-preview-content') as HTMLElement;
     if (!container) return;
-    
+
     // Clear previous margins
     const elements = container.querySelectorAll('*');
     elements.forEach(el => {
@@ -1520,6 +1533,8 @@ function ScaledBuilderPreview({ resume }: { resume: ResumeData }) {
     
     // Update the wrapper height to show all pages
     setActualHeight(container.scrollHeight);
+    }, 150);
+    return () => clearTimeout(timer);
   }, [resume, scale]);
 
   const pages = Math.max(1, Math.ceil(actualHeight / 1123));

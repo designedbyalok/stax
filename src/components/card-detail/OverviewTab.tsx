@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink } from "@/components/icons";
 import { ContactsList } from "./ContactsList";
 import { CalendarSection } from "./CalendarSection";
 import { Timeline } from "./Timeline";

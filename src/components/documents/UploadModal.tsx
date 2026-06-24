@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, X, File, Loader2 } from "lucide-react";
+import { Upload, X, File, Loader2 } from "@/components/icons";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";

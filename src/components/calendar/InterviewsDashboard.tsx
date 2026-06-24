@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { format, isPast, isToday, isTomorrow, isThisWeek } from "date-fns";
-import { Calendar as CalendarIcon, Video, AlignLeft, AlertCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Video, AlignLeft, AlertCircle } from "@/components/icons";
 import { api, ApiCalendarEvent } from "@/lib/api-client";
 import { useSelectedCard } from "@/components/kanban/selected-card-store";
 import { CardDrawer } from "@/components/card-detail/CardDrawer";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Columns3, Palette, Puzzle, Trash2, User, X } from "lucide-react";
+import { Bell, Columns3, Palette, Puzzle, Trash2, User, X } from "@/components/icons";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

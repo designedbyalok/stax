@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, FileUp, LayoutTemplate, ArrowRight } from "lucide-react";
+import { Loader2, Plus, FileUp, LayoutTemplate, ArrowRight } from "@/components/icons";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar, Plus, Video } from "lucide-react";
+import { Calendar, Plus, Video } from "@/components/icons";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ApiCalendarEvent } from "@/lib/api-client";

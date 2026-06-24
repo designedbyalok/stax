@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "@/components/icons";
 import { toast } from "sonner";
 import {
   Sheet,

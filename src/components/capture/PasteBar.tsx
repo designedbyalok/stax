@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2, Link2 } from "lucide-react";
+import { Loader2, Link2 } from "@/components/icons";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api-client";

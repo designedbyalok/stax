@@ -3,7 +3,8 @@
 import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ArrowRight, Globe, MapPin } from "lucide-react";
+import { ArrowRight01Icon, Globe02Icon, Location01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
 import { ApiApplication } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { BrandAvatar } from "@/components/ui/brand-avatar";
@@ -118,7 +119,7 @@ function KanbanCardImpl({ card, isOverlay, onSelect }: CardProps) {
             size={28}
           />
           <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-serif font-medium text-foreground leading-[1.35] tracking-[-0.005em] line-clamp-2">
+            <h3 className="text-[14px] font-semibold text-foreground leading-[1.35] tracking-[-0.01em] line-clamp-2">
               {card.roleTitle}
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
@@ -132,7 +133,7 @@ function KanbanCardImpl({ card, isOverlay, onSelect }: CardProps) {
           <div className="flex items-center gap-1.5 flex-wrap mt-1">
             {card.location && (
               <Pill
-                icon={<MapPin />}
+                icon={<Icon icon={Location01Icon} size={12} strokeWidth={1.8} />}
                 className="max-w-[180px]"
               >
                 {card.location}
@@ -152,14 +153,17 @@ function KanbanCardImpl({ card, isOverlay, onSelect }: CardProps) {
 
       <div className="relative z-10 flex items-center justify-between gap-2 px-3 py-2 border-t border-border text-[12px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <Globe className="h-3 w-3 shrink-0 opacity-70" strokeWidth={2} />
+          <Icon icon={Globe02Icon} size={12} strokeWidth={1.8} className="opacity-70" />
           <span className="truncate">
             {sourceLabel ? `${sourceLabel} · ${dateLabel}` : dateLabel}
           </span>
         </span>
-        <ArrowRight
+        <Icon
+          icon={ArrowRight01Icon}
+          size={13}
+          strokeWidth={2}
           className={cn(
-            "h-3 w-3 shrink-0 text-muted-foreground/0",
+            "text-muted-foreground/0",
             "transition-all duration-200 ease-out",
             "group-hover:text-foreground/70 group-hover:translate-x-0.5"
           )}

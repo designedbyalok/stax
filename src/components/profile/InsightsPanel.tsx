@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Globe2, Info, Loader2, MapPin, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { Globe2, Info, Loader2, MapPin, RefreshCw, Sparkles, TrendingUp } from "@/components/icons";
 import { toast } from "sonner";
 import { api, ApiSalaryDistribution } from "@/lib/api-client";
 import { citiesForCountry } from "@/lib/insights/options";

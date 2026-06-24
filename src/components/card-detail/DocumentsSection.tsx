@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, FileText, ChevronRight } from "lucide-react";
+import { Eye, FileText, ChevronRight } from "@/components/icons";
 import { api } from "@/lib/api-client";
 import { DocumentPicker } from "@/components/documents/DocumentPicker";
 import { PdfPreview } from "@/components/documents/PdfPreview";

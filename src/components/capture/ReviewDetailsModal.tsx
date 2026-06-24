@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, MapPin, Sparkles, X } from "lucide-react";
+import { AlertCircle, MapPin, Sparkles, X } from "@/components/icons";
 import {
   Dialog,
   DialogContent,

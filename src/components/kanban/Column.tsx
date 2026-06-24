@@ -3,7 +3,8 @@
 import { memo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontalIcon, Add01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
 import { ApiApplication } from "@/lib/api-client";
 import { KanbanCard } from "./Card";
 import { Pip } from "@/components/ui/pip";
@@ -63,7 +64,7 @@ function ColumnImpl({
     >
       <div className="flex items-center gap-2 px-1 pb-1 pt-0.5 group/colhead">
         <Pip color={pipColor} />
-        <span className="text-[15px] font-serif font-medium text-foreground tracking-[-0.005em]">
+        <span className="text-[13px] font-semibold text-foreground tracking-[-0.01em]">
           {column.name}
         </span>
         <span className="text-[12px] text-muted-foreground/80 font-medium tabular-nums">
@@ -74,18 +75,18 @@ function ColumnImpl({
             <button
               type="button"
               onClick={onAddCard}
-              className="w-[22px] h-[22px] grid place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              className="w-[22px] h-[22px] grid place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               title="Add card"
             >
-              <Plus className="h-3 w-3" strokeWidth={2} />
+              <Icon icon={Add01Icon} size={14} strokeWidth={2} />
             </button>
           )}
           <button
             type="button"
-            className="w-[22px] h-[22px] grid place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="w-[22px] h-[22px] grid place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
             title="Column options"
           >
-            <MoreHorizontal className="h-3 w-3" strokeWidth={2} />
+            <Icon icon={MoreHorizontalIcon} size={14} strokeWidth={2} />
           </button>
         </div>
       </div>
