@@ -1,6 +1,7 @@
 import "./landing.css";
 
 import { JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { LandingNav } from "@/components/landing/Nav";
 import { Hero } from "@/components/landing/Hero";
 import { TrustedBy, Stats, ProductShowcase, HowItWorks } from "@/components/landing/Sections";
@@ -23,6 +24,12 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+
 export default async function LandingPage() {
   const session = await auth();
 
@@ -34,7 +41,8 @@ export default async function LandingPage() {
     <div
       className={cn(
         "landing-page",
-        jetbrainsMono.variable
+        jetbrainsMono.variable,
+        geistSans.variable
       )}
       data-glass="on"
     >

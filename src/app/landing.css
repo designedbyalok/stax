@@ -12,19 +12,19 @@
   --ink-mute: #64748b;
   --line: #e2e8f0;
   --paper: #ffffff;
-  --accent: #10b981;
-  --accent-warm: #34d399;
-  --accent-deep: #047857;
-  --sky-1: #6ee7b7;
-  --sky-2: #a7f3d0;
-  --sky-3: #059669;
-  --moss: #065f46;
+  --accent: #cbd5e1; /* slate-300 */
+  --accent-warm: #e2e8f0; /* slate-200 */
+  --accent-deep: #94a3b8; /* slate-400 */
+  --sky-1: #f1f5f9; /* slate-100 */
+  --sky-2: #f8fafc; /* slate-50 */
+  --sky-3: #cbd5e1; /* slate-300 */
+  --moss: #64748b; /* slate-500 */
   --pill-bg: #0f172a;
   --pill-fg: #ffffff;
 
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-inter), -apple-system, system-ui, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
   font-size: 17px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -53,11 +53,11 @@
 .landing-page button { font-family: inherit; cursor: pointer; border: 0; background: none; padding: 0; color: inherit; }
 
 .landing-page .serif {
-  font-family: var(--font-playfair-display), "Times New Roman", serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-weight: 400;
   letter-spacing: -0.01em;
 }
-.landing-page .italic { font-style: italic; }
+.landing-page .italic { font-style: normal; }
 .landing-page .mono {
   font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
   font-size: 0.78em;
@@ -385,7 +385,7 @@
   margin: 0 auto;
   max-width: 960px;
 }
-.landing-page .hero-headline em { color: var(--accent-deep); }
+.landing-page .hero-headline em { color: #ffffff; }
 .landing-page .hero-sub {
   color: var(--ink);
   font-size: 19px; line-height: 1.5;
@@ -481,7 +481,7 @@
   font-size: 20px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-soft); opacity: 0.65; white-space: nowrap;
 }
 .landing-page .trusted-track .trusted-logo.serif {
-  font-family: var(--font-playfair-display), serif; font-weight: 400; font-style: italic; font-size: 24px;
+  font-family: var(--font-geist-sans), sans-serif; font-weight: 400; font-style: normal; font-size: 24px;
 }
 @keyframes landingTrustedScroll {
   from { transform: translateX(0); }
@@ -494,10 +494,10 @@
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
 }
 .landing-page .stat-num {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 72px; line-height: 1; letter-spacing: -0.02em; color: var(--ink);
 }
-.landing-page .stat-num em { color: var(--accent); font-style: italic; }
+.landing-page .stat-num em { color: var(--accent); font-style: normal; }
 .landing-page .stat-label { font-size: 13px; color: var(--ink-soft); margin-top: 10px; max-width: 200px; line-height: 1.4; }
 
 /* ── Sections ────────────────────────────────────── */
@@ -508,11 +508,11 @@
   font-family: var(--font-jetbrains-mono), monospace;
 }
 .landing-page .section-title {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 64px; line-height: 1; letter-spacing: -0.02em;
   margin: 12px 0 0; max-width: 720px; font-weight: 400;
 }
-.landing-page .section-title em { color: var(--accent-deep); font-style: italic; }
+.landing-page .section-title em { color: var(--accent-deep); font-style: normal; }
 .landing-page .section-sub {
   font-size: 18px; color: var(--ink-soft);
   margin-top: 20px; max-width: 560px;
@@ -578,7 +578,7 @@
   width: 14px; height: 14px; border-radius: 3px;
   display: grid; place-items: center;
   background: var(--ink); color: var(--paper);
-  font-family: var(--font-playfair-display), serif; font-size: 10px;
+  font-family: var(--font-geist-sans), sans-serif; font-size: 10px;
   flex-shrink: 0;
 }
 .landing-page .browser-tab-title { overflow: hidden; text-overflow: ellipsis; }
@@ -701,7 +701,7 @@
 .landing-page .card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .landing-page .logo {
   width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
-  font-family: var(--font-playfair-display), serif; font-size: 14px; color: var(--paper); font-weight: 600;
+  font-family: var(--font-geist-sans), sans-serif; font-size: 14px; color: var(--paper); font-weight: 600;
   flex-shrink: 0;
 }
 .landing-page .card-meta { line-height: 1.2; min-width: 0; }
@@ -716,9 +716,9 @@
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
   margin-top: 36px;
 }
-.landing-page .callout-num { font-family: var(--font-playfair-display), serif; font-size: 28px; color: var(--accent); }
+.landing-page .callout-num { font-family: var(--font-geist-sans), sans-serif; font-size: 28px; color: var(--accent); }
 .landing-page .callout h4 {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 24px; margin: 4px 0 6px; font-weight: 400; letter-spacing: -0.01em;
 }
 .landing-page .callout p { color: var(--ink-soft); font-size: 14px; margin: 0; line-height: 1.5; }
@@ -744,7 +744,7 @@
   color: var(--ink-mute);
 }
 .landing-page .feature h3 {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 32px; line-height: 1.05; margin: 8px 0 12px; font-weight: 400; letter-spacing: -0.01em;
 }
 .landing-page .feature p { font-size: 14.5px; color: var(--ink-soft); margin: 0; line-height: 1.55; }
@@ -761,13 +761,13 @@
   width: 64px; height: 64px; border-radius: 999px;
   background: var(--bg); border: 1px solid var(--line);
   display: grid; place-items: center;
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 32px; color: var(--accent);
   margin-bottom: 24px;
   position: relative; z-index: 1;
 }
 .landing-page .step h4 {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 28px; margin: 0 0 10px; font-weight: 400; letter-spacing: -0.01em;
 }
 .landing-page .step p { color: var(--ink-soft); font-size: 15px; margin: 0; line-height: 1.55; }
@@ -780,16 +780,16 @@
   display: flex; flex-direction: column; gap: 24px;
 }
 .landing-page .quote-text {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 26px; line-height: 1.25; letter-spacing: -0.01em;
   margin: 0; color: var(--ink);
 }
-.landing-page .quote-text em { color: var(--accent-deep); font-style: italic; }
+.landing-page .quote-text em { color: var(--accent-deep); font-style: normal; }
 .landing-page .quote-author { display: flex; align-items: center; gap: 12px; }
 .landing-page .quote-avatar {
   width: 40px; height: 40px; border-radius: 999px;
   display: grid; place-items: center;
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 18px; color: var(--paper); font-weight: 600;
 }
 .landing-page .quote-name { font-size: 14px; font-weight: 600; }
@@ -802,7 +802,7 @@
 .landing-page .faq-q {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
   cursor: pointer; width: 100%; text-align: left;
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 26px; letter-spacing: -0.01em; font-weight: 400;
 }
 .landing-page .faq-q-icon {
@@ -840,11 +840,11 @@
   color: var(--accent-warm);
 }
 .landing-page .cta-title {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 80px; line-height: 1; letter-spacing: -0.02em;
   margin: 18px auto 8px; max-width: 900px; font-weight: 400;
 }
-.landing-page .cta-title em { color: var(--accent-warm); font-style: italic; }
+.landing-page .cta-title em { color: var(--accent-warm); font-style: normal; }
 .landing-page .cta-sub { color: rgba(244,236,223,0.7); margin: 16px auto 32px; max-width: 480px; }
 .landing-page .cta .email-pill {
   background: rgba(244,236,223,0.06); border-color: rgba(244,236,223,0.16); margin: 0 auto;
@@ -883,13 +883,13 @@
 .landing-page .footer-brand { color: var(--paper); display: flex; align-items: center; gap: 10px; font-weight: 600; }
 .landing-page .footer-brand-col .nav-logo-mark span { background: var(--paper); }
 .landing-page .footer-brand-col h4 {
-  font-family: var(--font-playfair-display), serif; font-weight: 400;
+  font-family: var(--font-geist-sans), sans-serif; font-weight: 400;
   font-size: 32px; line-height: 1.05; letter-spacing: -0.01em;
   color: var(--paper);
   margin: 16px 0 16px;
   max-width: 280px;
 }
-.landing-page .footer-brand-col h4 em { color: var(--accent-warm); font-style: italic; }
+.landing-page .footer-brand-col h4 em { color: var(--accent-warm); font-style: normal; }
 .landing-page .footer-col h5 {
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
@@ -920,7 +920,7 @@
 .landing-page .footer-meta .mono { color: rgba(244,236,223,0.45); }
 .landing-page .footer-love { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .landing-page .footer-love em {
-  font-family: var(--font-playfair-display), serif; font-style: italic; color: rgba(244,236,223,0.85);
+  font-family: var(--font-geist-sans), sans-serif; font-style: normal; color: rgba(244,236,223,0.85);
 }
 .landing-page .footer-love strong { font-weight: 500; color: var(--paper); font-style: normal; }
 .landing-page .footer-heart {
@@ -935,7 +935,7 @@
 }
 
 .landing-page .footer-wordmark {
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-weight: 400;
   font-size: clamp(160px, 28vw, 360px);
   line-height: 0.82;
@@ -959,7 +959,7 @@
   color: transparent;
   transition: filter 0.4s;
 }
-.landing-page .footer-wordmark em { font-style: italic; -webkit-text-fill-color: inherit; }
+.landing-page .footer-wordmark em { font-style: normal; -webkit-text-fill-color: inherit; }
 
 .landing-page .footer-sparkle-layer {
   position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden;
@@ -1081,7 +1081,7 @@
 .landing-page .nav-mobile-item a {
   display: block;
   padding: 12px 0;
-  font-family: var(--font-playfair-display), serif;
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 36px;
   line-height: 1.1;
   letter-spacing: -0.01em;

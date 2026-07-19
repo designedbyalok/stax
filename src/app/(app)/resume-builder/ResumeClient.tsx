@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Printer, Save, Sparkles, ArrowLeft, Plus, Check, Palette } from "@/components/icons";
+import { Loader2, Printer, Save, Sparkles, ArrowLeft, Plus, Check, Palette, Download } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,7 @@ const LINK_PREFIXES: Record<string, string> = {
 };
 
 import { RESUME_FONTS, ALL_FONTS_HREF, resolveFont } from "@/lib/resume-fonts";
+import { generateLatex } from "@/lib/resume-latex";
 import { ResumePreview } from "./ResumePreview";
 import { ResumeLanding } from "./ResumeLanding";
 
@@ -327,6 +328,26 @@ export function ResumeClient() {
     }
   };
 
+  const handleExportLatex = () => {
+    if (!activeResume) return;
+    try {
+      const latexCode = generateLatex(activeResume.content);
+      const blob = new Blob([latexCode], { type: "application/x-tex" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${activeResume.content.basics.name || "Resume"}.tex`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("LaTeX source downloaded!");
+    } catch (err) {
+      toast.error("Failed to generate LaTeX");
+      console.error(err);
+    }
+  };
+
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1 h-full overflow-hidden bg-muted/20 print:block responsive-panels">
       {/* LEFT: Form / Content panel */}
@@ -360,6 +381,10 @@ export function ResumeClient() {
               <Button size="sm" className="flex-1" onClick={handlePrint}>
                 <Printer className="w-3.5 h-3.5 mr-1.5" />
                 Print
+              </Button>
+              <Button size="sm" className="flex-1" variant="outline" onClick={handleExportLatex}>
+                <Download className="w-3.5 h-3.5 mr-1.5" />
+                LaTeX
               </Button>
             </div>
           </section>

@@ -18,6 +18,13 @@ const playfairDisplay = Playfair_Display({
   style: ["normal", "italic"],
   variable: "--font-playfair-display",
 });
+
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
@@ -25,9 +32,41 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Stax — Every job, in its place.",
+  metadataBase: new URL("https://stax.com"),
+  title: {
+    default: "Stax — Every job, in its place.",
+    template: "%s | Stax",
+  },
   description:
     "A calm, single-canvas tracker for everywhere you've applied. Paste a link, drag a card. We'll keep the rest tidy.",
+  keywords: ["job tracker", "resume builder", "job applications", "career", "kanban"],
+  authors: [{ name: "Stax" }],
+  creator: "Stax",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://stax.com",
+    title: "Stax — Every job, in its place.",
+    description: "A calm, single-canvas tracker for everywhere you've applied.",
+    siteName: "Stax",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Stax — Every job, in its place.",
+    description: "A calm, single-canvas tracker for everywhere you've applied.",
+    creator: "@stax",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -39,7 +78,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("font-sans", inter.variable, playfairDisplay.variable, geistMono.variable)}
+      className={cn("font-sans", inter.variable, playfairDisplay.variable, geistSans.variable, geistMono.variable)}
     >
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
