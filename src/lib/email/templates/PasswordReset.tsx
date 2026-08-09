@@ -8,7 +8,7 @@ type Props = {
 
 export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) {
   return (
-    <html>
+    <html lang="en">
       <head>
         <title>Reset your Stax password</title>
       </head>

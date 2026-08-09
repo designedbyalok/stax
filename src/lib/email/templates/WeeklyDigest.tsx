@@ -27,7 +27,7 @@ export function WeeklyDigest({
       : "You're all caught up on Stax";
 
   return (
-    <html>
+    <html lang="en">
       <head>
         <title>{previewText}</title>
       </head>
