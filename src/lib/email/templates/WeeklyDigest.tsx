@@ -1,15 +1,4 @@
 import * as React from "react";
-import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Link,
-  Preview,
-  Section,
-  Text,
-} from "@react-email/components";
 
 type Item = {
   roleTitle: string;
@@ -32,16 +21,17 @@ export function WeeklyDigest({
   appUrl,
 }: Props) {
   const total = followUps.length + upcomingInterviews.length;
+  const previewText =
+    total > 0
+      ? `${total} thing${total > 1 ? "s" : ""} need your attention this week`
+      : "You're all caught up on Stax";
 
   return (
-    <Html>
-      <Head />
-      <Preview>
-        {total > 0
-          ? `${total} thing${total > 1 ? "s" : ""} need your attention this week`
-          : "You're all caught up on Stax"}
-      </Preview>
-      <Body
+    <html>
+      <head>
+        <title>{previewText}</title>
+      </head>
+      <body
         style={{
           backgroundColor: "#f4f4f5",
           fontFamily:
@@ -49,7 +39,7 @@ export function WeeklyDigest({
           padding: "32px 0",
         }}
       >
-        <Container
+        <div
           style={{
             backgroundColor: "#ffffff",
             borderRadius: 8,
@@ -58,13 +48,10 @@ export function WeeklyDigest({
             margin: "0 auto",
           }}
         >
-          <Heading
-            as="h1"
-            style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}
-          >
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>
             Hey {firstName || "there"},
-          </Heading>
-          <Text
+          </h1>
+          <p
             style={{
               fontSize: 14,
               lineHeight: 1.6,
@@ -75,12 +62,11 @@ export function WeeklyDigest({
             {total > 0
               ? `You have ${total} thing${total > 1 ? "s" : ""} that need your attention this week.`
               : "Nothing pressing this week — you're all caught up."}
-          </Text>
+          </p>
 
           {followUps.length > 0 && (
-            <Section style={{ marginBottom: 24 }}>
-              <Heading
-                as="h2"
+            <section style={{ marginBottom: 24 }}>
+              <h2
                 style={{
                   fontSize: 13,
                   fontWeight: 600,
@@ -91,13 +77,14 @@ export function WeeklyDigest({
                 }}
               >
                 Follow ups
-              </Heading>
+              </h2>
               {followUps.map((item, i) => (
                 <div
                   key={`${item.companyName}-${item.roleTitle}`}
                   style={{
                     padding: "12px 0",
-                    borderBottom: i === followUps.length - 1 ? "none" : "1px solid #e4e4e7",
+                    borderBottom:
+                      i === followUps.length - 1 ? "none" : "1px solid #e4e4e7",
                   }}
                 >
                   <div
@@ -113,13 +100,12 @@ export function WeeklyDigest({
                   </div>
                 </div>
               ))}
-            </Section>
+            </section>
           )}
 
           {upcomingInterviews.length > 0 && (
-            <Section style={{ marginBottom: 24 }}>
-              <Heading
-                as="h2"
+            <section style={{ marginBottom: 24 }}>
+              <h2
                 style={{
                   fontSize: 13,
                   fontWeight: 600,
@@ -130,7 +116,7 @@ export function WeeklyDigest({
                 }}
               >
                 Upcoming interviews
-              </Heading>
+              </h2>
               {upcomingInterviews.map((item, i) => (
                 <div
                   key={`${item.companyName}-${item.roleTitle}`}
@@ -153,10 +139,10 @@ export function WeeklyDigest({
                   </div>
                 </div>
               ))}
-            </Section>
+            </section>
           )}
 
-          <Link
+          <a
             href={appUrl}
             style={{
               display: "inline-block",
@@ -171,9 +157,9 @@ export function WeeklyDigest({
             }}
           >
             Open Stax
-          </Link>
+          </a>
 
-          <Text
+          <p
             style={{
               fontSize: 11,
               color: "#a1a1aa",
@@ -182,17 +168,17 @@ export function WeeklyDigest({
             }}
           >
             You&apos;re receiving this because email digests are on. Turn them off in{" "}
-            <Link
+            <a
               href={`${appUrl}/settings/notifications`}
               style={{ color: "#a1a1aa", textDecoration: "underline" }}
             >
               settings
-            </Link>
+            </a>
             .
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+          </p>
+        </div>
+      </body>
+    </html>
   );
 }
 

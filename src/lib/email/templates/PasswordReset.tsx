@@ -1,14 +1,4 @@
 import * as React from "react";
-import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Link,
-  Preview,
-  Text,
-} from "@react-email/components";
 
 type Props = {
   firstName: string;
@@ -18,10 +8,11 @@ type Props = {
 
 export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) {
   return (
-    <Html>
-      <Head />
-      <Preview>Reset your Stax password</Preview>
-      <Body
+    <html>
+      <head>
+        <title>Reset your Stax password</title>
+      </head>
+      <body
         style={{
           backgroundColor: "#f4f4f5",
           fontFamily:
@@ -29,7 +20,7 @@ export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) 
           padding: "32px 0",
         }}
       >
-        <Container
+        <div
           style={{
             backgroundColor: "#ffffff",
             borderRadius: 8,
@@ -38,13 +29,10 @@ export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) 
             margin: "0 auto",
           }}
         >
-          <Heading
-            as="h1"
-            style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}
-          >
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>
             Hey {firstName || "there"},
-          </Heading>
-          <Text
+          </h1>
+          <p
             style={{
               fontSize: 14,
               lineHeight: 1.6,
@@ -55,9 +43,9 @@ export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) 
             Someone (hopefully you) asked to reset the password for your Stax
             account. Click the button below to choose a new one. The link is
             valid for {expiresInMinutes} minutes.
-          </Text>
+          </p>
 
-          <Link
+          <a
             href={resetUrl}
             style={{
               display: "inline-block",
@@ -72,9 +60,9 @@ export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) 
             }}
           >
             Reset password
-          </Link>
+          </a>
 
-          <Text
+          <p
             style={{
               fontSize: 12,
               color: "#71717a",
@@ -87,9 +75,9 @@ export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) 
             <span style={{ wordBreak: "break-all", color: "#52525b" }}>
               {resetUrl}
             </span>
-          </Text>
+          </p>
 
-          <Text
+          <p
             style={{
               fontSize: 11,
               color: "#a1a1aa",
@@ -101,10 +89,10 @@ export function PasswordReset({ firstName, resetUrl, expiresInMinutes }: Props) 
           >
             If you didn&apos;t request this, you can safely ignore this email — your
             password won&apos;t change.
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+          </p>
+        </div>
+      </body>
+    </html>
   );
 }
 

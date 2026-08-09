@@ -67,5 +67,10 @@ export default sentryEnabled
       silent: true,
       widenClientFileUpload: true,
       tunnelRoute: "/monitoring",
+      // Don't fail production builds when source map upload or release
+      // creation hits an auth/network issue on Vercel.
+      errorHandler: (err) => {
+        console.warn("[sentry] build plugin warning:", err.message);
+      },
     })
   : nextConfig;
