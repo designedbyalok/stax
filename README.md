@@ -25,22 +25,25 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy on Vercel
 
-Vercel uses `bun.lock` and `vercel.json` (`bun install` + `bun run vercel-build`).
+Uses `bun install` + `bun run build` (`vercel.json`). **Do not** add
+`prisma migrate deploy` to the Vercel Build Command — Supabase pooler URLs
+reject migrations and will fail the build.
 
-**Important:** In the Vercel project → Settings → Build & Development, clear any
-custom Build Command (e.g. `bunx prisma migrate deploy && next build`). The
-repo’s `vercel.json` must own the build command.
-
-### Database env vars
+### Database env vars (runtime)
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Supabase **pooler** URL (runtime queries) |
-| `DIRECT_URL` | Supabase **direct** URL (migrations during build) |
+| `DATABASE_URL` | Supabase **pooler** URL (app + Prisma Client at runtime) |
 
-`prisma migrate deploy` cannot run against the transaction pooler. The Vercel
-build script runs migrations only when `DIRECT_URL` is set (using that URL).
-Set `SKIP_DB_MIGRATE=1` to skip migrations on deploy and run them manually.
+Migrations are **not** run during Vercel builds. Apply them manually when needed:
 
-Direct URL format (Supabase):  
+```bash
+# Uses DIRECT_URL from .env (direct connection, not pooler)
+bun run db:migrate:deploy
+```
+
+For local/CI migrations, set `DIRECT_URL` to the Supabase **direct** host:
+
 `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
+
+Not the pooler host (`*.pooler.supabase.com`).

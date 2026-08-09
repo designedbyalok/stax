@@ -35,6 +35,6 @@ Geist + shadcn primitives).
 - Secrets live in `.env.local` (gitignored). `.env` holds only the
   Prisma database URLs because Prisma CLI doesn't read `.env.local`.
 - Never commit anything matching `.env*`.
-- **Vercel:** use `DATABASE_URL` (pooler) + `DIRECT_URL` (direct) for builds.
-  Clear any custom Build Command in the Vercel dashboard — `vercel.json` runs
-  `bun run vercel-build`, which migrates via `DIRECT_URL` when set.
+- **Vercel:** set `DATABASE_URL` (pooler). Builds run `bun run build` only —
+  no `prisma migrate deploy` on deploy (pooler rejects migrations). Run
+  `bun run db:migrate:deploy` locally with `DIRECT_URL` when schema changes.
