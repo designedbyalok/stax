@@ -111,15 +111,15 @@ async function createIfMissing(
     select: { applicationId: true, snoozedUntil: true, status: true },
   });
 
-  const blocked = new Set(
-    existing
-      .filter(
-        (r) =>
-          r.status === "PENDING" ||
-          (r.status === "SNOOZED" && r.snoozedUntil && r.snoozedUntil > now)
-      )
-      .map((r) => r.applicationId)
-  );
+  const blocked = new Set<string>();
+  for (const r of existing) {
+    if (
+      r.status === "PENDING" ||
+      (r.status === "SNOOZED" && r.snoozedUntil && r.snoozedUntil > now)
+    ) {
+      blocked.add(r.applicationId);
+    }
+  }
 
   const toCreate = applications.filter((a) => !blocked.has(a.id));
   if (toCreate.length === 0) return 0;

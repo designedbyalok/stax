@@ -11,6 +11,21 @@ function escapeCsv(value: string | null | undefined): string {
   return str;
 }
 
+const CSV_HEADERS = [
+  "Company",
+  "Role",
+  "Status",
+  "Location",
+  "Salary",
+  "Source",
+  "URL",
+  "Applied At",
+  "Next Action",
+  "Next Action Date",
+  "Notes",
+  "Created At",
+];
+
 export async function GET() {
   const authResult = await requireUserId();
   if (!authResult.ok) return authResult.response;
@@ -20,21 +35,6 @@ export async function GET() {
     include: { column: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
   });
-
-  const headers = [
-    "Company",
-    "Role",
-    "Status",
-    "Location",
-    "Salary",
-    "Source",
-    "URL",
-    "Applied At",
-    "Next Action",
-    "Next Action Date",
-    "Notes",
-    "Created At",
-  ];
 
   const rows = apps.map((a) =>
     [
@@ -55,7 +55,7 @@ export async function GET() {
       .join(",")
   );
 
-  const body = [headers.map(escapeCsv).join(","), ...rows].join("\n");
+  const body = [CSV_HEADERS.map(escapeCsv).join(","), ...rows].join("\n");
   const filename = `stax-export-${new Date().toISOString().slice(0, 10)}.csv`;
 
   return new NextResponse(body, {

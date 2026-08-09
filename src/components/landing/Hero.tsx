@@ -1,5 +1,6 @@
 import { PaintedScene } from "./PaintedScene";
 import { MiniKanban } from "./MiniKanban";
+import "./styles/hero.css";
 
 export function Hero() {
   return (
@@ -28,7 +29,15 @@ export function Hero() {
             action="/signup"
             method="get"
           >
-            <input type="email" name="email" placeholder="you@somewhere-good.com" />
+            <label htmlFor="hero-email" className="sr-only">
+              Email address
+            </label>
+            <input
+              id="hero-email"
+              type="email"
+              name="email"
+              placeholder="you@somewhere-good.com"
+            />
             <button type="submit">Join the beta</button>
           </form>
         </div>

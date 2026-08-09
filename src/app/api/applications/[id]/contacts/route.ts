@@ -10,7 +10,7 @@ const CONTACT_ROLES = ["RECRUITER", "HIRING_MANAGER", "REFERRER", "OTHER"] as co
 const createSchema = z.object({
   name: z.string().trim().min(1).max(200),
   role: z.enum(CONTACT_ROLES).default("OTHER"),
-  email: z.string().email().max(200).optional().nullable().or(z.literal("")),
+  email: z.email().max(200).optional().nullable().or(z.literal("")),
   phone: z.string().max(100).optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(5000).optional().nullable(),
 });

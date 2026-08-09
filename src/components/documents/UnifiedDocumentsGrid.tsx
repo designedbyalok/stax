@@ -7,7 +7,7 @@ import { Loader2, Plus, Download, ListFilter, Check } from "@/components/icons";
 import { toast } from "sonner";
 import { ApiResume } from "@/lib/types/resume";
 import { api, ApiDocument } from "@/lib/api-client";
-import { ResumeCard } from "@/app/(app)/resume-builder/ResumeCard";
+import { ResumeCard } from "@/components/resume-builder";
 import { DocumentCard } from "./DocumentCard";
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ export function UnifiedDocumentsGrid({
   const queryClient = useQueryClient();
   const [gridSize, setGridSize] = useState<"small" | "medium" | "large">("small");
   const [filter, setFilter] = useState<"ALL" | "GENERATED" | "UPLOADED">("ALL");
-  const [isImporting, setIsImporting] = useState(false);
+  const importingRef = React.useRef(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Fetch Resumes (Platform Generated)
@@ -77,8 +77,10 @@ export function UnifiedDocumentsGrid({
       return;
     }
 
+    if (importingRef.current) return;
+    importingRef.current = true;
+
     try {
-      setIsImporting(true);
       const formData = new FormData();
       formData.append("file", file);
 
@@ -114,7 +116,7 @@ export function UnifiedDocumentsGrid({
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Import failed");
     } finally {
-      setIsImporting(false);
+      importingRef.current = false;
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -219,21 +221,21 @@ export function UnifiedDocumentsGrid({
         {unifiedItems.map(item => {
           if (item.type === "GENERATED_RESUME") {
             return (
-              <div key={`gen_${item.data.id}`}>
-                <ResumeCard resume={item.data} onClick={() => router.push(`/resume-builder?id=${item.data.id}`)} />
-              </div>
-            );
-          } else {
-            return (
-              <div key={`up_${item.data.id}`}>
-                <DocumentCard 
-                  doc={item.data} 
-                  type={item.data.type} 
-                  onPreview={onPreview} 
-                />
-              </div>
+              <ResumeCard
+                key={`gen_${item.data.id}`}
+                resume={item.data}
+                onClick={() => router.push(`/resume-builder?id=${item.data.id}`)}
+              />
             );
           }
+          return (
+            <DocumentCard
+              key={`up_${item.data.id}`}
+              doc={item.data}
+              type={item.data.type}
+              onPreview={onPreview}
+            />
+          );
         })}
       </div>
     </div>

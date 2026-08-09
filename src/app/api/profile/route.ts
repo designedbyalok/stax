@@ -5,47 +5,42 @@ import { requireUserId } from "@/lib/api";
 import { computeProfileCompletion } from "@/lib/profile-completion";
 import type { Prisma } from "@prisma/client";
 
-/** Serialises a UserProfile (+ the owning user's name) plus its completion. */
+/** Read-only serialisation of UserProfile (+ owning user's name) and completion. */
 async function serialize(userId: string) {
-  // Upsert so a row always exists; pull the user's name for completion + payload.
   const [profile, user] = await Promise.all([
-    prisma.userProfile.upsert({
-      where: { userId },
-      update: {},
-      create: { userId },
-    }),
+    prisma.userProfile.findUnique({ where: { userId } }),
     prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
   ]);
 
   const completion = computeProfileCompletion({
     name: user?.name ?? null,
-    photoUrl: profile.photoUrl,
-    jobRole: profile.jobRole,
-    city: profile.city,
-    country: profile.country,
-    yearsExperience: profile.yearsExperience,
-    currentSalary: profile.currentSalary,
-    bio: profile.bio,
+    photoUrl: profile?.photoUrl ?? null,
+    jobRole: profile?.jobRole ?? null,
+    city: profile?.city ?? null,
+    country: profile?.country ?? null,
+    yearsExperience: profile?.yearsExperience ?? null,
+    currentSalary: profile?.currentSalary ?? null,
+    bio: profile?.bio ?? null,
   });
 
   return {
-    id: profile.id,
-    userId: profile.userId,
+    id: profile?.id ?? "",
+    userId,
     name: user?.name ?? null,
-    jobRole: profile.jobRole,
-    jobFamily: profile.jobFamily,
-    city: profile.city,
-    country: profile.country,
-    yearsExperience: profile.yearsExperience,
-    currentSalary: profile.currentSalary,
-    salaryCurrency: profile.salaryCurrency,
-    photoUrl: profile.photoUrl,
-    bio: profile.bio,
-    onboardingStep: profile.onboardingStep,
-    onboardingCompletedAt: profile.onboardingCompletedAt?.toISOString() ?? null,
-    onboardingSkippedAt: profile.onboardingSkippedAt?.toISOString() ?? null,
-    createdAt: profile.createdAt.toISOString(),
-    updatedAt: profile.updatedAt.toISOString(),
+    jobRole: profile?.jobRole ?? null,
+    jobFamily: profile?.jobFamily ?? null,
+    city: profile?.city ?? null,
+    country: profile?.country ?? null,
+    yearsExperience: profile?.yearsExperience ?? null,
+    currentSalary: profile?.currentSalary ?? null,
+    salaryCurrency: profile?.salaryCurrency ?? null,
+    photoUrl: profile?.photoUrl ?? null,
+    bio: profile?.bio ?? null,
+    onboardingStep: profile?.onboardingStep ?? 0,
+    onboardingCompletedAt: profile?.onboardingCompletedAt?.toISOString() ?? null,
+    onboardingSkippedAt: profile?.onboardingSkippedAt?.toISOString() ?? null,
+    createdAt: profile?.createdAt?.toISOString() ?? "",
+    updatedAt: profile?.updatedAt?.toISOString() ?? "",
     completion,
   };
 }

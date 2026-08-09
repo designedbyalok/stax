@@ -1,4 +1,4 @@
-import { LoginForm } from "./LoginForm";
+import { LoginForm } from "@/components/auth/LoginForm";
 
 // Force per-request rendering so process.env (AUTH_GOOGLE_*) is evaluated at
 // runtime on the server, not baked in at build time.

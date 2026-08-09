@@ -142,7 +142,14 @@ export function DocumentsTab({
                       size="sm" 
                       className="h-8 text-xs" 
                       nativeButton={false}
-                      render={<a href={card.originalUrl} target="_blank" rel="noreferrer" />}
+                      render={
+                        <a
+                          href={card.originalUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="Go to job post"
+                        />
+                      }
                     >
                       Go to Job Post
                     </Button>

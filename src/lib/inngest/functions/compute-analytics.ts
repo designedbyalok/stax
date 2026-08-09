@@ -47,27 +47,27 @@ export const computeAnalytics = inngest.createFunction(
   async ({ step }) => {
     // Make sure the curated benchmark rows exist so a fresh database is never
     // empty (idempotent — safe to run every week).
-    const seeded = await step.run("seed-benchmarks", () => upsertSalaryBenchmarks());
-
-    // Pull every profile that has the fields needed to be aggregated.
-    const profiles = await step.run("load-profiles", async () =>
-      prisma.userProfile.findMany({
-        where: {
-          jobRole: { not: null },
-          country: { not: null },
-          currentSalary: { not: null },
-          yearsExperience: { not: null },
-        },
-        select: {
-          jobRole: true,
-          city: true,
-          country: true,
-          yearsExperience: true,
-          currentSalary: true,
-          salaryCurrency: true,
-        },
-      })
-    );
+    const [seeded, profiles] = await Promise.all([
+      step.run("seed-benchmarks", () => upsertSalaryBenchmarks()),
+      step.run("load-profiles", async () =>
+        prisma.userProfile.findMany({
+          where: {
+            jobRole: { not: null },
+            country: { not: null },
+            currentSalary: { not: null },
+            yearsExperience: { not: null },
+          },
+          select: {
+            jobRole: true,
+            city: true,
+            country: true,
+            yearsExperience: true,
+            currentSalary: true,
+            salaryCurrency: true,
+          },
+        })
+      ),
+    ]);
 
     // Bucket into role × city × country × bracket groups. Each profile feeds
     // both its city-level group (when a city is set) and the country-level
@@ -118,73 +118,84 @@ export const computeAnalytics = inngest.createFunction(
       add(p.jobRole, null, p.country, bracket, p.currentSalary, currency);
     }
 
-    const rows = Array.from(groups.values())
-      .filter((g) => g.salaries.length >= MIN_GROUP)
-      .map((g) => {
-        const sorted = [...g.salaries].sort((a, b) => a - b);
-        return {
-          jobRole: g.jobRole,
-          city: g.city,
-          country: g.country,
-          experienceBracket: g.bracket,
-          p25: percentile(sorted, 25),
-          p50: percentile(sorted, 50),
-          p75: percentile(sorted, 75),
-          p90: percentile(sorted, 90),
-          sampleSize: sorted.length,
-          currency: g.currency,
-        };
+    const rows: {
+      jobRole: string;
+      city: string | null;
+      country: string;
+      experienceBracket: ExperienceBracket;
+      p25: number;
+      p50: number;
+      p75: number;
+      p90: number;
+      sampleSize: number;
+      currency: string;
+    }[] = [];
+    for (const g of groups.values()) {
+      if (g.salaries.length < MIN_GROUP) continue;
+      const sorted = [...g.salaries].sort((a, b) => a - b);
+      rows.push({
+        jobRole: g.jobRole,
+        city: g.city,
+        country: g.country,
+        experienceBracket: g.bracket,
+        p25: percentile(sorted, 25),
+        p50: percentile(sorted, 50),
+        p75: percentile(sorted, 75),
+        p90: percentile(sorted, 90),
+        sampleSize: sorted.length,
+        currency: g.currency,
       });
+    }
 
     const written = await step.run("upsert-community-benchmarks", async () => {
-      let count = 0;
-      for (const row of rows) {
-        // Postgres treats NULL as distinct in unique constraints, so a compound
-        // upsert keyed on a null `city` would never match an existing row. Do a
-        // manual find-then-update/create to keep country-level rows idempotent.
-        const existing = await prisma.salaryBenchmark.findFirst({
-          where: {
-            jobRole: row.jobRole,
-            city: row.city,
-            country: row.country,
-            experienceBracket: row.experienceBracket,
-            source: "community",
-          },
-          select: { id: true },
-        });
-
-        if (existing) {
-          await prisma.salaryBenchmark.update({
-            where: { id: existing.id },
-            data: {
-              p25: row.p25,
-              p50: row.p50,
-              p75: row.p75,
-              p90: row.p90,
-              sampleSize: row.sampleSize,
-              currency: row.currency,
-            },
-          });
-        } else {
-          await prisma.salaryBenchmark.create({
-            data: {
+      await Promise.all(
+        rows.map(async (row) => {
+          // Postgres treats NULL as distinct in unique constraints, so a compound
+          // upsert keyed on a null `city` would never match an existing row. Do a
+          // manual find-then-update/create to keep country-level rows idempotent.
+          const existing = await prisma.salaryBenchmark.findFirst({
+            where: {
               jobRole: row.jobRole,
               city: row.city,
               country: row.country,
               experienceBracket: row.experienceBracket,
-              p25: row.p25,
-              p50: row.p50,
-              p75: row.p75,
-              p90: row.p90,
-              sampleSize: row.sampleSize,
-              currency: row.currency,
               source: "community",
             },
+            select: { id: true },
           });
-        }
-        count += 1;
-      }
-      return count;
+
+          if (existing) {
+            await prisma.salaryBenchmark.update({
+              where: { id: existing.id },
+              data: {
+                p25: row.p25,
+                p50: row.p50,
+                p75: row.p75,
+                p90: row.p90,
+                sampleSize: row.sampleSize,
+                currency: row.currency,
+              },
+            });
+          } else {
+            await prisma.salaryBenchmark.create({
+              data: {
+                jobRole: row.jobRole,
+                city: row.city,
+                country: row.country,
+                experienceBracket: row.experienceBracket,
+                source: "community",
+                p25: row.p25,
+                p50: row.p50,
+                p75: row.p75,
+                p90: row.p90,
+                sampleSize: row.sampleSize,
+                currency: row.currency,
+              },
+            });
+          }
+        }),
+      );
+      return rows.length;
     });
 
     return {

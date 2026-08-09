@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Link2 } from "@/components/icons";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ const LOADING_PHASES = [
 ];
 
 export function PasteBar() {
+  const queryClient = useQueryClient();
   const captureState = useCaptureStore((s) => s.state);
   const start = useCaptureStore((s) => s.start);
   const showSkeleton = useCaptureStore((s) => s.showSkeleton);
@@ -32,6 +33,7 @@ export function PasteBar() {
     onSuccess: (data) => {
       resolve(data);
       setValue("");
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (err) => {
       const msg = err instanceof Error ? err.message : "Couldn't parse this URL.";

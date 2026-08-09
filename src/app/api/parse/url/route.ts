@@ -6,7 +6,7 @@ import { parseJobUrl } from "@/lib/parsers";
 import { findDuplicate } from "@/lib/duplicate";
 
 const schema = z.object({
-  url: z.string().url().max(2000),
+  url: z.url().max(2000),
 });
 
 export async function POST(request: Request) {

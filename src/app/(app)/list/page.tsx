@@ -7,7 +7,7 @@ import {
   loadColumns,
   loadReminders,
 } from "@/lib/loaders";
-import ListPageClient from "./ListPageClient";
+import ListPageClient from "@/components/list/ListPageClient";
 
 // Mirrors /board: server-prefetch columns + applications + reminders so the
 // list shows up populated on first paint. userSettings isn't needed here.

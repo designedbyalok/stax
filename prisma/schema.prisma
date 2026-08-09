@@ -219,6 +219,7 @@ model Application {
 
   @@index([userId, columnId, position])
   @@index([userId, deletedAt])
+  @@index([userId, deletedAt, columnId, position])
 }
 
 model Contact {

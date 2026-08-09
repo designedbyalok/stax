@@ -26,40 +26,43 @@ export const schedulePrepReminders = inngest.createFunction(
     }
 
     const results = await step.run("create-reminders", async () => {
-      let createdCount = 0;
+      const dayStart = new Date(new Date(now).setHours(0, 0, 0, 0));
+      const dayEnd = new Date(new Date(now).setHours(23, 59, 59, 999));
 
-      for (const event of upcomingEvents) {
-        // Check if reminder already exists for this event
-        const existing = await prisma.reminder.findFirst({
-          where: {
+      const existing = await prisma.reminder.findMany({
+        where: {
+          type: "INTERVIEW_PREP_DUE",
+          dueAt: { gte: dayStart, lt: dayEnd },
+          OR: upcomingEvents.map((event) => ({
             userId: event.userId,
             applicationId: event.applicationId,
-            type: "INTERVIEW_PREP_DUE",
-            dueAt: {
-              // Same calendar day as `now`. Build fresh Date instances so
-              // setHours() mutations don't bleed across the two bounds.
-              gte: new Date(new Date(now).setHours(0, 0, 0, 0)),
-              lt: new Date(new Date(now).setHours(23, 59, 59, 999)),
-            },
-          },
-        });
+          })),
+        },
+        select: { userId: true, applicationId: true },
+      });
 
-        if (!existing) {
-          await prisma.reminder.create({
-            data: {
-              userId: event.userId,
-              applicationId: event.applicationId,
-              type: "INTERVIEW_PREP_DUE",
-              message: `Prep for your interview with ${event.application.companyName}`,
-              dueAt: new Date(), // Due immediately
-              status: "PENDING",
-            },
-          });
-          createdCount++;
-        }
+      const existingKeys = new Set(
+        existing.map((r) => `${r.userId}:${r.applicationId}`)
+      );
+
+      const toCreate = upcomingEvents.filter(
+        (event) => !existingKeys.has(`${event.userId}:${event.applicationId}`)
+      );
+
+      if (toCreate.length > 0) {
+        await prisma.reminder.createMany({
+          data: toCreate.map((event) => ({
+            userId: event.userId,
+            applicationId: event.applicationId,
+            type: "INTERVIEW_PREP_DUE" as const,
+            message: `Prep for your interview with ${event.application.companyName}`,
+            dueAt: new Date(),
+            status: "PENDING" as const,
+          })),
+        });
       }
 
-      return { createdCount };
+      return { createdCount: toCreate.length };
     });
 
     return { status: "processed", createdReminders: results.createdCount };

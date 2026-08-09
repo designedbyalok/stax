@@ -131,7 +131,7 @@ export function PrepTab({
           <Label>Pre-interview Checklist</Label>
           <div className="space-y-1.5 mb-3">
             {checklist.items.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 group">
+              <div key={item.text} className="flex items-center gap-2 group">
                 <button 
                   onClick={() => toggleChecklistItem(idx)}
                   className="text-muted-foreground hover:text-foreground shrink-0"
@@ -177,7 +177,7 @@ export function PrepTab({
           <Label>Questions to Ask Them</Label>
           <div className="space-y-2 mb-3">
             {checklist.questionsToAsk.map((q, idx) => (
-              <div key={idx} className="flex items-start gap-2 group text-[13px] bg-muted/30 p-2 rounded border">
+              <div key={q.text} className="flex items-start gap-2 group text-[13px] bg-muted/30 p-2 rounded border">
                 <span className="flex-1">{q.text}</span>
                 <button 
                   onClick={() => removeQuestion(idx)}

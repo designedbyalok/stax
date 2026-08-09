@@ -87,8 +87,8 @@ export function JobTldrBlock({
           )}
           {hasBullets && (
             <ul className="text-[12px] text-muted-foreground space-y-1 leading-relaxed">
-              {bullets!.map((b, i) => (
-                <li key={i} className="flex gap-1.5">
+              {bullets!.map((b) => (
+                <li key={b} className="flex gap-1.5">
                   <span className="text-foreground/40 select-none">·</span>
                   <span>{b}</span>
                 </li>
@@ -115,9 +115,9 @@ export function JobTldrBlock({
             <div className="border-t pt-3 space-y-2">
               <h4 className="text-[12px] font-medium text-foreground">Keywords</h4>
               <div className="flex flex-wrap gap-1.5">
-                {keywords.map((k, i) => (
+                {keywords.map((k) => (
                   <span
-                    key={i}
+                    key={k}
                     className="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[11px] rounded-sm font-medium"
                   >
                     {k}
@@ -137,8 +137,8 @@ function DetailList({ title, items }: { title: string; items: string[] }) {
     <div className="space-y-1.5">
       <h4 className="text-[12px] font-medium text-foreground">{title}</h4>
       <ul className="text-[12px] text-muted-foreground space-y-1 pl-3 list-disc">
-        {items.map((x, i) => (
-          <li key={i}>{x}</li>
+        {items.map((x) => (
+          <li key={x}>{x}</li>
         ))}
       </ul>
     </div>

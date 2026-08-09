@@ -17,13 +17,12 @@ export const detectStaleApplications = inngest.createFunction(
       prisma.user.findMany({ select: { id: true } })
     );
 
-    let total = 0;
-    for (const user of users) {
-      const result = await step.run(`detect-${user.id}`, () =>
-        detectRemindersForUser(user.id)
+    const total = await step.run("detect-all-users", async () => {
+      const results = await Promise.all(
+        users.map((user) => detectRemindersForUser(user.id)),
       );
-      total += result.created;
-    }
+      return results.reduce((sum, r) => sum + r.created, 0);
+    });
 
     return { usersScanned: users.length, remindersCreated: total };
   }

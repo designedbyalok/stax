@@ -1,0 +1,22 @@
+/* Stack resizable panels (editor / preview / design) vertically and let
+   each take the full viewport width whenever the row would be cramped.
+   Bumped from 768px → 1024px so tablets and narrow laptops also get the
+   single-column layout instead of a 300px-capped editor squeezed next
+   to the preview. */
+@media (max-width: 1024px) {
+  .responsive-panels {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .responsive-panel {
+    flex-basis: auto !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+  .responsive-handle {
+    display: none !important;
+  }
+}

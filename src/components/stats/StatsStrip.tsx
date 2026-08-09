@@ -95,11 +95,11 @@ function computeStats(
   const interviewCol = findCol("Interview");
   const rejectedCol = findCol("Rejected");
 
-  const excludedIds = new Set(
-    [rejectedCol?.id, ...columns.filter((c) => c.isArchive).map((c) => c.id)].filter(
-      Boolean
-    ) as string[]
-  );
+  const excludedIds = new Set<string>();
+  if (rejectedCol?.id) excludedIds.add(rejectedCol.id);
+  for (const c of columns) {
+    if (c.isArchive) excludedIds.add(c.id);
+  }
 
   // Active
   const activeApps = parsedApps.filter((a) => !excludedIds.has(a.columnId));

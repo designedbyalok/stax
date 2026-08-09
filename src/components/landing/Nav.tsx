@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import "./styles/nav.css";
+import "./styles/nav-mobile.css";
 
 const NAV_LINKS = [
   { href: "#product", label: "The board" },
@@ -109,12 +111,15 @@ export function LandingNav({ user }: { user?: { name?: string | null; email?: st
         className="nav-mobile-overlay"
         data-open={open ? "true" : "false"}
         aria-hidden={!open}
-        onClick={(e) => {
-          // Tap on the empty space dismisses; tap on the inner content doesn't.
-          if (e.target === e.currentTarget) setOpen(false);
-        }}
       >
-        <div className="nav-mobile-overlay-inner">
+        <button
+          type="button"
+          className="absolute inset-0 z-0 h-full w-full cursor-default"
+          aria-label="Close menu"
+          tabIndex={open ? 0 : -1}
+          onClick={() => setOpen(false)}
+        />
+        <div className="nav-mobile-overlay-inner relative z-10">
           <ul className="nav-mobile-list">
             {NAV_LINKS.map((l, i) => (
               <li

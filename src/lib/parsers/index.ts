@@ -44,15 +44,6 @@ const PARSERS: ParserEntry[] = [
   },
 ];
 
-export function detectSource(url: string): SourcePlatform {
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    return PARSERS.find((p) => p.match(host))?.source ?? "OTHER";
-  } catch {
-    return "OTHER";
-  }
-}
-
 export async function parseJobUrl(url: string): Promise<ParseResult> {
   let host: string;
   try {

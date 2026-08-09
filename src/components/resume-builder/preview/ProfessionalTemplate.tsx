@@ -1,0 +1,110 @@
+import type { TemplateProps } from "./types";
+import { contactLinks, ensureHttp } from "./utils";
+import { ExtraSections } from "./ExtraSections";
+import { SectionTitle } from "./SectionTitle";
+import { SocialIcon } from "./SocialIcon";
+
+export function ProfessionalTemplate({ resume, rootStyle, themeColor, s }: TemplateProps) {
+  return (
+    <div
+      id="resume-preview-content"
+      className="shadow-2xl print:shadow-none min-h-[1123px] w-[794px] max-w-[794px] shrink-0 border print:border-none flex flex-row a4-page-breaks"
+      style={rootStyle}
+    >
+      <div className="w-[33%] p-7" style={{ backgroundColor: "#f4f4f5" }}>
+        <div className="space-y-7">
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: themeColor }}>Contact</h2>
+            <div className="space-y-1.5 text-xs text-zinc-600 break-words">
+              {resume.basics.email && <div>{resume.basics.email}</div>}
+              {resume.basics.phone && <div>{resume.basics.phone}</div>}
+              {resume.basics.location && <div>{resume.basics.location}</div>}
+              <div className="flex flex-wrap gap-3 pt-2">
+                {contactLinks(resume.basics).map((l) => (
+                  <a key={l.id} href={ensureHttp(l.url)} target="_blank" rel="noreferrer" title={l.label} className="hover:opacity-75 transition-opacity" style={{ color: themeColor }}>
+                    <SocialIcon label={l.label} className="w-4 h-4" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+          {resume.skills && resume.skills.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: themeColor }}>Skills</h2>
+              <div className="flex flex-col gap-1 text-xs text-[color:var(--text-color)]">
+                {resume.skills.map((sk) => <span key={sk.id}>{sk.name}</span>)}
+              </div>
+            </div>
+          )}
+          {resume.languages && resume.languages.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: themeColor }}>Languages</h2>
+              <div className="flex flex-col gap-1 text-xs text-[color:var(--text-color)]">
+                {resume.languages.map((l) => (
+                  <span key={l.id}>{l.name}{l.fluency ? <span className="text-zinc-500"> — {l.fluency}</span> : null}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="w-[67%] p-8">
+        <div className="pb-3 mb-5 border-b-2" style={{ borderColor: themeColor }}>
+          <h1 className="text-3xl font-bold tracking-tight" style={{ color: themeColor }}>{resume.basics.name || "Your Name"}</h1>
+          {resume.basics.headline && <div className="text-base text-zinc-500 mt-1">{resume.basics.headline}</div>}
+        </div>
+
+        {resume.basics.summary && (
+          <div style={{ marginBottom: s(1.5) }}>
+            <SectionTitle template="professional" color={themeColor}>Summary</SectionTitle>
+            <p className="text-sm text-[color:var(--text-color)] leading-relaxed whitespace-pre-wrap">{resume.basics.summary}</p>
+          </div>
+        )}
+
+        {resume.work.length > 0 && (
+          <div style={{ marginBottom: s(1.5) }}>
+            <SectionTitle template="professional" color={themeColor}>Experience</SectionTitle>
+            <div className="space-y-5">
+              {resume.work.map((work) => (
+                <div key={work.id}>
+                  <div className="flex items-start justify-between mb-1">
+                    <div>
+                      <div className="font-bold text-[color:var(--text-color)]">{work.position || "Position"}</div>
+                      <div className="text-sm font-medium" style={{ color: themeColor }}>{work.company || "Company"}</div>
+                    </div>
+                    <div className="text-xs text-zinc-500 tabular-nums shrink-0 mt-0.5">
+                      {work.startDate} {work.startDate || work.endDate ? "–" : ""} {work.endDate}
+                    </div>
+                  </div>
+                  <p className="text-sm text-[color:var(--text-color)] leading-relaxed whitespace-pre-wrap mt-1">{work.summary}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {resume.education.length > 0 && (
+          <div style={{ marginBottom: s(1.5) }}>
+            <SectionTitle template="professional" color={themeColor}>Education</SectionTitle>
+            <div className="space-y-4">
+              {resume.education.map((ed) => (
+                <div key={ed.id} className="flex items-start justify-between">
+                  <div>
+                    <div className="font-bold text-[color:var(--text-color)]">{ed.institution || "Institution"}</div>
+                    <div className="text-sm text-zinc-600">{ed.studyType} {ed.studyType && ed.area ? "in" : ""} {ed.area}</div>
+                  </div>
+                  <div className="text-xs text-zinc-500 tabular-nums shrink-0 mt-0.5">
+                    {ed.startDate} {ed.startDate || ed.endDate ? "–" : ""} {ed.endDate}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <ExtraSections resume={resume} template="professional" color={themeColor} sectionMb={s(1.5)} />
+      </div>
+    </div>
+  );
+}

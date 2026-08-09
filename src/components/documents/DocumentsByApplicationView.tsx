@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { ChevronDown, ChevronRight, FileText, Eye } from "@/components/icons";
 import { useState } from "react";
 import { ApiDocument } from "@/lib/api-client";
@@ -24,39 +25,38 @@ const DocumentRow = memo(function DocumentRow({
 
   return (
     <div className="flex flex-col">
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => onToggle(doc.id)}
-        className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left cursor-pointer"
-      >
-        {isExpanded ? (
-          <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-        ) : (
-          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium truncate">{doc.name}</span>
-            {doc.isPrimary && (
-              <span className="text-[10px] uppercase font-semibold bg-secondary text-secondary-foreground px-1.5 py-0 rounded-sm">
-                Primary
-              </span>
-            )}
+      <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left">
+        <button
+          type="button"
+          onClick={() => onToggle(doc.id)}
+          className="flex min-w-0 flex-1 items-center gap-3 cursor-pointer text-left"
+        >
+          {isExpanded ? (
+            <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium truncate">{doc.name}</span>
+              {doc.isPrimary && (
+                <span className="text-[10px] uppercase font-semibold bg-secondary text-secondary-foreground px-1.5 py-0 rounded-sm">
+                  Primary
+                </span>
+              )}
+            </div>
+            <div className="text-xs text-muted-foreground truncate">
+              {doc.filename}
+            </div>
           </div>
-          <div className="text-xs text-muted-foreground truncate">
-            {doc.filename}
-          </div>
-        </div>
+        </button>
         <div className="flex items-center gap-3 shrink-0">
           <div className="text-xs text-muted-foreground">
             {count} {count === 1 ? "application" : "applications"}
           </div>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onPreview(doc);
-            }}
+            type="button"
+            onClick={() => onPreview(doc)}
             className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
             title="Preview Document"
           >
@@ -76,7 +76,7 @@ const DocumentRow = memo(function DocumentRow({
                     <span className="text-xs text-muted-foreground truncate">{app.companyName}</span>
                   </div>
                   <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
-                    {new Date(app.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {format(new Date(app.createdAt), "MMM d, yyyy")}
                   </span>
                 </div>
               ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 // Deterministic, pleasant background color for the initials monogram so a
@@ -90,8 +91,14 @@ export function ProfileAvatarRing({
         style={{ width: inner, height: inner }}
       >
         {photoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl} alt="" className="h-full w-full object-cover" />
+          <Image
+            src={photoUrl}
+            alt=""
+            width={inner}
+            height={inner}
+            unoptimized
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span
             className="h-full w-full grid place-items-center font-semibold text-white select-none"

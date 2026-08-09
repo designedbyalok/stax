@@ -38,8 +38,7 @@ export async function PATCH(
   const auth = await requireUserId();
   if (!auth.ok) return auth.response;
   
-  const { applicationId } = await params;
-  const body = await req.json();
+  const [{ applicationId }, body] = await Promise.all([params, req.json()]);
 
   const checklist = await prisma.interviewChecklist.upsert({
     where: { applicationId },

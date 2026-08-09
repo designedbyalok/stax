@@ -11,7 +11,15 @@ export function CTA() {
         spam, no marketing, just one email.
       </p>
       <form className="email-pill" action="/signup" method="get">
-        <input type="email" name="email" placeholder="you@where-you-are.com" />
+        <label htmlFor="cta-email" className="sr-only">
+          Email address
+        </label>
+        <input
+          id="cta-email"
+          type="email"
+          name="email"
+          placeholder="you@where-you-are.com"
+        />
         <button type="submit">Request invite →</button>
       </form>
     </div>

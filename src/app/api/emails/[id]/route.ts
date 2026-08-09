@@ -29,8 +29,7 @@ export async function PATCH(
   const auth = await requireUserId();
   if (!auth.ok) return auth.response;
   
-  const { id } = await params;
-  const body = await req.json();
+  const [{ id }, body] = await Promise.all([params, req.json()]);
 
   const emailEvent = await prisma.emailEvent.findUnique({
     where: { id, userId: auth.userId },

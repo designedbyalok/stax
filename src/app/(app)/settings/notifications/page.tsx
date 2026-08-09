@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,38 +10,81 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+type NotificationSettings = {
+  digestEnabled: boolean;
+  digestDay: number;
+  digestHour: number;
+  staleApplied: number;
+  staleInterview: number;
+};
+
+type Action =
+  | { type: "sync"; payload: NotificationSettings }
+  | { type: "setDigestEnabled"; value: boolean }
+  | { type: "setDigestDay"; value: number }
+  | { type: "setDigestHour"; value: number }
+  | { type: "setStaleApplied"; value: number }
+  | { type: "setStaleInterview"; value: number };
+
+const DEFAULT_SETTINGS: NotificationSettings = {
+  digestEnabled: true,
+  digestDay: 1,
+  digestHour: 9,
+  staleApplied: 7,
+  staleInterview: 5,
+};
+
+function settingsReducer(state: NotificationSettings, action: Action): NotificationSettings {
+  switch (action.type) {
+    case "sync":
+      return action.payload;
+    case "setDigestEnabled":
+      return { ...state, digestEnabled: action.value };
+    case "setDigestDay":
+      return { ...state, digestDay: action.value };
+    case "setDigestHour":
+      return { ...state, digestHour: action.value };
+    case "setStaleApplied":
+      return { ...state, staleApplied: action.value };
+    case "setStaleInterview":
+      return { ...state, staleInterview: action.value };
+    default:
+      return state;
+  }
+}
+
 export default function NotificationsSettings() {
   const queryClient = useQueryClient();
   const settingsQuery = useQuery({
-    // Same key the Board uses so the cache is shared.
     queryKey: ["userSettings"],
     queryFn: api.getUserSettings,
   });
 
-  const [digestEnabled, setDigestEnabled] = useState(true);
-  const [digestDay, setDigestDay] = useState(1);
-  const [digestHour, setDigestHour] = useState(9);
-  const [staleApplied, setStaleApplied] = useState(7);
-  const [staleInterview, setStaleInterview] = useState(5);
+  const [settings, dispatch] = useReducer(settingsReducer, DEFAULT_SETTINGS);
 
   useEffect(() => {
     if (settingsQuery.data) {
-      setDigestEnabled(settingsQuery.data.digestEnabled);
-      setDigestDay(settingsQuery.data.digestDay);
-      setDigestHour(settingsQuery.data.digestHour);
-      setStaleApplied(settingsQuery.data.staleDaysApplied);
-      setStaleInterview(settingsQuery.data.staleDaysInterview);
+      dispatch({
+        type: "sync",
+        payload: {
+          digestEnabled: settingsQuery.data.digestEnabled,
+          digestDay: settingsQuery.data.digestDay,
+          digestHour: settingsQuery.data.digestHour,
+          staleApplied: settingsQuery.data.staleDaysApplied,
+          staleInterview: settingsQuery.data.staleDaysInterview,
+        },
+      });
     }
   }, [settingsQuery.data]);
 
   const saveMutation = useMutation({
     mutationFn: () =>
       api.updateUserSettings({
-        digestEnabled,
-        digestDay,
-        digestHour,
-        staleDaysApplied: staleApplied,
-        staleDaysInterview: staleInterview,
+        digestEnabled: settings.digestEnabled,
+        digestDay: settings.digestDay,
+        digestHour: settings.digestHour,
+        staleDaysApplied: settings.staleApplied,
+        staleDaysInterview: settings.staleInterview,
       }),
     onSuccess: () => {
       toast.success("Saved.");
@@ -86,20 +129,24 @@ export default function NotificationsSettings() {
             </div>
             <input
               type="checkbox"
-              checked={digestEnabled}
-              onChange={(e) => setDigestEnabled(e.target.checked)}
+              checked={settings.digestEnabled}
+              onChange={(e) =>
+                dispatch({ type: "setDigestEnabled", value: e.target.checked })
+              }
               className="w-9 h-5 accent-foreground"
             />
           </label>
 
-          {digestEnabled && (
+          {settings.digestEnabled && (
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="digest-day">Day</Label>
                 <select
                   id="digest-day"
-                  value={digestDay}
-                  onChange={(e) => setDigestDay(Number(e.target.value))}
+                  value={settings.digestDay}
+                  onChange={(e) =>
+                    dispatch({ type: "setDigestDay", value: Number(e.target.value) })
+                  }
                   className="h-8 w-full rounded-md border border-input bg-background px-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-ring"
                 >
                   {DAYS.map((d, i) => (
@@ -113,8 +160,10 @@ export default function NotificationsSettings() {
                 <Label htmlFor="digest-hour">Hour (your time)</Label>
                 <select
                   id="digest-hour"
-                  value={digestHour}
-                  onChange={(e) => setDigestHour(Number(e.target.value))}
+                  value={settings.digestHour}
+                  onChange={(e) =>
+                    dispatch({ type: "setDigestHour", value: Number(e.target.value) })
+                  }
                   className="h-8 w-full rounded-md border border-input bg-background px-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-ring"
                 >
                   {Array.from({ length: 24 }, (_, i) => i).map((h) => (
@@ -138,8 +187,10 @@ export default function NotificationsSettings() {
             <Label htmlFor="stale-applied">After applying</Label>
             <select
               id="stale-applied"
-              value={staleApplied}
-              onChange={(e) => setStaleApplied(Number(e.target.value))}
+              value={settings.staleApplied}
+              onChange={(e) =>
+                dispatch({ type: "setStaleApplied", value: Number(e.target.value) })
+              }
               className="h-8 w-full rounded-md border border-input bg-background px-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-ring"
             >
               {[3, 5, 7, 10, 14].map((d) => (
@@ -153,8 +204,10 @@ export default function NotificationsSettings() {
             <Label htmlFor="stale-interview">After an interview</Label>
             <select
               id="stale-interview"
-              value={staleInterview}
-              onChange={(e) => setStaleInterview(Number(e.target.value))}
+              value={settings.staleInterview}
+              onChange={(e) =>
+                dispatch({ type: "setStaleInterview", value: Number(e.target.value) })
+              }
               className="h-8 w-full rounded-md border border-input bg-background px-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-ring"
             >
               {[2, 3, 5, 7, 10].map((d) => (

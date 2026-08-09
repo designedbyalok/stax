@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { format } from "date-fns";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Globe2, Info, Loader2, MapPin, RefreshCw, Sparkles, TrendingUp } from "@/components/icons";
 import { toast } from "sonner";
@@ -329,11 +330,7 @@ export function InsightsPanel({ className }: { className?: string }) {
           {data.distribution ? ` Comparable pool ~${data.distribution.sampleSize.toLocaleString()}.` : ""}
           <div className="mt-0.5">
             Last updated{" "}
-            {new Date(data.refreshedAt).toLocaleDateString(undefined, {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
+            {format(new Date(data.refreshedAt), "d MMM yyyy")}
             {data.source === "ai" ? " · regenerate anytime with Generate insight." : " · refreshed weekly."}
           </div>
         </div>

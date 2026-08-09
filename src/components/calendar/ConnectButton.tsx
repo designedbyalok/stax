@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, Loader2, Unplug } from "@/components/icons";
 import { toast } from "sonner";
@@ -9,8 +9,15 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
 
 export function ConnectButton() {
+  return (
+    <Suspense fallback={<div className="h-9 w-32 bg-muted animate-pulse rounded-md" />}>
+      <ConnectButtonContent />
+    </Suspense>
+  );
+}
+
+function ConnectButtonContent() {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [disconnecting, setDisconnecting] = useState(false);
 
@@ -43,8 +50,8 @@ export function ConnectButton() {
       toast.error(messages[error] ?? `Connection failed (${error})`);
     }
 
-    router.replace("/settings/integrations");
-  }, [searchParams, queryClient, router]);
+    window.history.replaceState(null, "", "/settings/integrations");
+  }, [searchParams, queryClient]);
 
   const isConnected = !!user?.googleIntegration;
 
@@ -87,12 +94,12 @@ export function ConnectButton() {
   return (
     <Button
       className="gap-2"
-      render={
-        <a href="/api/integrations/google-calendar/connect">
-          <Calendar className="h-4 w-4" />
-          Connect Google Calendar
-        </a>
-      }
-    />
+      onClick={() => {
+        window.location.href = "/api/integrations/google-calendar/connect";
+      }}
+    >
+      <Calendar className="h-4 w-4" />
+      Connect Google Calendar
+    </Button>
   );
 }

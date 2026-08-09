@@ -12,7 +12,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function EmailSettings() {
   const { data: user, isLoading } = useQuery({
     queryKey: ["user"],
-    queryFn: () => fetch("/api/user").then(r => r.json()),
+    queryFn: async () => {
+      const r = await fetch("/api/user");
+      if (!r.ok) throw new Error(`/api/user ${r.status}`);
+      return r.json();
+    },
   });
 
   const token = user?.inboundEmailToken;
@@ -52,9 +56,9 @@ export function EmailSettings() {
       <CardContent className="space-y-6">
         {token ? (
           <div className="space-y-3">
-            <label className="text-sm font-medium">Your personal forwarding address</label>
+            <label htmlFor="forwarding-address" className="text-sm font-medium">Your personal forwarding address</label>
             <div className="flex items-center gap-2">
-              <code className="flex-1 block p-3 bg-muted rounded-md text-sm font-mono border">
+              <code id="forwarding-address" className="flex-1 block p-3 bg-muted rounded-md text-sm font-mono border">
                 {forwardingAddress}
               </code>
               <Button variant="secondary" onClick={copyToClipboard} className="shrink-0 gap-2">

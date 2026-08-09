@@ -151,54 +151,85 @@ export const SALARY_BENCHMARKS: BenchmarkSeedRow[] = buildSeed();
  * key). Used by `prisma/seed` and can be triggered manually.
  */
 export async function upsertSalaryBenchmarks(): Promise<{ upserted: number }> {
-  let upserted = 0;
+  const existing = await prisma.salaryBenchmark.findMany({
+    where: { source: "benchmark" },
+    select: {
+      id: true,
+      jobRole: true,
+      city: true,
+      country: true,
+      experienceBracket: true,
+    },
+  });
+
+  const benchmarkKey = (row: {
+    jobRole: string;
+    city: string | null;
+    country: string;
+    experienceBracket: string;
+  }) => JSON.stringify([row.jobRole, row.city, row.country, row.experienceBracket]);
+
+  const byKey = new Map(existing.map((row) => [benchmarkKey(row), row.id]));
+
+  const toCreate: {
+    jobRole: string;
+    city: string | null;
+    country: string;
+    experienceBracket: ExperienceBracket;
+    p25: number;
+    p50: number;
+    p75: number;
+    p90: number;
+    sampleSize: number;
+    currency: string;
+    source: "benchmark";
+  }[] = [];
+  const updates: {
+    id: string;
+    data: {
+      p25: number;
+      p50: number;
+      p75: number;
+      p90: number;
+      sampleSize: number;
+      currency: string;
+    };
+  }[] = [];
+
   for (const row of SALARY_BENCHMARKS) {
-    // Postgres treats NULL as distinct in unique constraints, so a compound
-    // upsert keyed on a null `city` (country-level rows) would never match an
-    // existing row. Use a manual find-then-update/create to stay idempotent.
-    const existing = await prisma.salaryBenchmark.findFirst({
-      where: {
+    const id = byKey.get(benchmarkKey(row));
+    const data = {
+      p25: row.p25,
+      p50: row.p50,
+      p75: row.p75,
+      p90: row.p90,
+      sampleSize: row.sampleSize,
+      currency: row.currency,
+    };
+    if (id) {
+      updates.push({ id, data });
+    } else {
+      toCreate.push({
         jobRole: row.jobRole,
         city: row.city,
         country: row.country,
         experienceBracket: row.experienceBracket,
+        ...data,
         source: "benchmark",
-      },
-      select: { id: true },
-    });
-
-    if (existing) {
-      await prisma.salaryBenchmark.update({
-        where: { id: existing.id },
-        data: {
-          p25: row.p25,
-          p50: row.p50,
-          p75: row.p75,
-          p90: row.p90,
-          sampleSize: row.sampleSize,
-          currency: row.currency,
-        },
-      });
-    } else {
-      await prisma.salaryBenchmark.create({
-        data: {
-          jobRole: row.jobRole,
-          city: row.city,
-          country: row.country,
-          experienceBracket: row.experienceBracket,
-          p25: row.p25,
-          p50: row.p50,
-          p75: row.p75,
-          p90: row.p90,
-          sampleSize: row.sampleSize,
-          currency: row.currency,
-          source: "benchmark",
-        },
       });
     }
-    upserted += 1;
   }
-  return { upserted };
+
+  await prisma.$transaction([
+    ...updates.map(({ id, data }) =>
+      prisma.salaryBenchmark.update({ where: { id }, data })
+    ),
+    ...(toCreate.length > 0
+      ? [prisma.salaryBenchmark.createMany({ data: toCreate })]
+      : []),
+  ]);
+
+  return { upserted: SALARY_BENCHMARKS.length };
 }
 
 const sameCity = (a: string | null, b: string | null) =>

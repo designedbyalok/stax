@@ -90,6 +90,8 @@ export function UploadModal({
 
         {!file ? (
           <div
+            role="button"
+            tabIndex={0}
             className={`mt-4 border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer ${
               isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:bg-muted/50"
             }`}
@@ -101,6 +103,12 @@ export function UploadModal({
               handleFile(e.dataTransfer.files[0]);
             }}
             onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
           >
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
               <Upload className="h-5 w-5 text-muted-foreground" />

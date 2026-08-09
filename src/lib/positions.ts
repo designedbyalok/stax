@@ -1,5 +1,3 @@
-import { generateKeyBetween } from "fractional-indexing";
-
 /**
  * Application.position is stored as an Int in the DB but we want fractional
  * indexing-style ordering for cheap reorders. We keep the schema as Int by
@@ -23,6 +21,3 @@ export function midpoint(a: number | null, b: number | null): number {
   const mid = Math.floor((a + b) / 2);
   return mid === a || mid === b ? a + 1 : mid;
 }
-
-// Re-exported for parity in case we move to string keys later.
-export { generateKeyBetween };

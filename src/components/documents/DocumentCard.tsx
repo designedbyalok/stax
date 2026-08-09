@@ -119,8 +119,16 @@ export function DocumentCard({
   return (
     <div
       ref={cardRef}
+      role="button"
+      tabIndex={0}
       className="group flex flex-col cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5"
       onClick={() => onPreview(doc)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onPreview(doc);
+        }
+      }}
     >
       <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm group-hover:shadow-md transition-shadow">
         {/* Type badge — top right */}

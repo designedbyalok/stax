@@ -27,43 +27,40 @@ export const processInboundEmail = inngest.createFunction(
       return { status: "ignored", reason: "User not found or no token in address" };
     }
 
-    // 3. Deduplicate
-    const exists = await step.run("check-duplicate", async () => {
-      const existing = await prisma.emailEvent.findUnique({
-        where: { messageId: parsed.messageId },
-      });
-      return !!existing;
-    });
+    const [exists, applications] = await Promise.all([
+      step.run("check-duplicate", async () => {
+        const existing = await prisma.emailEvent.findUnique({
+          where: { messageId: parsed.messageId },
+        });
+        return !!existing;
+      }),
+      step.run("fetch-applications", async () => {
+        return prisma.application.findMany({
+          where: { userId: user.id },
+        });
+      }),
+    ]);
 
     if (exists) {
       return { status: "ignored", reason: "Duplicate message ID" };
     }
 
-    // 4. Match
-    const applications = await step.run("fetch-applications", async () => {
-      return prisma.application.findMany({
-        where: { userId: user.id },
-      });
-    });
-
-    const matchResult = await step.run("match-application", () => {
-      return matchEmailToApplication(
-        parsed.subject,
-        parsed.bodyText || "",
-        parsed.senderEmail,
-        applications as any // using any for now since the types in match.ts use ApiApplication
-      );
-    });
-
-    // 5. Classify Intent
-    const intent = await step.run("classify-intent", () => {
-      return classifyEmailIntent(parsed.subject, parsed.bodyText || "");
-    });
-
-    // 6. Sanitize HTML
-    const sanitizedHtml = await step.run("sanitize-html", () => {
-      return parsed.bodyHtml ? sanitizeHtml(parsed.bodyHtml) : null;
-    });
+    const [matchResult, intent, sanitizedHtml] = await Promise.all([
+      step.run("match-application", () => {
+        return matchEmailToApplication(
+          parsed.subject,
+          parsed.bodyText || "",
+          parsed.senderEmail,
+          applications as any,
+        );
+      }),
+      step.run("classify-intent", () => {
+        return classifyEmailIntent(parsed.subject, parsed.bodyText || "");
+      }),
+      step.run("sanitize-html", () => {
+        return parsed.bodyHtml ? sanitizeHtml(parsed.bodyHtml) : null;
+      }),
+    ]);
 
     // 7. Save to DB
     const result = await step.run("save-email", async () => {

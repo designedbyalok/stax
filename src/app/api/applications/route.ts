@@ -37,9 +37,9 @@ const createSchema = z.object({
   location: z.string().trim().max(200).optional().nullable(),
   salaryRange: z.string().trim().max(200).optional().nullable(),
   jobType: z.enum(JOB_TYPES).optional().nullable(),
-  originalUrl: z.string().url().max(2000).optional().nullable(),
+  originalUrl: z.url().max(2000).optional().nullable(),
   jobDescription: z.string().trim().max(50_000).optional().nullable(),
-  companyLogoUrl: z.string().url().max(2000).optional().nullable(),
+  companyLogoUrl: z.url().max(2000).optional().nullable(),
   sourcePlatform: z.enum(SOURCE_PLATFORMS).optional().nullable(),
   columnId: z.string().optional(),
 });

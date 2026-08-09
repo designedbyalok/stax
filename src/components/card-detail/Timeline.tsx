@@ -51,10 +51,27 @@ export function Timeline({
   }
 
   // Merge activities and emails, sorted by date descending
-  const mergedTimeline = [
-    ...activities.filter(a => a.type !== "EMAIL_RECEIVED").map(a => ({ type: "activity" as const, date: new Date(a.createdAt).getTime(), data: a })),
-    ...emailEvents.map(e => ({ type: "email" as const, date: new Date(e.date).getTime(), data: e }))
-  ].sort((a, b) => b.date - a.date);
+  const mergedTimeline: Array<
+    | { type: "activity"; date: number; data: ApiActivity }
+    | { type: "email"; date: number; data: ApiEmailEvent }
+  > = [];
+  for (const a of activities) {
+    if (a.type !== "EMAIL_RECEIVED") {
+      mergedTimeline.push({
+        type: "activity",
+        date: new Date(a.createdAt).getTime(),
+        data: a,
+      });
+    }
+  }
+  for (const e of emailEvents) {
+    mergedTimeline.push({
+      type: "email",
+      date: new Date(e.date).getTime(),
+      data: e,
+    });
+  }
+  mergedTimeline.sort((a, b) => b.date - a.date);
 
   return (
     <div className="space-y-2">

@@ -7,7 +7,7 @@ import {
   loadColumns,
   loadUserSettings,
 } from "@/lib/loaders";
-import BoardPageClient from "./BoardPageClient";
+import BoardPageClient from "@/components/board/BoardPageClient";
 
 // Server-prefetch the data the board needs and ship it down as a
 // dehydrated React Query cache, so the first paint already has the

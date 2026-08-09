@@ -28,16 +28,17 @@ export default function ForgotPasswordPage() {
 
       if (!res.ok && res.status === 429) {
         toast.error("Too many requests. Try again later.");
-        setSubmitting(false);
         return;
       }
+
+      setSent(true);
     } catch {
       // Even on failure, we treat the UX as success to avoid leaking
       // whether the email exists.
+      setSent(true);
+    } finally {
+      setSubmitting(false);
     }
-
-    setSent(true);
-    setSubmitting(false);
   }
 
   return (

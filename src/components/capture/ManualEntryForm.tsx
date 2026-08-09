@@ -10,7 +10,7 @@ import { useCaptureStore } from "./capture-store";
 import {
   ReviewDetailsModal,
   type ReviewDraft,
-} from "./ReviewDetailsModal";
+} from "./review/ReviewDetailsModal";
 
 // Manual entry flow. Shares the ReviewDetailsModal with the paste
 // flow but runs in `manual` mode — no AI badges, optional URL,

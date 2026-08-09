@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 // Company logo block. Falls back to the first letter of the name
@@ -35,12 +36,13 @@ export function BrandAvatar({
       aria-hidden
     >
       {src ? (
-        <img
+        <Image
           src={src}
           alt={name}
+          width={size}
+          height={size}
+          unoptimized
           className="w-full h-full object-contain bg-white"
-          loading="lazy"
-          decoding="async"
         />
       ) : (
         letter

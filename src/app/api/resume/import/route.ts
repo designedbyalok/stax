@@ -126,36 +126,50 @@ ${text.slice(0, 15000)}`;
     };
 
     let res: Response | null = null;
-    let fetchError: any = null;
+    let fetchError: unknown = null;
 
     try {
-      res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+      const primaryResponse = await fetch(`${ENDPOINT}?key=${apiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
         body: JSON.stringify(payload),
       });
-    } catch (err: any) {
-      console.log("Fetch failed or timed out:", err.name);
+      if (primaryResponse.ok) {
+        res = primaryResponse;
+      } else if (primaryResponse.status !== 503) {
+        const err = await primaryResponse.text();
+        console.error("Gemini API Error:", err);
+        return NextResponse.json({ error: "Failed to process resume with AI" }, { status: 500 });
+      }
+    } catch (err: unknown) {
+      const name = err instanceof Error ? err.name : "Error";
+      console.log("Fetch failed or timed out:", name);
       fetchError = err;
     }
     
     clearTimeout(timer);
 
-    if (fetchError || (res && res.status === 503)) {
+    if (!res) {
       console.log("Gemini 2.5 Flash failed or is busy, falling back to Gemini 2.5 Pro");
       const fallbackController = new AbortController();
       const fallbackTimer = setTimeout(() => fallbackController.abort(), 60000);
       const FALLBACK_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent`;
       
       try {
-        res = await fetch(`${FALLBACK_ENDPOINT}?key=${apiKey}`, {
+        const fallbackResponse = await fetch(`${FALLBACK_ENDPOINT}?key=${apiKey}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: fallbackController.signal,
           body: JSON.stringify(payload),
         });
-      } catch (err: any) {
+        if (!fallbackResponse.ok) {
+          const err = await fallbackResponse.text();
+          console.error("Gemini fallback API Error:", err);
+          return NextResponse.json({ error: "Failed to process resume with AI" }, { status: 500 });
+        }
+        res = fallbackResponse;
+      } catch (err: unknown) {
         console.error("Fallback fetch failed:", err);
         return NextResponse.json({ error: "Failed to process resume with AI" }, { status: 500 });
       } finally {
@@ -163,7 +177,7 @@ ${text.slice(0, 15000)}`;
       }
     }
 
-    if (!res || !res.ok) {
+    if (!res?.ok) {
       const err = res ? await res.text() : "Unknown network error";
       console.error("Gemini API Error:", err);
       return NextResponse.json({ error: "Failed to process resume with AI" }, { status: 500 });

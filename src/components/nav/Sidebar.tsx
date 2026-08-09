@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -55,6 +56,18 @@ const NAV_LIBRARY: Item[] = [
 ];
 
 export function Sidebar({
+  user,
+}: {
+  user: { name?: string | null; email?: string | null; image?: string | null };
+}) {
+  return (
+    <Suspense fallback={null}>
+      <SidebarContent user={user} />
+    </Suspense>
+  );
+}
+
+function SidebarContent({
   user,
 }: {
   user: { name?: string | null; email?: string | null; image?: string | null };

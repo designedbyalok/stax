@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ResumeClient } from "./ResumeClient";
+import { ResumeClient } from "@/components/resume-builder/ResumeClient";
 
 export default function ResumeBuilderPage() {
   return (

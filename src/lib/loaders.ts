@@ -29,10 +29,8 @@ export async function loadColumns(userId: string) {
 
 export async function loadUserSettings(userId: string) {
   const [settings, user] = await Promise.all([
-    prisma.userSettings.upsert({
+    prisma.userSettings.findUnique({
       where: { userId },
-      update: {},
-      create: { userId },
     }),
     prisma.user.findUnique({
       where: { id: userId },
@@ -40,11 +38,11 @@ export async function loadUserSettings(userId: string) {
     }),
   ]);
   return {
-    digestEnabled: settings.digestEnabled,
-    digestDay: settings.digestDay,
-    digestHour: settings.digestHour,
-    staleDaysApplied: settings.staleDaysApplied,
-    staleDaysInterview: settings.staleDaysInterview,
+    digestEnabled: settings?.digestEnabled ?? true,
+    digestDay: settings?.digestDay ?? 1,
+    digestHour: settings?.digestHour ?? 9,
+    staleDaysApplied: settings?.staleDaysApplied ?? 7,
+    staleDaysInterview: settings?.staleDaysInterview ?? 5,
     name: user?.name ?? "",
     email: user?.email ?? "",
     timezone: user?.timezone ?? "UTC",
@@ -96,43 +94,41 @@ import { computeProfileCompletion } from "@/lib/profile-completion";
 
 export async function loadProfile(userId: string) {
   const [profile, user] = await Promise.all([
-    prisma.userProfile.upsert({
+    prisma.userProfile.findUnique({
       where: { userId },
-      update: {},
-      create: { userId },
     }),
     prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
   ]);
 
   const completion = computeProfileCompletion({
     name: user?.name ?? null,
-    photoUrl: profile.photoUrl,
-    jobRole: profile.jobRole,
-    city: profile.city,
-    country: profile.country,
-    yearsExperience: profile.yearsExperience,
-    currentSalary: profile.currentSalary,
-    bio: profile.bio,
+    photoUrl: profile?.photoUrl ?? null,
+    jobRole: profile?.jobRole ?? null,
+    city: profile?.city ?? null,
+    country: profile?.country ?? null,
+    yearsExperience: profile?.yearsExperience ?? null,
+    currentSalary: profile?.currentSalary ?? null,
+    bio: profile?.bio ?? null,
   });
 
   return {
-    id: profile.id,
-    userId: profile.userId,
+    id: profile?.id ?? "",
+    userId: profile?.userId ?? userId,
     name: user?.name ?? null,
-    jobRole: profile.jobRole,
-    jobFamily: profile.jobFamily,
-    city: profile.city,
-    country: profile.country,
-    yearsExperience: profile.yearsExperience,
-    currentSalary: profile.currentSalary,
-    salaryCurrency: profile.salaryCurrency,
-    photoUrl: profile.photoUrl,
-    bio: profile.bio,
-    onboardingStep: profile.onboardingStep,
-    onboardingCompletedAt: profile.onboardingCompletedAt?.toISOString() ?? null,
-    onboardingSkippedAt: profile.onboardingSkippedAt?.toISOString() ?? null,
-    createdAt: profile.createdAt.toISOString(),
-    updatedAt: profile.updatedAt.toISOString(),
+    jobRole: profile?.jobRole ?? null,
+    jobFamily: profile?.jobFamily ?? null,
+    city: profile?.city ?? null,
+    country: profile?.country ?? null,
+    yearsExperience: profile?.yearsExperience ?? null,
+    currentSalary: profile?.currentSalary ?? null,
+    salaryCurrency: profile?.salaryCurrency ?? "USD",
+    photoUrl: profile?.photoUrl ?? null,
+    bio: profile?.bio ?? null,
+    onboardingStep: profile?.onboardingStep ?? 0,
+    onboardingCompletedAt: profile?.onboardingCompletedAt?.toISOString() ?? null,
+    onboardingSkippedAt: profile?.onboardingSkippedAt?.toISOString() ?? null,
+    createdAt: profile?.createdAt.toISOString() ?? new Date().toISOString(),
+    updatedAt: profile?.updatedAt.toISOString() ?? new Date().toISOString(),
     completion,
   };
 }

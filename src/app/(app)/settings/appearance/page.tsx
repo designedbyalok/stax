@@ -1,21 +1,22 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "@/components/icons";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useState } from "react";
+
+function useIsClient() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+}
 
 export default function AppearanceSettingsPage() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Avoid hydration mismatch by waiting for mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  const isClient = useIsClient();
+  const activeTheme = isClient ? theme : undefined;
 
   return (
     <div className="space-y-6">
@@ -36,7 +37,7 @@ export default function AppearanceSettingsPage() {
             <button
               onClick={() => setTheme("light")}
               className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                theme === "light" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30"
+                activeTheme === "light" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30"
               }`}
             >
               <div className="w-24 h-16 rounded-md bg-white border shadow-sm flex flex-col overflow-hidden">
@@ -58,7 +59,7 @@ export default function AppearanceSettingsPage() {
             <button
               onClick={() => setTheme("dark")}
               className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                theme === "dark" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30"
+                activeTheme === "dark" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30"
               }`}
             >
               <div className="w-24 h-16 rounded-md bg-zinc-950 border border-zinc-800 shadow-sm flex flex-col overflow-hidden">
@@ -80,7 +81,7 @@ export default function AppearanceSettingsPage() {
             <button
               onClick={() => setTheme("system")}
               className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                theme === "system" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30"
+                activeTheme === "system" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30"
               }`}
             >
               <div className="w-24 h-16 rounded-md bg-gradient-to-br from-white to-zinc-950 border shadow-sm flex flex-col overflow-hidden">

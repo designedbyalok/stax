@@ -8,7 +8,7 @@ import { useCaptureStore } from "./capture-store";
 import {
   ReviewDetailsModal,
   type ReviewDraft,
-} from "./ReviewDetailsModal";
+} from "./review/ReviewDetailsModal";
 
 // Paste flow: shows after /api/parse/url returns. Hands off to
 // the shared ReviewDetailsModal in `paste` mode so the UI matches
@@ -54,9 +54,12 @@ export function PreviewCard() {
   // Fields the parser filled in count as "AI filled"; fields that
   // came back empty don't get a badge.
   const fields = state.fields;
-  const aiFilledFields = Object.entries(fields)
-    .filter(([k, v]) => typeof v === "string" && v.trim().length > 0)
-    .map(([k]) => k);
+  const aiFilledFields: string[] = [];
+  for (const [k, v] of Object.entries(fields)) {
+    if (typeof v === "string" && v.trim().length > 0) {
+      aiFilledFields.push(k);
+    }
+  }
 
   const initialDraft: Partial<ReviewDraft> = {
     roleTitle: fields.roleTitle ?? "",

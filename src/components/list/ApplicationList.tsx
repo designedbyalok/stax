@@ -189,12 +189,15 @@ export function ApplicationList() {
                   <th
                     key={h.key}
                     className={cn(
-                      "text-left text-[11px] font-medium text-muted-foreground tracking-wide px-3 py-2 border-b cursor-pointer select-none",
+                      "text-left text-[11px] font-medium text-muted-foreground tracking-wide px-3 py-2 border-b select-none",
                       h.className
                     )}
-                    onClick={() => toggleSort(h.key)}
                   >
-                    <span className="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      className="inline-flex w-full items-center gap-1 cursor-pointer"
+                      onClick={() => toggleSort(h.key)}
+                    >
                       {h.label}
                       <Icon
                         className={cn(
@@ -203,7 +206,7 @@ export function ApplicationList() {
                         )}
                         strokeWidth={1.75}
                       />
-                    </span>
+                    </button>
                   </th>
                 );
               })}
@@ -213,7 +216,15 @@ export function ApplicationList() {
             {rows.map((row) => (
               <tr
                 key={row.app.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedId(row.app.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedId(row.app.id);
+                  }
+                }}
                 className="hover:bg-muted/40 cursor-pointer"
               >
                 <td className="px-3 py-2.5 border-b font-medium max-w-0">

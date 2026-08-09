@@ -65,7 +65,7 @@ export function WelcomeModal() {
              <div className={cn("absolute inset-0 blur-3xl opacity-20 bg-gradient-to-br rounded-full transition-colors duration-500", currentStep.color)} />
              
              {/* Floating card */}
-             <div className="relative w-40 h-52 bg-card border shadow-xl rounded-xl flex flex-col items-center justify-center overflow-hidden transition-all duration-500 hover:scale-105">
+             <div className="relative w-40 h-52 bg-card border shadow-xl rounded-xl flex flex-col items-center justify-center overflow-hidden transition-transform duration-500 hover:scale-105">
                 <Icon className={cn("w-12 h-12 text-muted-foreground/30")} />
              </div>
 
@@ -78,7 +78,7 @@ export function WelcomeModal() {
            {/* Carousel Dots */}
            <div className="flex items-center gap-1.5 mb-8">
              {STEPS.map((_, i) => (
-               <div key={i} className={cn("h-1.5 rounded-full transition-all duration-300", i === step ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30")} />
+               <div key={i} className={cn("h-1.5 rounded-full transition-[width,background-color] duration-300", i === step ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30")} />
              ))}
            </div>
 

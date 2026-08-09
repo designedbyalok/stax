@@ -71,7 +71,12 @@ export function googleFontsHref(families: string[]): string {
     .join("&");
   return `https://fonts.googleapis.com/css2?${params}&display=swap`;
 }
+const FONT_CATEGORIES: FontCategory[] = ["Sans Serif", "Serif", "Monospace"];
 
-// Single href that pulls in every curated family — used by the design panel
-// so each option can preview in its own typeface.
-export const ALL_FONTS_HREF = googleFontsHref(RESUME_FONTS.map((f) => f.name));
+/** Pre-grouped fonts for the design panel picker (avoids filter-per-category in render). */
+export const RESUME_FONTS_BY_CATEGORY = Object.fromEntries(
+  FONT_CATEGORIES.map((cat) => [
+    cat,
+    RESUME_FONTS.filter((f) => f.category === cat),
+  ]),
+) as Record<FontCategory, ResumeFont[]>;

@@ -245,7 +245,7 @@ export function ProfileModal() {
             <div className="mt-3 w-full truncate text-sm font-semibold">{firstName}</div>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-primary motion-safe:transition-all motion-safe:duration-500"
+                className="h-full rounded-full bg-primary motion-safe:transition-[width] motion-safe:duration-500"
                 style={{ width: `${completion.percent}%` }}
               />
             </div>

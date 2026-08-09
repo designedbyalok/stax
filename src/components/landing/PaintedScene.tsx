@@ -1,16 +1,19 @@
 // Painted atmospheric hero scene using layered SVG silhouettes + gradients.
 // Server-rendered — pure visual, no interactivity.
+
+const PAINT_PALETTE = {
+  sky: ["#f5dba8", "#f0b079", "#d97a55"],
+  sun: "#fde6b5",
+  sunCore: "#ffd07a",
+  far: "#b85e48",
+  mid: "#7a3a35",
+  near: "#3a2722",
+  water: "#e89867",
+  birds: "#3a2722",
+};
+
 export function PaintedScene() {
-  const p = {
-    sky: ["#f5dba8", "#f0b079", "#d97a55"],
-    sun: "#fde6b5",
-    sunCore: "#ffd07a",
-    far: "#b85e48",
-    mid: "#7a3a35",
-    near: "#3a2722",
-    water: "#e89867",
-    birds: "#3a2722",
-  };
+  const p = PAINT_PALETTE;
 
   return (
     <svg

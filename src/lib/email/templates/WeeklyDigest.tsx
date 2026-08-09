@@ -94,7 +94,7 @@ export function WeeklyDigest({
               </Heading>
               {followUps.map((item, i) => (
                 <div
-                  key={i}
+                  key={`${item.companyName}-${item.roleTitle}`}
                   style={{
                     padding: "12px 0",
                     borderBottom: i === followUps.length - 1 ? "none" : "1px solid #e4e4e7",
@@ -133,7 +133,7 @@ export function WeeklyDigest({
               </Heading>
               {upcomingInterviews.map((item, i) => (
                 <div
-                  key={i}
+                  key={`${item.companyName}-${item.roleTitle}`}
                   style={{
                     padding: "12px 0",
                     borderBottom:

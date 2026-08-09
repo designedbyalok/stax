@@ -114,11 +114,19 @@ export function RemindersBell() {
         ) : (
           <ul className="max-h-[360px] overflow-y-auto py-1">
             {visible.map((r) => (
-              <li
-                key={r.id}
-                className="px-3 py-2 hover:bg-muted/40 group cursor-pointer"
-                onClick={() => select(r.application.id)}
-              >
+              <li key={r.id}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="w-full px-3 py-2 hover:bg-muted/40 group cursor-pointer text-left"
+                  onClick={() => select(r.application.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      select(r.application.id);
+                    }
+                  }}
+                >
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="text-[12px] font-medium truncate">
@@ -166,6 +174,7 @@ export function RemindersBell() {
                       <X className="h-3 w-3" strokeWidth={1.75} />
                     </Button>
                   </div>
+                </div>
                 </div>
               </li>
             ))}

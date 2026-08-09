@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { Clock, X } from "@/components/icons";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -117,11 +117,19 @@ export default function RemindersPage() {
           ) : (
             <ul className="space-y-1.5">
               {reminders.map((r) => (
-                <li
-                  key={r.id}
-                  className="group flex items-center gap-3 px-3 py-2.5 rounded-md border bg-card hover:border-foreground/15 cursor-pointer transition-colors"
-                  onClick={() => select(r.application.id)}
-                >
+                <li key={r.id}>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className="group flex w-full items-center gap-3 px-3 py-2.5 rounded-md border bg-card hover:border-foreground/15 cursor-pointer transition-colors text-left"
+                    onClick={() => select(r.application.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        select(r.application.id);
+                      }
+                    }}
+                  >
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-medium truncate">
                       {r.application.roleTitle}
@@ -137,7 +145,7 @@ export default function RemindersPage() {
                         {r.status === "SNOOZED" && r.snoozedUntil && (
                           <>
                             {" · snoozed until "}
-                            {new Date(r.snoozedUntil).toLocaleDateString()}
+                            {format(new Date(r.snoozedUntil), "MMM d, yyyy")}
                           </>
                         )}
                       </span>
@@ -180,6 +188,7 @@ export default function RemindersPage() {
                     >
                       <X className="h-3 w-3" strokeWidth={1.75} />
                     </Button>
+                  </div>
                   </div>
                 </li>
               ))}

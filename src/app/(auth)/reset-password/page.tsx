@@ -48,7 +48,6 @@ function ResetPasswordContent() {
       if (!res.ok) {
         const { error } = await res.json().catch(() => ({ error: "Reset failed" }));
         toast.error(error || "This link is invalid or expired.");
-        setSubmitting(false);
         return;
       }
 
@@ -56,6 +55,7 @@ function ResetPasswordContent() {
       router.push("/login");
     } catch {
       toast.error("Something went wrong. Please try again.");
+    } finally {
       setSubmitting(false);
     }
   }

@@ -13,7 +13,7 @@ const patchSchema = z.object({
   companyName: z.string().trim().min(1).max(200).optional(),
   location: optionalString(200),
   salaryRange: optionalString(200),
-  originalUrl: z.string().url().max(2000).nullable().optional(),
+  originalUrl: z.url().max(2000).nullable().optional(),
   jobDescription: optionalString(50_000),
   notes: optionalString(50_000),
   resumeVersion: optionalString(200),
@@ -21,8 +21,8 @@ const patchSchema = z.object({
   resumeId: z.string().min(1).nullable().optional(),
   coverLetterId: z.string().min(1).nullable().optional(),
   nextAction: optionalString(500),
-  nextActionDate: z.string().datetime().nullable().optional(),
-  appliedAt: z.string().datetime().nullable().optional(),
+  nextActionDate: z.iso.datetime().nullable().optional(),
+  appliedAt: z.iso.datetime().nullable().optional(),
 });
 
 export async function GET(_req: Request, { params }: Params) {

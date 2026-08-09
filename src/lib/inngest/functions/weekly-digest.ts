@@ -4,6 +4,41 @@ import { FROM_EMAIL, getResend } from "@/lib/email/client";
 import { WeeklyDigest } from "@/lib/email/templates/WeeklyDigest";
 import { inngest } from "../client";
 
+const DAY_MAP: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
+const dateTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getLocalDayAndHour(now: Date, tz: string): { day: number | undefined; hour: number } {
+  let formatter = dateTimeFormatters.get(tz);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      weekday: "short",
+      hour: "numeric",
+      hour12: false,
+    });
+    dateTimeFormatters.set(tz, formatter);
+  }
+  const parts = formatter.formatToParts(now);
+  const weekday = parts.find((p) => p.type === "weekday")?.value;
+  const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "-1");
+  return { day: weekday ? DAY_MAP[weekday] : undefined, hour };
+}
+
+const interviewDateFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+});
+
 /**
  * Hourly cron — for each user whose digest day + hour match the current time
  * in their timezone, send the digest.
@@ -34,39 +69,21 @@ export const sendWeeklyDigest = inngest.createFunction(
     );
 
     const appUrl = process.env.AUTH_URL || "https://jobstax.com";
-    let sent = 0;
 
-    for (const user of users) {
+    const eligible = users.filter((user) => {
       const tz = user.timezone || "UTC";
-      // Compute the user's local day-of-week + hour using Intl.
-      const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: tz,
-        weekday: "short",
-        hour: "numeric",
-        hour12: false,
-      }).formatToParts(now);
-      const weekday = parts.find((p) => p.type === "weekday")?.value;
-      const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "-1");
+      const { day: userDay, hour } = getLocalDayAndHour(now, tz);
+      return userDay === user.settings?.digestDay && hour === user.settings?.digestHour;
+    });
 
-      const dayMap: Record<string, number> = {
-        Sun: 0,
-        Mon: 1,
-        Tue: 2,
-        Wed: 3,
-        Thu: 4,
-        Fri: 5,
-        Sat: 6,
-      };
-      const userDay = weekday ? dayMap[weekday] : undefined;
-
-      if (userDay !== user.settings?.digestDay) continue;
-      if (hour !== user.settings?.digestHour) continue;
-
-      const result = await step.run(`send-${user.id}`, () =>
-        sendDigestForUser(user.id, user.email, user.name ?? "", appUrl)
+    const sent = await step.run("send-digests", async () => {
+      const results = await Promise.all(
+        eligible.map((user) =>
+          sendDigestForUser(user.id, user.email, user.name ?? "", appUrl),
+        ),
       );
-      if (result.sent) sent++;
-    }
+      return results.filter((r) => r.sent).length;
+    });
 
     return { sent };
   }
@@ -100,40 +117,44 @@ async function sendDigestForUser(
     },
   });
 
-  const followUps = reminders
-    .filter((r) => r.type === "AUTO_FOLLOWUP")
-    .map((r) => {
+  const followUps: {
+    roleTitle: string;
+    companyName: string;
+    daysSinceApplied: number | undefined;
+  }[] = [];
+  const upcomingInterviews: {
+    roleTitle: string;
+    companyName: string;
+    interviewDate: string | undefined;
+  }[] = [];
+
+  for (const r of reminders) {
+    if (r.type === "AUTO_FOLLOWUP") {
       const days = r.application.appliedAt
         ? Math.floor(
             (Date.now() - new Date(r.application.appliedAt).getTime()) /
               86_400_000
           )
         : undefined;
-      return {
+      followUps.push({
         roleTitle: r.application.roleTitle,
         companyName: r.application.companyName,
         daysSinceApplied: days,
-      };
-    });
-
-  const upcomingInterviews = reminders
-    .filter(
-      (r) =>
-        r.type === "NEXT_ACTION_DUE" &&
-        (r.application.column.name === "Phone Screen" ||
-          r.application.column.name === "Interview")
-    )
-    .map((r) => ({
-      roleTitle: r.application.roleTitle,
-      companyName: r.application.companyName,
-      interviewDate: r.application.nextActionDate
-        ? new Date(r.application.nextActionDate).toLocaleDateString("en-US", {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-          })
-        : undefined,
-    }));
+      });
+    } else if (
+      r.type === "NEXT_ACTION_DUE" &&
+      (r.application.column.name === "Phone Screen" ||
+        r.application.column.name === "Interview")
+    ) {
+      upcomingInterviews.push({
+        roleTitle: r.application.roleTitle,
+        companyName: r.application.companyName,
+        interviewDate: r.application.nextActionDate
+          ? interviewDateFormatter.format(new Date(r.application.nextActionDate))
+          : undefined,
+      });
+    }
+  }
 
   if (followUps.length === 0 && upcomingInterviews.length === 0) {
     return { sent: false, reason: "nothing to send" };

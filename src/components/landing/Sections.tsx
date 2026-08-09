@@ -13,17 +13,27 @@ const TRUSTED_LOGOS = [
   { name: "OpenAI", style: "sans" },
 ];
 
+const STATS_ITEMS = [
+  { num: "10s", label: "from paste to saved card", em: true },
+  { num: "5", label: "platforms parsed out of the box", em: false },
+  { num: "0", label: "modals between you and your next move", em: false },
+  { num: "1", label: "place for every application", em: true },
+];
+
 export function TrustedBy() {
-  const loop = [...TRUSTED_LOGOS, ...TRUSTED_LOGOS];
+  const loop = [
+    ...TRUSTED_LOGOS.map((l) => ({ ...l, marqueeKey: `${l.name}-a` })),
+    ...TRUSTED_LOGOS.map((l) => ({ ...l, marqueeKey: `${l.name}-b` })),
+  ];
   return (
     <div className="trusted">
       <div className="trusted-inner">
         <div className="trusted-label">Used by job seekers from</div>
         <div className="trusted-marquee">
           <div className="trusted-track">
-            {loop.map((l, i) => (
+            {loop.map((l) => (
               <div
-                key={i}
+                key={l.marqueeKey}
                 className={"trusted-logo" + (l.style === "serif" ? " serif" : "")}
               >
                 {l.name}
@@ -37,17 +47,11 @@ export function TrustedBy() {
 }
 
 export function Stats() {
-  const items = [
-    { num: "10s", label: "from paste to saved card", em: true },
-    { num: "5", label: "platforms parsed out of the box", em: false },
-    { num: "0", label: "modals between you and your next move", em: false },
-    { num: "1", label: "place for every application", em: true },
-  ];
   return (
     <div className="container">
       <div className="stats reveal-stagger">
-        {items.map((it, i) => (
-          <div key={i}>
+        {STATS_ITEMS.map((it) => (
+          <div key={it.label}>
             <div className="stat-num" data-countup>
               {it.em ? <em>{it.num}</em> : it.num}
             </div>

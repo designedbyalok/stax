@@ -1,7 +1,3 @@
-import "./landing.css";
-
-import { JetBrains_Mono } from "next/font/google";
-import localFont from "next/font/local";
 import { LandingNav } from "@/components/landing/Nav";
 import { Hero } from "@/components/landing/Hero";
 import { TrustedBy, Stats, ProductShowcase, HowItWorks } from "@/components/landing/Sections";
@@ -11,24 +7,9 @@ import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
 import { LandingMotion } from "@/components/landing/motion";
+import { LandingShell } from "@/components/landing/LandingShell";
 import { auth } from "@/lib/auth";
-import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
-
-// Landing-only fonts. Scoped here (not in the root layout) so app routes
-// like /board and /documents don't pay the FCP cost for woff2s they never use.
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-jetbrains-mono",
-});
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
 
 export default async function LandingPage() {
   const session = await auth();
@@ -38,14 +19,7 @@ export default async function LandingPage() {
   }
 
   return (
-    <div
-      className={cn(
-        "landing-page",
-        jetbrainsMono.variable,
-        geistSans.variable
-      )}
-      data-glass="on"
-    >
+    <LandingShell>
       <LandingNav user={session?.user} />
       <Hero />
       <TrustedBy />
@@ -58,6 +32,6 @@ export default async function LandingPage() {
       <CTA />
       <Footer />
       <LandingMotion />
-    </div>
+    </LandingShell>
   );
 }

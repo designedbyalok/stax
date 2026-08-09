@@ -82,7 +82,19 @@ function KanbanCardImpl({ card, isOverlay, onSelect }: CardProps) {
       style={style}
       {...(isOverlay ? {} : attributes)}
       {...(isOverlay ? {} : listeners)}
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect && !isOverlay ? 0 : undefined}
       onClick={onSelect ? () => onSelect(card.id) : undefined}
+      onKeyDown={
+        onSelect
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onSelect(card.id);
+              }
+            }
+          : undefined
+      }
       className={cn(
         "group relative isolate bg-card text-card-foreground rounded-[10px] border border-border",
         "transition-[border-color,background-color,box-shadow] duration-200 ease-out",
@@ -164,7 +176,7 @@ function KanbanCardImpl({ card, isOverlay, onSelect }: CardProps) {
           strokeWidth={2}
           className={cn(
             "text-muted-foreground/0",
-            "transition-all duration-200 ease-out",
+            "transition-[opacity,transform] duration-200 ease-out",
             "group-hover:text-foreground/70 group-hover:translate-x-0.5"
           )}
         />

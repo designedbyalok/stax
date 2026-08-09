@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Trash2 } from "@/components/icons";
 import { toast } from "sonner";
@@ -47,6 +48,19 @@ function toDateInputValue(iso: string | null): string {
   return d.toISOString().slice(0, 10);
 }
 
+function cardToDraft(card: ApiApplication): DraftFields {
+  return {
+    roleTitle: card.roleTitle,
+    companyName: card.companyName,
+    location: card.location,
+    salaryRange: card.salaryRange,
+    notes: card.notes,
+    nextAction: card.nextAction,
+    nextActionDate: card.nextActionDate,
+    originalUrl: card.originalUrl,
+  };
+}
+
 export function CardDrawer({
   card,
   isOpen,
@@ -56,8 +70,26 @@ export function CardDrawer({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  if (!card) return null;
+
+  return (
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <CardDrawerContent key={card.id} card={card} isOpen={isOpen} onClose={onClose} />
+    </Sheet>
+  );
+}
+
+function CardDrawerContent({
+  card,
+  isOpen,
+  onClose,
+}: {
+  card: ApiApplication;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const queryClient = useQueryClient();
-  const [draft, setDraft] = useState<DraftFields | null>(null);
+  const [draft, setDraft] = useState<DraftFields>(() => cardToDraft(card));
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch full detail (contacts + activities) when drawer opens.
@@ -74,23 +106,6 @@ export function CardDrawer({
       return d && d.jobDescription && !d.tldrHeadline ? 2500 : false;
     },
   });
-
-  useEffect(() => {
-    if (card) {
-      setDraft({
-        roleTitle: card.roleTitle,
-        companyName: card.companyName,
-        location: card.location,
-        salaryRange: card.salaryRange,
-        notes: card.notes,
-        nextAction: card.nextAction,
-        nextActionDate: card.nextActionDate,
-        originalUrl: card.originalUrl,
-      });
-    } else {
-      setDraft(null);
-    }
-  }, [card]);
 
   const updateMutation = useMutation({
     mutationFn: (data: Partial<DraftFields>) =>
@@ -127,13 +142,12 @@ export function CardDrawer({
     }, 500);
   }
 
-  if (!card || !draft) return null;
+  if (!draft) return null;
 
   const sourceLabel = card.sourcePlatform ? SOURCE_LABEL[card.sourcePlatform] : null;
   const detail = detailQuery.data;
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         // Floating drawer: inset from the viewport edges, rounded
         // corners, soft elevation. `!` overrides the side= preset
@@ -179,10 +193,13 @@ export function CardDrawer({
             </div>
             {card.companyLogoUrl && (
               <div className="pt-6 pr-2 shrink-0">
-                <img 
-                  src={card.companyLogoUrl} 
-                  alt={card.companyName} 
-                  className="w-16 h-16 rounded-md object-contain border bg-background shadow-sm" 
+                <Image
+                  src={card.companyLogoUrl}
+                  alt={card.companyName}
+                  width={64}
+                  height={64}
+                  unoptimized
+                  className="w-16 h-16 rounded-md object-contain border bg-background shadow-sm"
                 />
               </div>
             )}
@@ -217,6 +234,5 @@ export function CardDrawer({
           </Button>
         </div>
       </SheetContent>
-    </Sheet>
   );
 }

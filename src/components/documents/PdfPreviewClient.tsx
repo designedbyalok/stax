@@ -74,16 +74,19 @@ export default function PdfPreviewClient({
                 className="max-w-full"
               />
             ) : (
-              Array.from(new Array(numPages), (el, index) => (
+              Array.from({ length: numPages }, (_, pageIndex) => {
+                const pageNumber = pageIndex + 1;
+                return (
                 <Page
-                  key={`page_${index + 1}`}
-                  pageNumber={index + 1}
+                  key={`page-${pageNumber}`}
+                  pageNumber={pageNumber}
                   width={width}
                   renderTextLayer={false}
                   renderAnnotationLayer={true}
                   className="shadow-sm border rounded-sm overflow-hidden mb-6 max-w-full"
                 />
-              ))
+                );
+              })
             ))}
           </Document>
         )}
@@ -99,7 +102,16 @@ export default function PdfPreviewClient({
             className="h-7 text-[11px] gap-1 px-2"
             disabled={!signedUrl}
             nativeButton={!signedUrl}
-            render={signedUrl ? <a href={signedUrl} target="_blank" rel="noopener noreferrer" /> : undefined}
+            render={
+              signedUrl ? (
+                <a
+                  href={signedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open full PDF"
+                />
+              ) : undefined
+            }
           >
             Open full
             <ExternalLink className="h-3 w-3" />

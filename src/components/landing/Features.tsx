@@ -11,6 +11,19 @@ function useTick(intervalMs: number, count: number) {
   return tick;
 }
 
+const CARD_NEXT_ACTIONS = [
+  "Follow up w/ Sarah · Fri",
+  "Send portfolio · Mon",
+  "Reply to recruiter · Thu",
+  "Schedule onsite · Tue",
+];
+
+const DIGEST_ROWS = [
+  { co: "Vercel", role: "Product Manager", days: "9d silent", color: "#1a1814" },
+  { co: "Notion", role: "Sr. PM, Growth", days: "5d silent", color: "#1a1814" },
+  { co: "Stripe", role: "Frontend Eng.", days: "7d silent", color: "#6259ca" },
+];
+
 function CaptureMini() {
   const phase = useTick(1200, 5);
   const FULL_URL = "linear.app/careers/senior-designer";
@@ -126,13 +139,7 @@ function CaptureMini() {
 }
 
 function CardMini() {
-  const NEXT_ACTIONS = [
-    "Follow up w/ Sarah · Fri",
-    "Send portfolio · Mon",
-    "Reply to recruiter · Thu",
-    "Schedule onsite · Tue",
-  ];
-  const idx = useTick(2200, NEXT_ACTIONS.length);
+  const idx = useTick(2200, CARD_NEXT_ACTIONS.length);
   return (
     <div
       className="mini"
@@ -180,8 +187,8 @@ function CardMini() {
           }}
         >
           <span style={{ color: "var(--ink-mute)" }}>Next</span>
-          <span key={idx} className="mini-row-value">
-            {NEXT_ACTIONS[idx]}
+          <span key={CARD_NEXT_ACTIONS[idx]} className="mini-row-value">
+            {CARD_NEXT_ACTIONS[idx]}
           </span>
         </div>
         <div
@@ -215,11 +222,6 @@ function CardMini() {
 
 function DigestMini() {
   const phase = useTick(900, 5);
-  const rows = [
-    { co: "Vercel", role: "Product Manager", days: "9d silent", color: "#1a1814" },
-    { co: "Notion", role: "Sr. PM, Growth", days: "5d silent", color: "#1a1814" },
-    { co: "Stripe", role: "Frontend Eng.", days: "7d silent", color: "#6259ca" },
-  ];
   return (
     <div
       className="mini"
@@ -261,9 +263,9 @@ function DigestMini() {
         3 follow-ups due this week
       </div>
       <div style={{ display: "grid", gap: 6 }}>
-        {rows.map((r, i) => (
+        {DIGEST_ROWS.map((r, i) => (
           <div
-            key={i}
+            key={`${r.co}-${r.role}`}
             className={"mini-digest-row" + (phase > i ? " in" : "")}
             style={{
               display: "flex",

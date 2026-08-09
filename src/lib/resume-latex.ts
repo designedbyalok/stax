@@ -47,19 +47,19 @@ export function generateLatex(resume: ResumeData): string {
   if (basics.url) {
     // extract just the domain/path for display if needed
     latex += `\\homepage{${escapeLatex(
-      basics.url.replace(/^https?:\\/\\//, "")
+      basics.url.replace(/^https?:\/\//, "")
     )}}\n`;
   }
   
   if (basics.links && basics.links.length > 0) {
     for (const link of basics.links) {
-      const urlClean = link.url.replace(/^https?:\\/\\//, "");
+      const urlClean = link.url.replace(/^https?:\/\//, "");
       if (link.label.toLowerCase().includes("linkedin")) {
-        latex += `\\social[linkedin]{${escapeLatex(urlClean.replace(/.*linkedin\\.com\\/in\\//, ""))}}\n`;
+        latex += `\\social[linkedin]{${escapeLatex(urlClean.replace(/.*linkedin\.com\/in\//, ""))}}\n`;
       } else if (link.label.toLowerCase().includes("github")) {
-        latex += `\\social[github]{${escapeLatex(urlClean.replace(/.*github\\.com\\//, ""))}}\n`;
+        latex += `\\social[github]{${escapeLatex(urlClean.replace(/.*github\.com\//, ""))}}\n`;
       } else if (link.label.toLowerCase().includes("twitter") || link.label.toLowerCase() === "x") {
-        latex += `\\social[twitter]{${escapeLatex(urlClean.replace(/.*x\\.com\\//, "").replace(/.*twitter\\.com\\//, ""))}}\n`;
+        latex += `\\social[twitter]{${escapeLatex(urlClean.replace(/.*x\.com\//, "").replace(/.*twitter\.com\//, ""))}}\n`;
       } else {
         // generic fallback
         latex += `\\extrainfo{${escapeLatex(link.label)}: \\url{${escapeLatex(link.url)}}}\n`;

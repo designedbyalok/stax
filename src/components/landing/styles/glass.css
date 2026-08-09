@@ -1,0 +1,30 @@
+/* ── Liquid glass ─────────────────────────────────────── */
+.landing-page .glass-light {
+  background: rgba(250, 245, 236, 0.42);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 8px 24px -6px rgba(26, 24, 20, 0.10);
+  position: relative;
+}
+.landing-page .glass-dark {
+  background: rgba(26, 24, 20, 0.50);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 236, 223, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 236, 223, 0.14),
+    0 8px 24px -6px rgba(0, 0, 0, 0.22);
+  position: relative;
+}
+
+.landing-page .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+

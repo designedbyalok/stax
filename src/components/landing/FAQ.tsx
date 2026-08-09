@@ -42,7 +42,7 @@ export function FAQ() {
         </div>
         <div className="faq reveal">
           {FAQS.map((item, i) => (
-            <div key={i} className={"faq-item" + (open === i ? " open" : "")}>
+            <div key={item.q} className={"faq-item" + (open === i ? " open" : "")}>
               <button
                 className="faq-q"
                 onClick={() => setOpen(open === i ? -1 : i)}

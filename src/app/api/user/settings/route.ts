@@ -19,11 +19,7 @@ export async function GET() {
   const userId = authResult.userId;
 
   const [settings, user] = await Promise.all([
-    prisma.userSettings.upsert({
-      where: { userId },
-      update: {},
-      create: { userId },
-    }),
+    prisma.userSettings.findUnique({ where: { userId } }),
     prisma.user.findUnique({
       where: { id: userId },
       select: { name: true, email: true, timezone: true },
@@ -31,11 +27,11 @@ export async function GET() {
   ]);
 
   return NextResponse.json({
-    digestEnabled: settings.digestEnabled,
-    digestDay: settings.digestDay,
-    digestHour: settings.digestHour,
-    staleDaysApplied: settings.staleDaysApplied,
-    staleDaysInterview: settings.staleDaysInterview,
+    digestEnabled: settings?.digestEnabled ?? true,
+    digestDay: settings?.digestDay ?? 1,
+    digestHour: settings?.digestHour ?? 9,
+    staleDaysApplied: settings?.staleDaysApplied ?? 7,
+    staleDaysInterview: settings?.staleDaysInterview ?? 5,
     name: user?.name ?? "",
     email: user?.email ?? "",
     timezone: user?.timezone ?? "UTC",

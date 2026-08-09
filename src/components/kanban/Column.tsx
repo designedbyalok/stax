@@ -109,8 +109,8 @@ function ColumnImpl({
 
         {cards.length === 0 && showPlaceholders && (
           <div className="space-y-2">
-            {PLACEHOLDERS.map((p, i) => (
-              <PlaceholderCard key={i} {...p} />
+            {PLACEHOLDERS.map((p) => (
+              <PlaceholderCard key={`${p.companyName}-${p.roleTitle}`} {...p} />
             ))}
           </div>
         )}
