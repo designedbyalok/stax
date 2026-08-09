@@ -15,7 +15,8 @@ Geist + shadcn primitives).
 
 ## Stack at a glance
 
-- Next.js 15 (App Router) · React 19 · TypeScript strict
+- Next.js 16 (App Router) · React 19 · TypeScript strict
+- Bun for package management and scripts
 - Tailwind 3 · shadcn/ui on `@base-ui/react` (note: uses `render` prop,
   not `asChild`)
 - Prisma 5 + Postgres (Supabase pooler URLs)

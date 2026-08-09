@@ -31,7 +31,13 @@ export async function createGoogleCalendarEvent(args: CreateEventArgs) {
   const oauth2Client = getGoogleOAuthClient();
   oauth2Client.setCredentials({ refresh_token: refreshToken });
 
-  const calendar = googleCalendar({ version: "v3", auth: oauth2Client });
+  // @googleapis/calendar types against its own nested google-auth-library copy.
+  const calendar = googleCalendar({
+    version: "v3",
+    auth: oauth2Client as Parameters<typeof googleCalendar>[0] extends { auth?: infer A }
+      ? A
+      : never,
+  });
 
   const eventRequestBody: any = {
     summary: args.title,

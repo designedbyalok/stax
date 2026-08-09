@@ -3,7 +3,7 @@
  * (src/lib/insights/benchmarks.ts) — the rows that power Career Insights.
  *
  * Run with:  bun run scripts/seed-benchmarks.ts
- *   (or:     npm run db:seed)
+ *   (or:     bun run db:seed)
  *
  * Reads from .env.local (same database the app uses). Idempotent — safe to
  * re-run; existing rows are updated in place. Run this once after applying the
